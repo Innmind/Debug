@@ -1,0 +1,33 @@
+{
+    "name": "innmind/debug",
+    "type": "library",
+    "description": "Set of tools to help debug applications",
+    "keywords": ["debug", "http", "cli"],
+    "homepage": "http://github.com/Innmind/Debug",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Baptiste Langlade",
+            "email": "langlade.baptiste@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "http://github.com/Innmind/Debug/issues"
+    },
+    "require": {
+        "php": "~7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Innmind\\Debug\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Innmind\\Debug\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~7.0"
+    }
+}
