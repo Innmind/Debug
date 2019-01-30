@@ -19,7 +19,9 @@
         "innmind/rest-client": "^7.1",
         "innmind/time-continuum": "^1.3",
         "innmind/http-framework": "^1.3",
-        "innmind/http": "~3.9"
+        "innmind/http": "~3.9",
+        "innmind/stack-trace": "^2.0",
+        "innmind/server-control": "^2.7"
     },
     "autoload": {
         "psr-4": {
