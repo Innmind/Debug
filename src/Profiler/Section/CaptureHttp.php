@@ -12,10 +12,6 @@ use Innmind\Rest\Client\{
     HttpResource,
     HttpResource\Property,
 };
-use Innmind\Http\Message\{
-    ServerRequest,
-    Response,
-};
 
 final class CaptureHttp implements Section
 {
@@ -33,7 +29,7 @@ final class CaptureHttp implements Section
         $this->profile = $identity;
     }
 
-    public function received(ServerRequest\Stringable $request): void
+    public function received(string $request): void
     {
         if (\is_null($this->profile)) {
             return;
@@ -41,12 +37,12 @@ final class CaptureHttp implements Section
 
         $this->identity = $this->server->create(HttpResource::of(
             'api.section.http',
-            new Property('request', (string) $request),
+            new Property('request', $request),
             new Property('profile', (string) $this->profile)
         ));
     }
 
-    public function respondedWith(Response\Stringable $response): void
+    public function respondedWith(string $response): void
     {
         if (\is_null($this->identity)) {
             return;
@@ -56,7 +52,7 @@ final class CaptureHttp implements Section
             $this->identity,
             HttpResource::of(
                 'api.section.http',
-                new Property('response', (string) $response)
+                new Property('response', $response)
             )
         );
     }

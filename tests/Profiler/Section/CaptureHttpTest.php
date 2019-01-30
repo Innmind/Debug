@@ -12,14 +12,6 @@ use Innmind\Rest\Client\{
     Server,
     Identity as RestIdentity,
 };
-use Innmind\Http\{
-    Message\ServerRequest,
-    Message\Response,
-    Message\Method\Method,
-    Message\StatusCode\StatusCode,
-    ProtocolVersion\ProtocolVersion,
-};
-use Innmind\Url\Url;
 use PHPUnit\Framework\TestCase;
 
 class CaptureHttpTest extends TestCase
@@ -43,9 +35,7 @@ class CaptureHttpTest extends TestCase
             ->expects($this->never())
             ->method('create');
 
-        $this->assertNull($section->received(new ServerRequest\Stringable(
-            $this->createMock(ServerRequest::class)
-        )));
+        $this->assertNull($section->received('request'));
     }
 
     public function testCreateSectionWhenRequestReceived()
@@ -61,17 +51,11 @@ class CaptureHttpTest extends TestCase
                     $resource->properties()->contains('profile') &&
                     $resource->properties()->contains('request') &&
                     $resource->properties()->get('profile')->value() === 'profile-uuid' &&
-                    $resource->properties()->get('request')->value() === "GET /foo/bar HTTP/1.0\n\n\n";
+                    $resource->properties()->get('request')->value() === 'http request';
             }));
 
         $this->assertNull($section->start(new Identity('profile-uuid')));
-        $this->assertNull($section->received(new ServerRequest\Stringable(
-            new ServerRequest\ServerRequest(
-                Url::fromString('/foo/bar'),
-                Method::get(),
-                new ProtocolVersion(1, 0)
-            )
-        )));
+        $this->assertNull($section->received('http request'));
     }
 
     public function testDoesntUpdateSectionWhenProfilingNotStarted()
@@ -83,9 +67,7 @@ class CaptureHttpTest extends TestCase
             ->expects($this->never())
             ->method('update');
 
-        $this->assertNull($section->respondedWith(new Response\Stringable(
-            $this->createMock(Response::class)
-        )));
+        $this->assertNull($section->respondedWith('response'));
     }
 
     public function testDoesntUpdateSectionWhenProfilingHasFinished()
@@ -99,9 +81,7 @@ class CaptureHttpTest extends TestCase
 
         $section->start($identity = new Identity('profile-uuid'));
         $this->assertNull($section->finish($identity));
-        $this->assertNull($section->respondedWith(new Response\Stringable(
-            $this->createMock(Response::class)
-        )));
+        $this->assertNull($section->respondedWith('response'));
     }
 
     public function testDoesntUpdateSectionWhenNoRequestReceived()
@@ -114,9 +94,7 @@ class CaptureHttpTest extends TestCase
             ->method('update');
 
         $section->start(new Identity('profile-uuid'));
-        $this->assertNull($section->respondedWith(new Response\Stringable(
-            $this->createMock(Response::class)
-        )));
+        $this->assertNull($section->respondedWith('response'));
     }
 
     public function testUpdateSectionWhenResponseAboutToBeSent()
@@ -136,24 +114,12 @@ class CaptureHttpTest extends TestCase
                 $this->callback(static function($resource): bool {
                     return $resource->name() === 'api.section.http' &&
                         $resource->properties()->contains('response') &&
-                        $resource->properties()->get('response')->value() === "HTTP/1.0 200 OK\n\n\n";
+                        $resource->properties()->get('response')->value() === 'http response';
                 })
             );
 
         $section->start(new Identity('profile-uuid'));
-        $section->received(new ServerRequest\Stringable(
-            new ServerRequest\ServerRequest(
-                Url::fromString('/foo/bar'),
-                Method::get(),
-                new ProtocolVersion(1, 0)
-            )
-        ));
-        $this->assertNull($section->respondedWith(new Response\Stringable(
-            new Response\Response(
-                $code = StatusCode::of('OK'),
-                $code->associatedReasonPhrase(),
-                new ProtocolVersion(1, 0)
-            )
-        )));
+        $section->received('request');
+        $this->assertNull($section->respondedWith('http response'));
     }
 }
