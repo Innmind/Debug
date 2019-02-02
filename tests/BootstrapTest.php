@@ -7,6 +7,7 @@ use function Innmind\Debug\bootstrap;
 use Innmind\Debug\{
     HttpFramework,
     CLI,
+    OperatingSystem\Debug,
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Url\Url;
@@ -31,6 +32,9 @@ class BootstrapTest extends TestCase
         $this->assertInternalType('array', $debug);
         $this->assertInternalType('callable', $debug['http']);
         $this->assertInternalType('callable', $debug['cli']);
+        $this->assertInternalType('callable', $debug['os']);
+
+        $this->assertInstanceOf(Debug::class, $debug['os']());
 
         $handler = $debug['http']($this->createMock(RequestHandler::class));
         $this->assertInstanceOf(RequestHandler::class, $handler);
