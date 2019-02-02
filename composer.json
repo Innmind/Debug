@@ -22,7 +22,8 @@
         "innmind/http": "~3.9",
         "innmind/stack-trace": "^2.0",
         "innmind/server-control": "^2.7",
-        "innmind/object-graph": "^1.4"
+        "innmind/object-graph": "^1.4",
+        "innmind/cli": "^1.5"
     },
     "autoload": {
         "psr-4": {
