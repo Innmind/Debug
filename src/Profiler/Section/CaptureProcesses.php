@@ -46,6 +46,10 @@ final class CaptureProcesses implements Section
 
     public function finish(Identity $identity): void
     {
+        if ($this->processes->empty()) {
+            return;
+        }
+
         $this->server->create(HttpResource::of(
             $this->resource,
             new Property('processes', $this->processes),

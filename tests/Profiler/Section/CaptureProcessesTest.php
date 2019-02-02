@@ -56,6 +56,18 @@ class CaptureProcessesTest extends TestCase
         $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
 
+    public function testDoesntCreateProcessesSectionWhenNoneCaptured()
+    {
+        $section = new CaptureProcesses(
+            $server = $this->createMock(Server::class)
+        );
+        $server
+            ->expects($this->never())
+            ->method('create');
+
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
+    }
+
     public function testCaptureRemoteProcesses()
     {
         $section = CaptureProcesses::remote(
@@ -74,6 +86,18 @@ class CaptureProcessesTest extends TestCase
 
         $this->assertInstanceOf(CaptureProcesses::class, $section);
         $this->assertNull($section->capture('some-command'));
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
+    }
+
+    public function testDoesntCreateRemoteProcessesSectionWhenNoneCaptured()
+    {
+        $section = CaptureProcesses::remote(
+            $server = $this->createMock(Server::class)
+        );
+        $server
+            ->expects($this->never())
+            ->method('create');
+
         $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
 }
