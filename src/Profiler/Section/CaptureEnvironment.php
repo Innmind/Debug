@@ -19,7 +19,6 @@ final class CaptureEnvironment implements Section
 {
     private $server;
     private $environment;
-    private $identity;
 
     public function __construct(Server $server, SetInterface $environment)
     {
