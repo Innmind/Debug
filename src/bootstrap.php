@@ -80,8 +80,8 @@ function bootstrap(
                 $profiler
             );
         },
-        'cli' => static function(Command ...$commands) use ($profiler, $captureHttp, $captureException, $captureAppGraph): StreamInterface {
-            return Stream::of(Command::class, ...$commands)->map(static function($command) use ($profiler, $captureHttp, $captureException, $captureAppGraph): Command {
+        'cli' => static function(Command ...$commands) use ($profiler, $captureException, $captureAppGraph): StreamInterface {
+            return Stream::of(Command::class, ...$commands)->map(static function($command) use ($profiler, $captureException, $captureAppGraph): Command {
                 return new CLI\StartProfile(
                     new CLI\CaptureException(
                         new CLI\CaptureAppGraph(
