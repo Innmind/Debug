@@ -24,12 +24,14 @@
         "innmind/server-control": "^2.7",
         "innmind/object-graph": "^1.4",
         "innmind/cli": "^1.5",
-        "innmind/immutable": "^2.13"
+        "innmind/immutable": "^2.13",
+        "innmind/filesystem": "^3.3"
     },
     "autoload": {
         "psr-4": {
             "Innmind\\Debug\\": "src/"
-        }
+        },
+        "files": ["src/bootstrap.php"]
     },
     "autoload-dev": {
         "psr-4": {
