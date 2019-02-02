@@ -37,7 +37,7 @@ final class CaptureProcesses implements Section
 
     public function start(Identity $identity): void
     {
-        // nothing to do
+        $this->processes = $this->processes->clear();
     }
 
     public function capture(string $process): void

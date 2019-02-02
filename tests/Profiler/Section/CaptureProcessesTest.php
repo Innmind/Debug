@@ -100,4 +100,20 @@ class CaptureProcessesTest extends TestCase
 
         $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
+
+    public function testProcessesAreResettedWhenStartingANewProfile()
+    {
+        $section = new CaptureProcesses(
+            $server = $this->createMock(Server::class)
+        );
+        $server
+            ->expects($this->once())
+            ->method('create');
+
+        $section->start(new Identity('profile-uuid'));
+        $section->capture('some-command');
+        $section->finish(new Identity('profile-uuid'));
+        $section->start(new Identity('profile-uuid2'));
+        $section->finish(new Identity('profile-uuid2'));
+    }
 }
