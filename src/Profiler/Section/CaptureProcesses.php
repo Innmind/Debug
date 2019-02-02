@@ -23,6 +23,15 @@ final class CaptureProcesses implements Section
     {
         $this->server = $server;
         $this->processes = Set::of('string');
+        $this->resource = 'api.section.processes';
+    }
+
+    public static function remote(Server $server): self
+    {
+        $self = new self($server);
+        $self->resource = 'api.section.remote.processes';
+
+        return $self;
     }
 
     public function start(Identity $identity): void
@@ -38,7 +47,7 @@ final class CaptureProcesses implements Section
     public function finish(Identity $identity): void
     {
         $this->server->create(HttpResource::of(
-            'api.section.processes',
+            $this->resource,
             new Property('processes', $this->processes),
             new Property('profile', (string) $identity)
         ));

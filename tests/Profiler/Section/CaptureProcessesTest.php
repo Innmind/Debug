@@ -55,4 +55,25 @@ class CaptureProcessesTest extends TestCase
         $this->assertNull($section->capture('some-command'));
         $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
+
+    public function testCaptureRemoteProcesses()
+    {
+        $section = CaptureProcesses::remote(
+            $server = $this->createMock(Server::class)
+        );
+        $server
+            ->expects($this->once())
+            ->method('create')
+            ->with($this->callback(static function($resource): bool {
+                return $resource->name() === 'api.section.remote.processes' &&
+                    $resource->properties()->contains('profile') &&
+                    $resource->properties()->contains('processes') &&
+                    $resource->properties()->get('profile')->value() === 'profile-uuid' &&
+                    $resource->properties()->get('processes')->value()->equals(Set::of('string', 'some-command'));
+            }));
+
+        $this->assertInstanceOf(CaptureProcesses::class, $section);
+        $this->assertNull($section->capture('some-command'));
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
+    }
 }
