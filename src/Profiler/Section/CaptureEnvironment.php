@@ -36,6 +36,10 @@ final class CaptureEnvironment implements Section
 
     public function finish(Identity $identity): void
     {
+        if ($this->environment->empty()) {
+            return;
+        }
+
         $this->server->create(HttpResource::of(
             'api.section.environment',
             new Property('pairs', $this->environment),

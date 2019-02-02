@@ -57,4 +57,17 @@ class CaptureEnvironmentTest extends TestCase
 
         $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
+
+    public function testDoesntSendEmptyEnvironment()
+    {
+        $section = new CaptureEnvironment(
+            $server = $this->createMock(Server::class),
+            Set::of('string')
+        );
+        $server
+            ->expects($this->never())
+            ->method('create');
+
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
+    }
 }
