@@ -36,6 +36,24 @@ class CaptureAppGraphTest extends TestCase
         );
     }
 
+    public function testStringCast()
+    {
+        $handle = new CaptureAppGraph(
+            $inner = $this->createMock(Command::class),
+            new Section(
+                $this->createMock(Server::class),
+                $this->createMock(Processes::class),
+                new Visualize
+            )
+        );
+        $inner
+            ->expects($this->once())
+            ->method('__toString')
+            ->willReturn('foo');
+
+        $this->assertSame('foo', (string) $handle);
+    }
+
     public function testCaptureInnerHandlerThatRepresentTheRealApp()
     {
         $handle = new CaptureAppGraph(
