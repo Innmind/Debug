@@ -18,6 +18,7 @@ final class CaptureProcesses implements Section
 {
     private $server;
     private $processes;
+    private $resource;
 
     public function __construct(Server $server)
     {
