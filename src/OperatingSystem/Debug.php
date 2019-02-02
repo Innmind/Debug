@@ -3,13 +3,16 @@ declare(strict_types = 1);
 
 namespace Innmind\Debug\OperatingSystem;
 
-use Innmind\Debug\Profiler\Section\CaptureProcesses;
+use Innmind\Debug\Profiler\Section\{
+    CaptureProcesses,
+    Remote\CaptureHttp,
+};
 use Innmind\OperatingSystem\{
     OperatingSystem,
     Filesystem,
     Ports,
     Sockets,
-    Remote,
+    Remote as RemoteInterface,
     CurrentProcess,
 };
 use Innmind\Server\Status\Server as ServerStatus;
@@ -20,14 +23,18 @@ final class Debug implements OperatingSystem
 {
     private $os;
     private $captureProcesses;
+    private $captureHttp;
     private $control;
+    private $remote;
 
     public function __construct(
         OperatingSystem $os,
-        CaptureProcesses $captureProcesses
+        CaptureProcesses $captureProcesses,
+        CaptureHttp $captureHttp
     ) {
         $this->os = $os;
         $this->captureProcesses = $captureProcesses;
+        $this->captureHttp = $captureHttp;
     }
 
     public function clock(): TimeContinuumInterface
@@ -63,9 +70,12 @@ final class Debug implements OperatingSystem
         return $this->os->sockets();
     }
 
-    public function remote(): Remote
+    public function remote(): RemoteInterface
     {
-        return $this->os->remote();
+        return $this->remote ?? $this->remote = new Remote(
+            $this->os->remote(),
+            $this->captureHttp
+        );
     }
 
     public function process(): CurrentProcess

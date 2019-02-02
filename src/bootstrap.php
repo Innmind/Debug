@@ -38,7 +38,8 @@ function bootstrap(
 
     $debugOS = new DebugOS(
         $os,
-        new Profiler\Section\CaptureProcesses($server)
+        new Profiler\Section\CaptureProcesses($server),
+        new Profiler\Section\Remote\CaptureHttp($server)
     );
 
     $profiler = new Profiler\Http(
@@ -48,7 +49,6 @@ function bootstrap(
         $captureException = new Profiler\Section\CaptureException($server, $os->control()->processes(), new Render),
         $captureAppGraph = new Profiler\Section\CaptureAppGraph($server, $os->control()->processes(), new Visualize),
         Profiler\Section\CaptureProcesses::remote($server),
-        new Profiler\Section\Remote\CaptureHttp($server),
         $debugOS->control()->processes(),
         new Profiler\Section\CaptureEnvironment(
             $server,
