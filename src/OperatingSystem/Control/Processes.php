@@ -10,7 +10,6 @@ use Innmind\Server\Control\Server\{
     Command,
     Signal,
 };
-use Innmind\Immutable\Map;
 
 final class Processes implements ProcessesInterface
 {
