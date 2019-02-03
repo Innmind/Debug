@@ -45,10 +45,12 @@ function bootstrap(
         new Profiler\Section\CaptureProcesses($server)
     );
 
+    $captureRemoteHttp = new Profiler\Section\Remote\CaptureHttp($server);
+
     $debugOS = new DebugOS(
         $os,
         $localProcesses,
-        new Profiler\Section\Remote\CaptureHttp($server)
+        $captureRemoteHttp
     );
 
     $profiler = new Profiler\Http(
@@ -59,6 +61,7 @@ function bootstrap(
         $captureAppGraph = new Profiler\Section\CaptureAppGraph($server, $os->control()->processes(), new Visualize),
         $localProcesses,
         Profiler\Section\CaptureProcesses::remote($server),
+        $captureRemoteHttp,
         new Profiler\Section\CaptureEnvironment(
             $server,
             $environmentVariables->reduce(
