@@ -16,8 +16,6 @@ final class Processes implements ProcessesInterface
 {
     private $processes;
     private $state;
-    private $renderProcess;
-    private $pairs;
 
     public function __construct(
         ProcessesInterface $processes,
