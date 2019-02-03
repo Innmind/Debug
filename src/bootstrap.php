@@ -57,8 +57,8 @@ function bootstrap(
         $captureHttp = new Profiler\Section\CaptureHttp($server),
         $captureException = new Profiler\Section\CaptureException($server, $os->control()->processes(), new Render),
         $captureAppGraph = new Profiler\Section\CaptureAppGraph($server, $os->control()->processes(), new Visualize),
-        Profiler\Section\CaptureProcesses::remote($server),
         $localProcesses,
+        Profiler\Section\CaptureProcesses::remote($server),
         new Profiler\Section\CaptureEnvironment(
             $server,
             $environmentVariables->reduce(
