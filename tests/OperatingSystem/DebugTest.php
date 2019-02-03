@@ -6,6 +6,8 @@ namespace Tests\Innmind\Debug\OperatingSystem;
 use Innmind\Debug\{
     OperatingSystem\Debug,
     OperatingSystem\Control,
+    OperatingSystem\Control\RenderProcess,
+    OperatingSystem\Control\Processes\State,
     OperatingSystem\Remote,
     Profiler\Section\CaptureProcesses,
     Profiler\Section\Remote\CaptureHttp,
@@ -28,8 +30,11 @@ class DebugTest extends TestCase
     {
         $os = new Debug(
             $this->createMock(OperatingSystem::class),
-            new CaptureProcesses(
-                $this->createMock(Server::class)
+            new State(
+                $this->createMock(RenderProcess::class),
+                new CaptureProcesses(
+                    $this->createMock(Server::class)
+                )
             ),
             new CaptureHttp(
                 $this->createMock(Server::class)

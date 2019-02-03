@@ -3,9 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Debug\OperatingSystem;
 
-use Innmind\Debug\Profiler\Section\{
-    CaptureProcesses,
-    Remote\CaptureHttp,
+use Innmind\Debug\{
+    Profiler\Section\CaptureProcesses,
+    Profiler\Section\Remote\CaptureHttp,
+    OperatingSystem\Control\Processes\State,
 };
 use Innmind\OperatingSystem\{
     OperatingSystem,
@@ -22,18 +23,18 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
 final class Debug implements OperatingSystem
 {
     private $os;
-    private $captureProcesses;
+    private $localProcesses;
     private $captureHttp;
     private $control;
     private $remote;
 
     public function __construct(
         OperatingSystem $os,
-        CaptureProcesses $captureProcesses,
+        State $localProcesses,
         CaptureHttp $captureHttp
     ) {
         $this->os = $os;
-        $this->captureProcesses = $captureProcesses;
+        $this->localProcesses = $localProcesses;
         $this->captureHttp = $captureHttp;
     }
 
@@ -56,7 +57,7 @@ final class Debug implements OperatingSystem
     {
         return $this->control ?? $this->control = new Control(
             $this->os->control(),
-            $this->captureProcesses
+            $this->localProcesses
         );
     }
 

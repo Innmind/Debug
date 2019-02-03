@@ -5,8 +5,8 @@ namespace Tests\Innmind\Debug\OperatingSystem\Control;
 
 use Innmind\Debug\{
     OperatingSystem\Control\Processes,
+    OperatingSystem\Control\Processes\State,
     OperatingSystem\Control\RenderProcess,
-    Profiler\Section,
     Profiler\Section\CaptureProcesses,
     Profiler\Profile\Identity,
 };
@@ -27,24 +27,27 @@ class ProcessesTest extends TestCase
     {
         $processes = new Processes(
             $this->createMock(ProcessesInterface::class),
-            new CaptureProcesses(
-                $this->createMock(Server::class)
-            ),
-            $this->createMock(RenderProcess::class)
+            new State(
+                $this->createMock(RenderProcess::class),
+                new CaptureProcesses(
+                    $this->createMock(Server::class)
+                )
+            )
         );
 
         $this->assertInstanceOf(ProcessesInterface::class, $processes);
-        $this->assertInstanceOf(Section::class, $processes);
     }
 
     public function testExecute()
     {
         $processes = new Processes(
             $inner = $this->createMock(ProcessesInterface::class),
-            new CaptureProcesses(
-                $this->createMock(Server::class)
-            ),
-            $this->createMock(RenderProcess::class)
+            new State(
+                $this->createMock(RenderProcess::class),
+                new CaptureProcesses(
+                    $this->createMock(Server::class)
+                )
+            )
         );
         $command = Command::foreground('echo');
         $inner
@@ -60,10 +63,12 @@ class ProcessesTest extends TestCase
     {
         $processes = new Processes(
             $inner = $this->createMock(ProcessesInterface::class),
-            new CaptureProcesses(
-                $this->createMock(Server::class)
-            ),
-            $this->createMock(RenderProcess::class)
+            new State(
+                $this->createMock(RenderProcess::class),
+                new CaptureProcesses(
+                    $this->createMock(Server::class)
+                )
+            )
         );
         $pid = new Pid(42);
         $inner
@@ -79,28 +84,32 @@ class ProcessesTest extends TestCase
     {
         $processes = new Processes(
             $inner = $this->createMock(ProcessesInterface::class),
-            new CaptureProcesses(
-                $server = $this->createMock(Server::class)
-            ),
-            $this->createMock(RenderProcess::class)
+            $state = new State(
+                $this->createMock(RenderProcess::class),
+                new CaptureProcesses(
+                    $server = $this->createMock(Server::class)
+                )
+            )
         );
         $server
             ->expects($this->never())
             ->method('create');
 
         $processes->execute(Command::foreground('echo'));
-        $processes->start(new Identity('profile-uuid'));
-        $processes->finish(new Identity('profile-uuid'));
+        $state->start(new Identity('profile-uuid'));
+        $state->finish(new Identity('profile-uuid'));
     }
 
     public function testSendProcesses()
     {
         $processes = new Processes(
             $inner = $this->createMock(ProcessesInterface::class),
-            new CaptureProcesses(
-                $server = $this->createMock(Server::class)
-            ),
-            $render = $this->createMock(RenderProcess::class)
+            $state = new State(
+                $render = $this->createMock(RenderProcess::class),
+                new CaptureProcesses(
+                    $server = $this->createMock(Server::class)
+                )
+            )
         );
         $command1 = Command::foreground('foo');
         $command2 = Command::foreground('foo');
@@ -135,9 +144,9 @@ class ProcessesTest extends TestCase
                 ));
             }));
 
-        $processes->start(new Identity('profile-uuid'));
+        $state->start(new Identity('profile-uuid'));
         $processes->execute($command1);
         $processes->execute($command2);
-        $processes->finish(new Identity('profile-uuid'));
+        $state->finish(new Identity('profile-uuid'));
     }
 }

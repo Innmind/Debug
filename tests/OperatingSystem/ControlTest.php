@@ -17,8 +17,11 @@ class ControlTest extends TestCase
     {
         $server = new Control(
             $this->createMock(Server::class),
-            new CaptureProcesses(
-                $this->createMock(RestServer::class)
+            new Control\Processes\State(
+                $this->createMock(Control\RenderProcess::class),
+                new CaptureProcesses(
+                    $this->createMock(RestServer::class)
+                )
             )
         );
 

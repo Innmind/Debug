@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Debug;
 
-use Innmind\Debug\OperatingSystem\Debug as DebugOS;
+use Innmind\Debug\OperatingSystem\{
+    Debug as DebugOS,
+    Control,
+};
 use Innmind\OperatingSystem\OperatingSystem;
 use Innmind\HttpFramework\RequestHandler;
 use Innmind\CLI\Command;
@@ -36,9 +39,15 @@ function bootstrap(
     );
     $server = $rest->server((string) $profiler);
 
+    $renderProcess = new Control\RenderProcess\Local;
+    $localProcesses = new Control\Processes\State(
+        $renderProcess,
+        new Profiler\Section\CaptureProcesses($server)
+    );
+
     $debugOS = new DebugOS(
         $os,
-        new Profiler\Section\CaptureProcesses($server),
+        $localProcesses,
         new Profiler\Section\Remote\CaptureHttp($server)
     );
 
@@ -49,7 +58,7 @@ function bootstrap(
         $captureException = new Profiler\Section\CaptureException($server, $os->control()->processes(), new Render),
         $captureAppGraph = new Profiler\Section\CaptureAppGraph($server, $os->control()->processes(), new Visualize),
         Profiler\Section\CaptureProcesses::remote($server),
-        $debugOS->control()->processes(),
+        $localProcesses,
         new Profiler\Section\CaptureEnvironment(
             $server,
             $environmentVariables->reduce(
