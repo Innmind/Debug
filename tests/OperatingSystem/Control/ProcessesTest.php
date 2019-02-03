@@ -14,8 +14,6 @@ use Innmind\Server\Control\Server\{
     Processes as ProcessesInterface,
     Process,
     Process\Pid,
-    Process\ExitCode,
-    Process\Output,
     Command,
     Signal,
 };
@@ -102,73 +100,44 @@ class ProcessesTest extends TestCase
             new CaptureProcesses(
                 $server = $this->createMock(Server::class)
             ),
-            new RenderProcess\Local
+            $render = $this->createMock(RenderProcess::class)
         );
+        $command1 = Command::foreground('foo');
+        $command2 = Command::foreground('foo');
         $inner
             ->expects($this->at(0))
             ->method('execute')
+            ->with($command1)
             ->willReturn($process1 = $this->createMock(Process::class));
-        $process1
-            ->expects($this->any())
-            ->method('isRunning')
-            ->willReturn(false);
-        $process1
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
-        $process1
-            ->expects($this->once())
-            ->method('output')
-            ->willReturn($output1 = $this->createMock(Output::class));
-        $output1
-            ->expects($this->once())
-            ->method('__toString')
-            ->willReturn('back');
         $inner
             ->expects($this->at(1))
             ->method('execute')
+            ->with($command2)
             ->willReturn($process2 = $this->createMock(Process::class));
-        $process2
-            ->expects($this->any())
-            ->method('isRunning')
-            ->willReturn(true);
-        $inner
-            ->expects($this->at(3))
-            ->method('execute')
-            ->willReturn($process4 = $this->createMock(Process::class));
-        $process4
-            ->expects($this->any())
-            ->method('isRunning')
-            ->willReturn(false);
-        $process4
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(127));
+        $render
+            ->expects($this->at(0))
+            ->method('__invoke')
+            ->with($command1, $process1)
+            ->willReturn('foo');
+        $render
+            ->expects($this->at(1))
+            ->method('__invoke')
+            ->with($command2, $process2)
+            ->willReturn('bar');
         $server
             ->expects($this->once())
             ->method('create')
             ->with($this->callback(static function($resource): bool {
                 return $resource->properties()->get('processes')->value()->equals(Set::of(
                     'string',
-                    "[0] echo\nback",
-                    "[still-running] sleep '42000'\n",
-                    "[background] /home/some-user: sleep '42000'\n",
-                    "[127] unknown\n"
+                    'foo',
+                    'bar'
                 ));
             }));
 
         $processes->start(new Identity('profile-uuid'));
-        $processes->execute(Command::foreground('echo'));
-        $processes->execute(
-            Command::foreground('sleep')
-                ->withArgument('42000')
-        );
-        $processes->execute(
-            Command::background('sleep')
-                ->withArgument('42000')
-                ->withWorkingDirectory('/home/some-user')
-        );
-        $processes->execute(Command::foreground('unknown'));
+        $processes->execute($command1);
+        $processes->execute($command2);
         $processes->finish(new Identity('profile-uuid'));
     }
 }
