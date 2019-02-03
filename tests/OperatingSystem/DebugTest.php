@@ -36,6 +36,15 @@ class DebugTest extends TestCase
                     $this->createMock(Server::class)
                 )
             ),
+            new State(
+                $this->createMock(RenderProcess::class),
+                CaptureProcesses::remote(
+                    $this->createMock(Server::class)
+                )
+            ),
+            new RenderProcess\Remote(
+                $this->createMock(RenderProcess::class)
+            ),
             new CaptureHttp(
                 $this->createMock(Server::class)
             )

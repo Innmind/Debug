@@ -39,10 +39,16 @@ function bootstrap(
     );
     $server = $rest->server((string) $profiler);
 
-    $renderProcess = new Control\RenderProcess\Local;
+    $renderProcess = new Control\RenderProcess\Remote(
+        new Control\RenderProcess\Local
+    );
     $localProcesses = new Control\Processes\State(
         $renderProcess,
         new Profiler\Section\CaptureProcesses($server)
+    );
+    $remoteProcesses = new Control\Processes\State(
+        $renderProcess,
+        Profiler\Section\CaptureProcesses::remote($server)
     );
 
     $captureRemoteHttp = new Profiler\Section\Remote\CaptureHttp($server);
@@ -50,6 +56,8 @@ function bootstrap(
     $debugOS = new DebugOS(
         $os,
         $localProcesses,
+        $remoteProcesses,
+        $renderProcess,
         $captureRemoteHttp
     );
 
@@ -60,7 +68,7 @@ function bootstrap(
         $captureException = new Profiler\Section\CaptureException($server, $os->control()->processes(), new Render),
         $captureAppGraph = new Profiler\Section\CaptureAppGraph($server, $os->control()->processes(), new Visualize),
         $localProcesses,
-        Profiler\Section\CaptureProcesses::remote($server),
+        $remoteProcesses,
         $captureRemoteHttp,
         new Profiler\Section\CaptureEnvironment(
             $server,

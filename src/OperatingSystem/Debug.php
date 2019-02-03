@@ -24,6 +24,8 @@ final class Debug implements OperatingSystem
 {
     private $os;
     private $localProcesses;
+    private $remoteProcesses;
+    private $render;
     private $captureHttp;
     private $control;
     private $remote;
@@ -31,10 +33,14 @@ final class Debug implements OperatingSystem
     public function __construct(
         OperatingSystem $os,
         State $localProcesses,
+        State $remoteProcesses,
+        Control\RenderProcess\Remote $render,
         CaptureHttp $captureHttp
     ) {
         $this->os = $os;
         $this->localProcesses = $localProcesses;
+        $this->remoteProcesses = $remoteProcesses;
+        $this->render = $render;
         $this->captureHttp = $captureHttp;
     }
 
@@ -75,7 +81,9 @@ final class Debug implements OperatingSystem
     {
         return $this->remote ?? $this->remote = new Remote(
             $this->os->remote(),
-            $this->captureHttp
+            $this->captureHttp,
+            $this->render,
+            $this->remoteProcesses
         );
     }
 

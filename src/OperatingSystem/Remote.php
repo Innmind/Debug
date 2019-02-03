@@ -24,19 +24,30 @@ final class Remote implements RemoteInterface, Section
 {
     private $remote;
     private $captureHttp;
+    private $render;
+    private $remoteProcesses;
     private $http;
 
     public function __construct(
         RemoteInterface $remote,
-        CaptureHttp $captureHttp
+        CaptureHttp $captureHttp,
+        Control\RenderProcess\Remote $render,
+        Control\Processes\State $remoteProcesses
     ) {
         $this->remote = $remote;
         $this->captureHttp = $captureHttp;
+        $this->render = $render;
+        $this->remoteProcesses = $remoteProcesses;
     }
 
     public function ssh(UrlInterface $server): Server
     {
-        return $this->remote->ssh($server);
+        return new Remote\Server(
+            $this->remote->ssh($server),
+            $server,
+            $this->render,
+            $this->remoteProcesses
+        );
     }
 
     public function socket(Transport $transport, AuthorityInterface $authority): Client
