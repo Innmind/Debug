@@ -5,6 +5,7 @@ namespace Tests\Innmind\Debug\OperatingSystem\Control;
 
 use Innmind\Debug\{
     OperatingSystem\Control\Processes,
+    OperatingSystem\Control\RenderProcess,
     Profiler\Section,
     Profiler\Section\CaptureProcesses,
     Profiler\Profile\Identity,
@@ -30,7 +31,8 @@ class ProcessesTest extends TestCase
             $this->createMock(ProcessesInterface::class),
             new CaptureProcesses(
                 $this->createMock(Server::class)
-            )
+            ),
+            $this->createMock(RenderProcess::class)
         );
 
         $this->assertInstanceOf(ProcessesInterface::class, $processes);
@@ -43,7 +45,8 @@ class ProcessesTest extends TestCase
             $inner = $this->createMock(ProcessesInterface::class),
             new CaptureProcesses(
                 $this->createMock(Server::class)
-            )
+            ),
+            $this->createMock(RenderProcess::class)
         );
         $command = Command::foreground('echo');
         $inner
@@ -61,7 +64,8 @@ class ProcessesTest extends TestCase
             $inner = $this->createMock(ProcessesInterface::class),
             new CaptureProcesses(
                 $this->createMock(Server::class)
-            )
+            ),
+            $this->createMock(RenderProcess::class)
         );
         $pid = new Pid(42);
         $inner
@@ -79,7 +83,8 @@ class ProcessesTest extends TestCase
             $inner = $this->createMock(ProcessesInterface::class),
             new CaptureProcesses(
                 $server = $this->createMock(Server::class)
-            )
+            ),
+            $this->createMock(RenderProcess::class)
         );
         $server
             ->expects($this->never())
@@ -96,7 +101,8 @@ class ProcessesTest extends TestCase
             $inner = $this->createMock(ProcessesInterface::class),
             new CaptureProcesses(
                 $server = $this->createMock(Server::class)
-            )
+            ),
+            new RenderProcess\Local
         );
         $inner
             ->expects($this->at(0))

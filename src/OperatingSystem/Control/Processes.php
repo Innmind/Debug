@@ -21,14 +21,17 @@ final class Processes implements ProcessesInterface, Section
 {
     private $processes;
     private $section;
+    private $renderProcess;
     private $pairs;
 
     public function __construct(
         ProcessesInterface $processes,
-        CaptureProcesses $section
+        CaptureProcesses $section,
+        RenderProcess $render
     ) {
         $this->processes = $processes;
         $this->section = $section;
+        $this->render = $render;
         $this->pairs = Map::of(Command::class, Process::class);
     }
 
@@ -57,34 +60,9 @@ final class Processes implements ProcessesInterface, Section
     {
         $this->pairs->foreach(function(Command $command, Process $process): void {
             $this->section->capture(
-                $this->render($command, $process)
+                ($this->render)($command, $process)
             );
         });
         $this->section->finish($identity);
-    }
-
-    private function render(Command $command, Process $process): string
-    {
-        if ($command->toBeRunInBackground()) {
-            $status = 'background';
-        } elseif ($process->isRunning()) {
-            $status = 'still-running';
-        } else {
-            $status = (string) $process->exitCode();
-        }
-
-        $directory = '';
-
-        if ($command->hasWorkingDirectory()) {
-            $directory = $command->workingDirectory().': ';
-        }
-
-        return \sprintf(
-            "[%s] %s%s\n%s",
-            $status,
-            $directory,
-            $command,
-            $command->toBeRunInBackground() || $process->isRunning() ? '' : $process->output()
-        );
     }
 }
