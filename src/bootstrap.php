@@ -18,6 +18,7 @@ use Innmind\UrlResolver\UrlResolver;
 use Innmind\StackTrace\Render;
 use Innmind\ObjectGraph\Visualize;
 use Innmind\Filesystem\Adapter\MemoryAdapter;
+use Innmind\CommandBus\CommandBus as CommandBusInterface;
 use Innmind\Immutable\{
     MapInterface,
     Map,
@@ -134,6 +135,9 @@ function bootstrap(
         },
         'controller' => static function(Controller $controller) use ($callGraph): Controller {
             return new HttpFramework\CaptureController($controller, $callGraph);
+        },
+        'command_bus' => static function(CommandBusInterface $bus) use ($callGraph): CommandBusInterface {
+            return new CommandBus\CaptureCallGraph($bus, $callGraph);
         },
     ];
 }
