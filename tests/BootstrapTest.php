@@ -11,6 +11,7 @@ use Innmind\Debug\{
     CallGraph,
     CommandBus,
     EventBus,
+    Closure,
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Url\Url;
@@ -45,6 +46,7 @@ class BootstrapTest extends TestCase
         $this->assertInternalType('callable', $debug['controller']);
         $this->assertInternalType('callable', $debug['command_bus']);
         $this->assertInternalType('callable', $debug['event_bus']);
+        $this->assertInternalType('callable', $debug['callable']);
 
         $this->assertInstanceOf(Debug::class, $debug['os']());
         $this->assertInstanceOf(CallGraph::class, $debug['call_graph']());
@@ -59,6 +61,10 @@ class BootstrapTest extends TestCase
         $this->assertInstanceOf(
             EventBus\CaptureCallGraph::class,
             $debug['event_bus']($this->createMock(EventBusInterface::class))
+        );
+        $this->assertInstanceOf(
+            Closure\CaptureCallGraph::class,
+            $debug['callable'](function(){})
         );
 
         $handler = $debug['http']($this->createMock(RequestHandler::class));

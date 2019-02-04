@@ -143,5 +143,8 @@ function bootstrap(
         'event_bus' => static function(EventBusInterface $bus) use ($callGraph): EventBusInterface {
             return new EventBus\CaptureCallGraph($bus, $callGraph);
         },
+        'callable' => static function(callable $fn) use ($callGraph): callable {
+            return new Closure\CaptureCallGraph($fn, $callGraph);
+        },
     ];
 }
