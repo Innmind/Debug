@@ -19,6 +19,7 @@ use Innmind\StackTrace\Render;
 use Innmind\ObjectGraph\Visualize;
 use Innmind\Filesystem\Adapter\MemoryAdapter;
 use Innmind\CommandBus\CommandBus as CommandBusInterface;
+use Innmind\EventBus\EventBus as EventBusInterface;
 use Innmind\Immutable\{
     MapInterface,
     Map,
@@ -138,6 +139,9 @@ function bootstrap(
         },
         'command_bus' => static function(CommandBusInterface $bus) use ($callGraph): CommandBusInterface {
             return new CommandBus\CaptureCallGraph($bus, $callGraph);
+        },
+        'event_bus' => static function(EventBusInterface $bus) use ($callGraph): EventBusInterface {
+            return new EventBus\CaptureCallGraph($bus, $callGraph);
         },
     ];
 }

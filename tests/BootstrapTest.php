@@ -10,6 +10,7 @@ use Innmind\Debug\{
     OperatingSystem\Debug,
     CallGraph,
     CommandBus,
+    EventBus,
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Url\Url;
@@ -23,6 +24,7 @@ use Innmind\ObjectGraph\{
     Assert\Stack,
 };
 use Innmind\CommandBus\CommandBus as CommandBusInterface;
+use Innmind\EventBus\EventBus as EventBusInterface;
 use Innmind\Immutable\StreamInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -42,6 +44,7 @@ class BootstrapTest extends TestCase
         $this->assertInternalType('callable', $debug['call_graph']);
         $this->assertInternalType('callable', $debug['controller']);
         $this->assertInternalType('callable', $debug['command_bus']);
+        $this->assertInternalType('callable', $debug['event_bus']);
 
         $this->assertInstanceOf(Debug::class, $debug['os']());
         $this->assertInstanceOf(CallGraph::class, $debug['call_graph']());
@@ -52,6 +55,10 @@ class BootstrapTest extends TestCase
         $this->assertInstanceOf(
             CommandBus\CaptureCallGraph::class,
             $debug['command_bus']($this->createMock(CommandBusInterface::class))
+        );
+        $this->assertInstanceOf(
+            EventBus\CaptureCallGraph::class,
+            $debug['event_bus']($this->createMock(EventBusInterface::class))
         );
 
         $handler = $debug['http']($this->createMock(RequestHandler::class));
