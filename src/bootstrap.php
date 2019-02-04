@@ -8,7 +8,10 @@ use Innmind\Debug\OperatingSystem\{
     Control,
 };
 use Innmind\OperatingSystem\OperatingSystem;
-use Innmind\HttpFramework\RequestHandler;
+use Innmind\HttpFramework\{
+    RequestHandler,
+    Controller,
+};
 use Innmind\CLI\Command;
 use Innmind\Url\UrlInterface;
 use Innmind\UrlResolver\UrlResolver;
@@ -128,6 +131,9 @@ function bootstrap(
         },
         'call_graph' => function() use ($callGraph): CallGraph {
             return $callGraph;
-        }
+        },
+        'controller' => static function(Controller $controller) use ($callGraph): Controller {
+            return new HttpFramework\CaptureController($controller, $callGraph);
+        },
     ];
 }

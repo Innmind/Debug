@@ -12,7 +12,10 @@ use Innmind\Debug\{
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Url\Url;
-use Innmind\HttpFramework\RequestHandler;
+use Innmind\HttpFramework\{
+    RequestHandler,
+    Controller,
+};
 use Innmind\CLI\Command;
 use Innmind\ObjectGraph\{
     Graph,
@@ -35,9 +38,11 @@ class BootstrapTest extends TestCase
         $this->assertInternalType('callable', $debug['cli']);
         $this->assertInternalType('callable', $debug['os']);
         $this->assertInternalType('callable', $debug['call_graph']);
+        $this->assertInternalType('callable', $debug['controller']);
 
         $this->assertInstanceOf(Debug::class, $debug['os']());
         $this->assertInstanceOf(CallGraph::class, $debug['call_graph']());
+        $this->assertInstanceOf(Controller::class, $debug['controller']($this->createMock(Controller::class)));
 
         $handler = $debug['http']($this->createMock(RequestHandler::class));
         $this->assertInstanceOf(RequestHandler::class, $handler);
