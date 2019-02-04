@@ -108,13 +108,17 @@ function bootstrap(
                 $profiler
             );
         },
-        'cli' => static function(Command ...$commands) use ($profiler, $captureException, $captureAppGraph): StreamInterface {
-            return Stream::of(Command::class, ...$commands)->map(static function($command) use ($profiler, $captureException, $captureAppGraph): Command {
+        'cli' => static function(Command ...$commands) use ($profiler, $captureException, $captureAppGraph, $callGraph): StreamInterface {
+            return Stream::of(Command::class, ...$commands)->map(static function($command) use ($profiler, $captureException, $captureAppGraph, $callGraph): Command {
                 return new CLI\StartProfile(
                     new CLI\CaptureException(
-                        new CLI\CaptureAppGraph(
-                            $command,
-                            $captureAppGraph
+                        new CLI\StartCallGraph( // above app graph to not show debug stuff in the graph
+                            new CLI\CaptureAppGraph(
+                                $command,
+                                $captureAppGraph
+                            ),
+                            $callGraph,
+                            \get_class($command)
                         ),
                         $captureException
                     ),

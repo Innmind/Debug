@@ -62,6 +62,7 @@ class BootstrapTest extends TestCase
         $stack = Stack::of(
             CLI\StartProfile::class,
             CLI\CaptureException::class,
+            CLI\StartCallGraph::class,
             CLI\CaptureAppGraph::class
         );
         $this->assertTrue($stack((new Graph)($command)));
