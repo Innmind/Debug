@@ -61,13 +61,16 @@ function bootstrap(
         $captureRemoteHttp
     );
 
+    $captureCallGraph = new Profiler\Section\CaptureCallGraph($server);
+    $callGraph = new CallGraph($captureCallGraph, $os->clock());
+
     $profiler = new Profiler\Http(
         $server,
         $os->clock(),
         $captureHttp = new Profiler\Section\CaptureHttp($server),
         $captureException = new Profiler\Section\CaptureException($server, $os->control()->processes(), new Render),
         $captureAppGraph = new Profiler\Section\CaptureAppGraph($server, $os->control()->processes(), new Visualize),
-        new Profiler\Section\CaptureCallGraph($server),
+        $captureCallGraph,
         $localProcesses,
         $remoteProcesses,
         $captureRemoteHttp,
@@ -86,13 +89,17 @@ function bootstrap(
         'os' => static function() use ($debugOS): OperatingSystem {
             return $debugOS;
         },
-        'http' => static function(RequestHandler $handler) use ($profiler, $captureHttp, $captureException, $captureAppGraph): RequestHandler {
+        'http' => static function(RequestHandler $handler) use ($profiler, $captureHttp, $captureException, $captureAppGraph, $callGraph): RequestHandler {
             return new HttpFramework\StartProfile(
                 new HttpFramework\CaptureHttp(
                     new HttpFramework\CaptureException(
-                        new HttpFramework\CaptureAppGraph(
-                            $handler,
-                            $captureAppGraph
+                        new HttpFramework\StartCallGraph( // above app graph to not show debug stuff in the graph
+                            new HttpFramework\CaptureAppGraph(
+                                $handler,
+                                $captureAppGraph
+                            ),
+                            $callGraph,
+                            \get_class($handler)
                         ),
                         $captureException
                     ),
@@ -115,5 +122,8 @@ function bootstrap(
                 );
             });
         },
+        'call_graph' => function() use ($callGraph): CallGraph {
+            return $callGraph;
+        }
     ];
 }

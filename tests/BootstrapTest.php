@@ -8,6 +8,7 @@ use Innmind\Debug\{
     HttpFramework,
     CLI,
     OperatingSystem\Debug,
+    CallGraph,
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Url\Url;
@@ -33,8 +34,10 @@ class BootstrapTest extends TestCase
         $this->assertInternalType('callable', $debug['http']);
         $this->assertInternalType('callable', $debug['cli']);
         $this->assertInternalType('callable', $debug['os']);
+        $this->assertInternalType('callable', $debug['call_graph']);
 
         $this->assertInstanceOf(Debug::class, $debug['os']());
+        $this->assertInstanceOf(CallGraph::class, $debug['call_graph']());
 
         $handler = $debug['http']($this->createMock(RequestHandler::class));
         $this->assertInstanceOf(RequestHandler::class, $handler);
@@ -42,6 +45,7 @@ class BootstrapTest extends TestCase
             HttpFramework\StartProfile::class,
             HttpFramework\CaptureHttp::class,
             HttpFramework\CaptureException::class,
+            HttpFramework\StartCallGraph::class,
             HttpFramework\CaptureAppGraph::class
         );
         $this->assertTrue($stack((new Graph)($handler)));
