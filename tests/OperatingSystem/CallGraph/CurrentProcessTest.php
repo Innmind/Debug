@@ -12,8 +12,10 @@ use Innmind\Debug\{
 use Innmind\OperatingSystem\{
     CurrentProcess as CurrentProcessInterface,
     CurrentProcess\ForkSide,
+    CurrentProcess\Children,
     Exception\ForkFailed,
 };
+use Innmind\Server\Status\Server\Process\Pid;
 use Innmind\Rest\Client\Server;
 use Innmind\TimeContinuum\{
     TimeContinuumInterface,
@@ -38,6 +40,44 @@ class CurrentProcessTest extends TestCase
                 )
             )
         );
+    }
+
+    public function testId()
+    {
+        $process = new CurrentProcess(
+            $inner = $this->createMock(CurrentProcessInterface::class),
+            new CallGraph(
+                new CaptureCallGraph(
+                    $this->createMock(Server::class)
+                ),
+                $this->createMock(TimeContinuumInterface::class)
+            )
+        );
+        $inner
+            ->expects($this->once())
+            ->method('id')
+            ->willReturn($expected = new Pid(42));
+
+        $this->assertSame($expected, $process->id());
+    }
+
+    public function testChildren()
+    {
+        $process = new CurrentProcess(
+            $inner = $this->createMock(CurrentProcessInterface::class),
+            new CallGraph(
+                new CaptureCallGraph(
+                    $this->createMock(Server::class)
+                ),
+                $this->createMock(TimeContinuumInterface::class)
+            )
+        );
+        $inner
+            ->expects($this->once())
+            ->method('children')
+            ->willReturn($expected = new Children);
+
+        $this->assertSame($expected, $process->children());
     }
 
     public function testCaptureHalt()

@@ -53,7 +53,7 @@ final class CurrentProcess implements CurrentProcessInterface
 
     public function children(): Children
     {
-        return $this->process-children();
+        return $this->process->children();
     }
 
     public function halt(PeriodInterface $period): void
