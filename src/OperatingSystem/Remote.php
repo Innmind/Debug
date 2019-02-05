@@ -3,11 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Debug\OperatingSystem;
 
-use Innmind\Debug\Profiler\{
-    Section\Remote\CaptureHttp,
-    Section,
-    Profile\Identity,
-};
+use Innmind\Debug\Profiler\Section\Remote\CaptureHttp;
 use Innmind\OperatingSystem\Remote as RemoteInterface;
 use Innmind\Server\Control\Server;
 use Innmind\Socket\{
@@ -20,7 +16,7 @@ use Innmind\Url\{
 };
 use Innmind\HttpTransport\Transport as HttpTransport;
 
-final class Remote implements RemoteInterface, Section
+final class Remote implements RemoteInterface
 {
     private $remote;
     private $captureHttp;
@@ -61,15 +57,5 @@ final class Remote implements RemoteInterface, Section
             $this->remote->http(),
             $this->captureHttp
         );
-    }
-
-    public function start(Identity $identity): void
-    {
-        $this->captureHttp->start($identity);
-    }
-
-    public function finish(Identity $identity): void
-    {
-        $this->captureHttp->finish($identity);
     }
 }

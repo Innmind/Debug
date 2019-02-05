@@ -7,7 +7,6 @@ use Innmind\Debug\{
     OperatingSystem\Remote,
     OperatingSystem\Remote\Http,
     OperatingSystem\Control,
-    Profiler\Section,
     Profiler\Section\Remote\CaptureHttp,
     Profiler\Section\CaptureProcesses,
     Profiler\Profile\Identity,
@@ -59,7 +58,6 @@ class RemoteTest extends TestCase
         );
 
         $this->assertInstanceOf(RemoteInterface::class, $remote);
-        $this->assertInstanceOf(Section::class, $remote);
         $this->assertInstanceOf(
             Remote\Server::class,
             $remote->ssh($this->createMock(UrlInterface::class))
@@ -79,7 +77,7 @@ class RemoteTest extends TestCase
         );
         $remote = new Remote(
             $inner = $this->createMock(RemoteInterface::class),
-            new CaptureHttp(
+            $section = new CaptureHttp(
                 $server = $this->createMock(Server::class)
             ),
             $render,
@@ -113,9 +111,9 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('create');
 
-        $this->assertNull($remote->start(new Identity('profile-uuid')));
+        $this->assertNull($section->start(new Identity('profile-uuid')));
         $remote->http()($request);
-        $this->assertNull($remote->finish(new Identity('profile-uuid')));
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
 
     public function testSendProcesses()
