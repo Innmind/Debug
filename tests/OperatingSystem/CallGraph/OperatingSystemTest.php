@@ -6,6 +6,7 @@ namespace Tests\Innmind\Debug\OperatingSystem\CallGraph;
 use Innmind\Debug\{
     OperatingSystem\CallGraph\OperatingSystem,
     OperatingSystem\CallGraph\Remote,
+    OperatingSystem\CallGraph\CurrentProcess,
     Profiler\Section\CaptureCallGraph,
     CallGraph,
 };
@@ -14,7 +15,6 @@ use Innmind\OperatingSystem\{
     Filesystem,
     Ports,
     Sockets,
-    CurrentProcess,
 };
 use Innmind\TimeContinuum\TimeContinuumInterface;
 use Innmind\Server\Status\Server as ServerStatus;
@@ -46,5 +46,6 @@ class CaptureTest extends TestCase
         $this->assertInstanceOf(Ports::class, $os->ports());
         $this->assertInstanceOf(Sockets::class, $os->sockets());
         $this->assertInstanceOf(CurrentProcess::class, $os->process());
+        $this->assertSame($os->process(), $os->process());
     }
 }

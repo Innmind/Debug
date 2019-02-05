@@ -10,7 +10,7 @@ use Innmind\OperatingSystem\{
     Ports,
     Sockets,
     Remote as RemoteInterface,
-    CurrentProcess,
+    CurrentProcess as CurrentProcessInterface,
 };
 use Innmind\Server\Status\Server as ServerStatus;
 use Innmind\Server\Control\Server as ServerControl;
@@ -21,6 +21,7 @@ final class OperatingSystem implements OperatingSystemInterface
     private $os;
     private $graph;
     private $remote;
+    private $process;
 
     public function __construct(OperatingSystemInterface $os, CallGraph $graph)
     {
@@ -66,8 +67,11 @@ final class OperatingSystem implements OperatingSystemInterface
         );
     }
 
-    public function process(): CurrentProcess
+    public function process(): CurrentProcessInterface
     {
-        return $this->os->process();
+        return $this->process ?? $this->process = new CurrentProcess(
+            $this->os->process(),
+            $this->graph
+        );
     }
 }
