@@ -8,6 +8,7 @@ use Innmind\OperatingSystem\{
     CurrentProcess as CurrentProcessInterface,
     CurrentProcess\ForkSide,
     CurrentProcess\Children,
+    Exception\ForkFailed,
 };
 use Innmind\Server\Status\Server\Process\Pid;
 use Innmind\TimeContinuum\PeriodInterface;
@@ -33,7 +34,21 @@ final class CurrentProcess implements CurrentProcessInterface
      */
     public function fork(): ForkSide
     {
-        return $this->process->fork();
+        $this->graph->enter('fork()');
+
+        try {
+            $side = $this->process->fork();
+        } catch (ForkFailed $e) {
+            $this->graph->leave();
+
+            throw $e;
+        }
+
+        if ($side->parent()) {
+            $this->graph->leave();
+        }
+
+        return $side;
     }
 
     public function children(): Children
