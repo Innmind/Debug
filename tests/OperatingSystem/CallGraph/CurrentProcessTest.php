@@ -145,7 +145,7 @@ class CurrentProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('fork')
-            ->willReturn($side = ForkSide::of(0));
+            ->willReturn($side = ForkSide::of(42));
 
         $graph->start('foo');
         $this->assertSame($side, $process->fork());
