@@ -7,7 +7,7 @@ use function Innmind\Debug\bootstrap;
 use Innmind\Debug\{
     HttpFramework,
     CLI,
-    OperatingSystem\Debug,
+    OperatingSystem,
     CallGraph,
     CommandBus,
     EventBus,
@@ -48,7 +48,12 @@ class BootstrapTest extends TestCase
         $this->assertInternalType('callable', $debug['event_bus']);
         $this->assertInternalType('callable', $debug['callable']);
 
-        $this->assertInstanceOf(Debug::class, $debug['os']());
+        $stack = Stack::of(
+            OperatingSystem\Capture::class,
+            OperatingSystem\Debug::class
+        );
+        $this->assertTrue($stack((new Graph)($debug['os']())));
+
         $this->assertInstanceOf(CallGraph::class, $debug['call_graph']());
         $this->assertInstanceOf(
             Controller::class,

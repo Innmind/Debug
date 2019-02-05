@@ -6,6 +6,7 @@ namespace Innmind\Debug;
 use Innmind\Debug\OperatingSystem\{
     Debug as DebugOS,
     Control,
+    Capture,
 };
 use Innmind\OperatingSystem\OperatingSystem;
 use Innmind\HttpFramework\{
@@ -57,6 +58,8 @@ function bootstrap(
     );
 
     $captureRemoteHttp = new Profiler\Section\Remote\CaptureHttp($server);
+    $captureCallGraph = new Profiler\Section\CaptureCallGraph($server);
+    $callGraph = new CallGraph($captureCallGraph, $os->clock());
 
     $debugOS = new DebugOS(
         $os,
@@ -65,9 +68,7 @@ function bootstrap(
         $renderProcess,
         $captureRemoteHttp
     );
-
-    $captureCallGraph = new Profiler\Section\CaptureCallGraph($server);
-    $callGraph = new CallGraph($captureCallGraph, $os->clock());
+    $debugOS = new Capture($debugOS, $callGraph);
 
     $profiler = new Profiler\Http(
         $server,
