@@ -3,11 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Debug;
 
-use Innmind\Debug\OperatingSystem\{
-    Debug as DebugOS,
-    Control,
-    Capture,
-};
+use Innmind\Debug\OperatingSystem as OS;
 use Innmind\OperatingSystem\OperatingSystem;
 use Innmind\HttpFramework\{
     RequestHandler,
@@ -45,14 +41,14 @@ function bootstrap(
     );
     $server = $rest->server((string) $profiler);
 
-    $renderProcess = new Control\RenderProcess\Remote(
-        new Control\RenderProcess\Local
+    $renderProcess = new OS\Debug\Control\RenderProcess\Remote(
+        new OS\Debug\Control\RenderProcess\Local
     );
-    $localProcesses = new Control\Processes\State(
+    $localProcesses = new OS\Debug\Control\Processes\State(
         $renderProcess,
         new Profiler\Section\CaptureProcesses($server)
     );
-    $remoteProcesses = new Control\Processes\State(
+    $remoteProcesses = new OS\Debug\Control\Processes\State(
         $renderProcess,
         Profiler\Section\CaptureProcesses::remote($server)
     );
@@ -61,14 +57,14 @@ function bootstrap(
     $captureCallGraph = new Profiler\Section\CaptureCallGraph($server);
     $callGraph = new CallGraph($captureCallGraph, $os->clock());
 
-    $debugOS = new DebugOS(
+    $debugOS = new OS\Debug\OperatingSystem(
         $os,
         $localProcesses,
         $remoteProcesses,
         $renderProcess,
         $captureRemoteHttp
     );
-    $debugOS = new Capture($debugOS, $callGraph);
+    $debugOS = new OS\CallGraph\OperatingSystem($debugOS, $callGraph);
 
     $profiler = new Profiler\Http(
         $server,

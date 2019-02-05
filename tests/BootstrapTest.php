@@ -49,8 +49,8 @@ class BootstrapTest extends TestCase
         $this->assertInternalType('callable', $debug['callable']);
 
         $stack = Stack::of(
-            OperatingSystem\Capture::class,
-            OperatingSystem\Debug::class
+            OperatingSystem\CallGraph\OperatingSystem::class,
+            OperatingSystem\Debug\OperatingSystem::class
         );
         $this->assertTrue($stack((new Graph)($debug['os']())));
 
