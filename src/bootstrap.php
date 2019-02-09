@@ -12,8 +12,14 @@ use Innmind\HttpFramework\{
 use Innmind\CLI\Command;
 use Innmind\Url\UrlInterface;
 use Innmind\UrlResolver\UrlResolver;
-use Innmind\StackTrace\Render;
-use Innmind\ObjectGraph\Visualize;
+use Innmind\StackTrace\{
+    Render,
+    Link,
+};
+use Innmind\ObjectGraph\{
+    Visualize,
+    LocationRewriter,
+};
 use Innmind\Filesystem\Adapter\MemoryAdapter;
 use Innmind\CommandBus\CommandBus as CommandBusInterface;
 use Innmind\EventBus\EventBus as EventBusInterface;
@@ -30,9 +36,22 @@ use function Innmind\Rest\Client\bootstrap as client;
 function bootstrap(
     OperatingSystem $os,
     UrlInterface $profiler,
-    MapInterface $environmentVariables = null
+    MapInterface $environmentVariables = null,
+    CodeEditor $codeEditor = null
 ): array {
     $environmentVariables = $environmentVariables ?? Map::of('string', 'scalar');
+
+    switch ($codeEditor) {
+        case CodeEditor::sublimeText():
+            $linkException = new Link\SublimeHandler;
+            $locateClass = new LocationRewriter\SublimeHandler;
+            break;
+
+        default:
+            $linkException = null;
+            $locateClass = null;
+            break;
+    }
 
     $rest = client(
         $os->remote()->http(),
@@ -70,8 +89,16 @@ function bootstrap(
         $server,
         $os->clock(),
         $captureHttp = new Profiler\Section\CaptureHttp($server),
-        $captureException = new Profiler\Section\CaptureException($server, $os->control()->processes(), new Render),
-        $captureAppGraph = new Profiler\Section\CaptureAppGraph($server, $os->control()->processes(), new Visualize),
+        $captureException = new Profiler\Section\CaptureException(
+            $server,
+            $os->control()->processes(),
+            new Render($linkException)
+        ),
+        $captureAppGraph = new Profiler\Section\CaptureAppGraph(
+            $server,
+            $os->control()->processes(),
+            new Visualize($locateClass)
+        ),
         $captureCallGraph,
         $localProcesses,
         $remoteProcesses,

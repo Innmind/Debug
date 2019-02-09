@@ -12,6 +12,7 @@ use Innmind\Debug\{
     CommandBus,
     EventBus,
     Closure,
+    CodeEditor,
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Url\Url;
@@ -23,9 +24,15 @@ use Innmind\CLI\Command;
 use Innmind\ObjectGraph\{
     Graph,
     Assert\Stack,
+    Visualize,
+    LocationRewriter,
 };
 use Innmind\CommandBus\CommandBus as CommandBusInterface;
 use Innmind\EventBus\EventBus as EventBusInterface;
+use Innmind\StackTrace\{
+    Render,
+    Link,
+};
 use Innmind\Immutable\StreamInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -99,5 +106,51 @@ class BootstrapTest extends TestCase
             CLI\CaptureAppGraph::class
         );
         $this->assertTrue($stack((new Graph)($command)));
+    }
+
+    public function testUseSublimeSchemeToRenderGraphWhenUsingSublimeTextEditor()
+    {
+        $debug = bootstrap(
+            Factory::build(),
+            Url::fromString('http://localhost:8000/'),
+            null,
+            CodeEditor::sublimeText()
+        );
+
+        $handler = $debug['http']($this->createMock(RequestHandler::class));
+
+        $stack = Stack::of(
+            Render::class,
+            Link\SublimeHandler::class
+        );
+        $this->assertTrue($stack((new Graph)($handler)));
+
+        $stack = Stack::of(
+            Visualize::class,
+            LocationRewriter\SublimeHandler::class
+        );
+        $this->assertTrue($stack((new Graph)($handler)));
+    }
+
+    public function testDoesntUseSublimeSchemeToRenderGraphWhenNoTextEditorSpecified()
+    {
+        $debug = bootstrap(
+            Factory::build(),
+            Url::fromString('http://localhost:8000/')
+        );
+
+        $handler = $debug['http']($this->createMock(RequestHandler::class));
+
+        $stack = Stack::of(
+            Render::class,
+            Link\SublimeHandler::class
+        );
+        $this->assertFalse($stack((new Graph)($handler)));
+
+        $stack = Stack::of(
+            Visualize::class,
+            LocationRewriter\SublimeHandler::class
+        );
+        $this->assertFalse($stack((new Graph)($handler)));
     }
 }
