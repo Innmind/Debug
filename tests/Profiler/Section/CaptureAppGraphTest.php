@@ -48,6 +48,24 @@ class CaptureAppGraphTest extends TestCase
         $this->assertNull($section->capture(new \stdClass));
     }
 
+    public function testDoesntCreateSectionWhenProfilerStartedButNotFinished()
+    {
+        $section = new CaptureAppGraph(
+            $server = $this->createMock(Server::class),
+            $processes = $this->createMock(Processes::class),
+            new Visualize
+        );
+        $server
+            ->expects($this->never())
+            ->method('create');
+        $processes
+            ->expects($this->never())
+            ->method('execute');
+
+        $this->assertNull($section->start(new Identity('profile-uuid')));
+        $this->assertNull($section->capture(new \stdClass));
+    }
+
     public function testDoesntCreateSectionWhenProfilerHasFinished()
     {
         $section = new CaptureAppGraph(
@@ -65,6 +83,25 @@ class CaptureAppGraphTest extends TestCase
         $section->start($identity = new Identity('profile-uuid'));
         $this->assertNull($section->finish($identity));
         $this->assertNull($section->capture(new \stdClass));
+    }
+
+    public function testDoesntCreateSectionWhenCapturedBeforeStarted()
+    {
+        $section = new CaptureAppGraph(
+            $server = $this->createMock(Server::class),
+            $processes = $this->createMock(Processes::class),
+            new Visualize
+        );
+        $server
+            ->expects($this->never())
+            ->method('create');
+        $processes
+            ->expects($this->never())
+            ->method('execute');
+
+        $this->assertNull($section->capture(new \stdClass));
+        $this->assertNull($section->start(new Identity('profile-uuid')));
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
 
     public function testCreateSectionWhenProfilerStarted()
@@ -107,5 +144,6 @@ class CaptureAppGraphTest extends TestCase
 
         $this->assertNull($section->start(new Identity('profile-uuid')));
         $this->assertNull($section->capture(new \stdClass));
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
 }

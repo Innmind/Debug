@@ -58,5 +58,7 @@ class CaptureAppGraphTest extends TestCase
         $section->start(new Identity('profile-uuid'));
 
         $this->assertSame($response, $handle($request));
+
+        $section->finish(new Identity('profile-uuid'));
     }
 }

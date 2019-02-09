@@ -28,6 +28,7 @@ final class CaptureAppGraph implements Section
     private $render;
     private $graph;
     private $profile;
+    private $app;
 
     public function __construct(
         Server $server,
@@ -43,11 +44,17 @@ final class CaptureAppGraph implements Section
     public function start(Identity $identity): void
     {
         $this->profile = $identity;
+        $this->app = null;
     }
 
     public function capture(object $app): void
     {
-        if (\is_null($this->profile)) {
+        $this->app = $app;
+    }
+
+    public function finish(Identity $identity): void
+    {
+        if (\is_null($this->profile) || \is_null($this->app)) {
             return;
         }
 
@@ -63,7 +70,7 @@ final class CaptureAppGraph implements Section
                             ->withShortOption('Tsvg')
                             ->withInput(
                                 ($this->render)(
-                                    ($this->graph)($app)
+                                    ($this->graph)($this->app)
                                 )
                             )
                     )
@@ -71,10 +78,7 @@ final class CaptureAppGraph implements Section
                     ->output()
             )
         ));
-    }
-
-    public function finish(Identity $identity): void
-    {
         $this->profile = null;
+        $this->app = null;
     }
 }
