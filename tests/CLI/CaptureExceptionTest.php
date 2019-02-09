@@ -104,8 +104,11 @@ class CaptureExceptionTest extends TestCase
 
         $section->start(new Identity('profile-uuid'));
 
-        $this->expectException(\Exception::class);
-
-        $handle($env, $arguments, $options);
+        try {
+            $handle($env, $arguments, $options);
+            $this->fail('it should throw');
+        } catch (\Exception $e) {
+            $section->finish(new Identity('profile-uuid'));
+        }
     }
 }

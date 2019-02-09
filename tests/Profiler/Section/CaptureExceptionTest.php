@@ -48,6 +48,24 @@ class CaptureExceptionTest extends TestCase
         $this->assertNull($section->capture(new \Exception));
     }
 
+    public function testDoesntCreateSectionWhenProfilerStartedButNotFinished()
+    {
+        $section = new CaptureException(
+            $server = $this->createMock(Server::class),
+            $processes = $this->createMock(Processes::class),
+            new Render
+        );
+        $server
+            ->expects($this->never())
+            ->method('create');
+        $processes
+            ->expects($this->never())
+            ->method('execute');
+
+        $this->assertNull($section->start(new Identity('profile-uuid')));
+        $this->assertNull($section->capture(new \Exception));
+    }
+
     public function testDoesntCreateSectionWhenProfilerHasFinished()
     {
         $section = new CaptureException(
@@ -67,7 +85,27 @@ class CaptureExceptionTest extends TestCase
         $this->assertNull($section->capture(new \Exception));
     }
 
-    public function testCreateSectionWhenProfilerStarted()
+    public function testExceptionCapturedBeforeProfilingIsNotSent()
+    {
+        $section = new CaptureException(
+            $server = $this->createMock(Server::class),
+            $processes = $this->createMock(Processes::class),
+            new Render
+        );
+        $e = new \Exception;
+        $server
+            ->expects($this->never())
+            ->method('create');
+        $processes
+            ->expects($this->never())
+            ->method('execute');
+
+        $this->assertNull($section->capture($e));
+        $this->assertNull($section->start(new Identity('profile-uuid')));
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
+    }
+
+    public function testCreateSectionWhenFinishingProfiler()
     {
         $section = new CaptureException(
             $server = $this->createMock(Server::class),
@@ -108,5 +146,6 @@ class CaptureExceptionTest extends TestCase
 
         $this->assertNull($section->start(new Identity('profile-uuid')));
         $this->assertNull($section->capture($e));
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
 }

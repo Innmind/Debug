@@ -27,6 +27,7 @@ final class CaptureException implements Section
     private $processes;
     private $render;
     private $profile;
+    private $exception;
 
     public function __construct(
         Server $server,
@@ -41,11 +42,17 @@ final class CaptureException implements Section
     public function start(Identity $identity): void
     {
         $this->profile = $identity;
+        $this->exception = null;
     }
 
     public function capture(\Throwable $e): void
     {
-        if (\is_null($this->profile)) {
+        $this->exception = $e;
+    }
+
+    public function finish(Identity $identity): void
+    {
+        if (\is_null($this->profile) || \is_null($this->exception)) {
             return;
         }
 
@@ -60,17 +67,14 @@ final class CaptureException implements Section
                         Command::foreground('dot')
                             ->withShortOption('Tsvg')
                             ->withInput(
-                                ($this->render)(new StackTrace($e))
+                                ($this->render)(new StackTrace($this->exception))
                             )
                     )
                     ->wait()
                     ->output()
             )
         ));
-    }
-
-    public function finish(Identity $identity): void
-    {
         $this->profile = null;
+        $this->exception = null;
     }
 }
