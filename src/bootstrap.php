@@ -33,11 +33,15 @@ use Innmind\Immutable\{
 };
 use function Innmind\Rest\Client\bootstrap as client;
 
+/**
+ * @param  SetInterface<string>|null $disable
+ */
 function bootstrap(
     OperatingSystem $os,
     UrlInterface $profiler,
     MapInterface $environmentVariables = null,
-    CodeEditor $codeEditor = null
+    CodeEditor $codeEditor = null,
+    SetInterface $disable = null
 ): array {
     $environmentVariables = $environmentVariables ?? Map::of('string', 'scalar');
 
@@ -85,20 +89,23 @@ function bootstrap(
     );
     $debugOS = new OS\CallGraph\OperatingSystem($debugOS, $callGraph);
 
-    $profiler = new Profiler\Http(
+    $captureHttp = new Profiler\Section\CaptureHttp($server);
+    $captureException = new Profiler\Section\CaptureException(
         $server,
-        $os->clock(),
-        $captureHttp = new Profiler\Section\CaptureHttp($server),
-        $captureException = new Profiler\Section\CaptureException(
-            $server,
-            $os->control()->processes(),
-            new Render($linkException)
-        ),
-        $captureAppGraph = new Profiler\Section\CaptureAppGraph(
-            $server,
-            $os->control()->processes(),
-            new Visualize($locateClass)
-        ),
+        $os->control()->processes(),
+        new Render($linkException)
+    );
+    $captureAppGraph = new Profiler\Section\CaptureAppGraph(
+        $server,
+        $os->control()->processes(),
+        new Visualize($locateClass)
+    );
+
+    $sections = Set::of(
+        Profiler\Section::class,
+        $captureHttp,
+        $captureException,
+        $captureAppGraph,
         $captureCallGraph,
         $localProcesses,
         $remoteProcesses,
@@ -112,6 +119,14 @@ function bootstrap(
                 }
             )
         )
+    );
+
+    $profiler = new Profiler\Http(
+        $server,
+        $os->clock(),
+        ...$sections->filter(static function(object $section) use ($disable): bool {
+            return $disable === null || !$disable->contains(\get_class($section));
+        })
     );
 
     return [
