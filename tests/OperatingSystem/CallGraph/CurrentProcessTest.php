@@ -13,6 +13,7 @@ use Innmind\OperatingSystem\{
     CurrentProcess as CurrentProcessInterface,
     CurrentProcess\ForkSide,
     CurrentProcess\Children,
+    CurrentProcess\Signals,
     Exception\ForkFailed,
 };
 use Innmind\Server\Status\Server\Process\Pid;
@@ -191,5 +192,24 @@ class CurrentProcessTest extends TestCase
             $graph->end();
             $section->finish(new Identity('profile-uuid'));
         }
+    }
+
+    public function testSignals()
+    {
+        $process = new CurrentProcess(
+            $inner = $this->createMock(CurrentProcessInterface::class),
+            new CallGraph(
+                new CaptureCallGraph(
+                    $this->createMock(Server::class)
+                ),
+                $this->createMock(TimeContinuumInterface::class)
+            )
+        );
+        $inner
+            ->expects($this->once())
+            ->method('signals')
+            ->willReturn($expected = $this->createMock(Signals::class));
+
+        $this->assertSame($expected, $process->signals());
     }
 }
