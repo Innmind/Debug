@@ -8,6 +8,7 @@ use Innmind\OperatingSystem\{
     CurrentProcess as CurrentProcessInterface,
     CurrentProcess\ForkSide,
     CurrentProcess\Children,
+    CurrentProcess\Signals,
     Exception\ForkFailed,
 };
 use Innmind\Server\Status\Server\Process\Pid;
@@ -54,6 +55,11 @@ final class CurrentProcess implements CurrentProcessInterface
     public function children(): Children
     {
         return $this->process->children();
+    }
+
+    public function signals(): Signals
+    {
+        return $this->process->signals();
     }
 
     public function halt(PeriodInterface $period): void
