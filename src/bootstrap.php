@@ -98,7 +98,21 @@ function bootstrap(
     $captureAppGraph = new Profiler\Section\CaptureAppGraph(
         $server,
         $os->control()->processes(),
-        new Visualize($locateClass)
+        new Visualize($locateClass),
+        Set::of(
+            'object',
+            $os,
+            $os->clock(),
+            $os->filesystem(),
+            $os->status(),
+            $os->control(),
+            $os->ports(),
+            $os->sockets(),
+            $os->remote(),
+            $os->remote()->http(),
+            $os->process(),
+            $os->process()->signals()
+        )
     );
 
     $sections = Set::of(
