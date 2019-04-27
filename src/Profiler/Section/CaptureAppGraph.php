@@ -19,13 +19,22 @@ use Innmind\Server\Control\Server\{
 use Innmind\ObjectGraph\{
     Visualize,
     Graph,
+    Visitor\FlagDependencies,
+    Visitor\RemoveDependenciesSubGraph,
 };
+use Innmind\Immutable\{
+    SetInterface,
+    Set,
+};
+use function Innmind\Immutable\assertSet;
 
 final class CaptureAppGraph implements Section
 {
     private $server;
     private $processes;
     private $render;
+    private $flagDependencies;
+    private $removeDependencies;
     private $graph;
     private $profile;
     private $app;
@@ -33,11 +42,17 @@ final class CaptureAppGraph implements Section
     public function __construct(
         Server $server,
         Processes $processes,
-        Visualize $render
+        Visualize $render,
+        SetInterface $dependencies = null
     ) {
+        $dependencies = $dependencies ?? Set::of('object');
+        assertSet('object', $dependencies, 4);
+
         $this->server = $server;
         $this->processes = $processes;
         $this->render = $render;
+        $this->flagDependencies = new FlagDependencies(...$dependencies);
+        $this->removeDependencies = new RemoveDependenciesSubGraph;
         $this->graph = new Graph;
     }
 
@@ -58,6 +73,10 @@ final class CaptureAppGraph implements Section
             return;
         }
 
+        $graph = ($this->graph)($this->app);
+        ($this->flagDependencies)($graph);
+        ($this->removeDependencies)($graph);
+
         $this->server->create(HttpResource::of(
             'api.section.app_graph',
             new Property('profile', (string) $this->profile),
@@ -69,9 +88,7 @@ final class CaptureAppGraph implements Section
                         Command::foreground('dot')
                             ->withShortOption('Tsvg')
                             ->withInput(
-                                ($this->render)(
-                                    ($this->graph)($this->app)
-                                )
+                                ($this->render)($graph)
                             )
                     )
                     ->wait()
