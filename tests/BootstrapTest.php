@@ -5,6 +5,7 @@ namespace Tests\Innmind\Debug;
 
 use function Innmind\Debug\bootstrap;
 use Innmind\Debug\{
+    Profiler,
     HttpFramework,
     CLI,
     OperatingSystem,
@@ -46,6 +47,7 @@ class BootstrapTest extends TestCase
         );
 
         $this->assertIsArray($debug);
+        $this->assertIsCallable($debug['profiler']);
         $this->assertIsCallable($debug['http']);
         $this->assertIsCallable($debug['cli']);
         $this->assertIsCallable($debug['os']);
@@ -54,6 +56,8 @@ class BootstrapTest extends TestCase
         $this->assertIsCallable($debug['command_bus']);
         $this->assertIsCallable($debug['event_bus']);
         $this->assertIsCallable($debug['callable']);
+
+        $this->assertInstanceOf(Profiler::class, $debug['profiler']());
 
         $stack = Stack::of(
             OperatingSystem\CallGraph\OperatingSystem::class,

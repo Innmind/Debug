@@ -130,6 +130,9 @@ function bootstrap(
     );
 
     return [
+        'profiler' => static function() use ($profiler): Profiler {
+            return $profiler;
+        },
         'os' => static function() use ($debugOS): OperatingSystem {
             return $debugOS;
         },
