@@ -64,6 +64,8 @@ function bootstrap(
     );
     $server = $rest->server((string) $profiler);
 
+    $toBeHighighted = new Profiler\Section\CaptureAppGraph\ToBeHighlighted;
+
     $renderProcess = new OS\Debug\Control\RenderProcess\Remote(
         new OS\Debug\Control\RenderProcess\Local
     );
@@ -99,6 +101,7 @@ function bootstrap(
         $server,
         $os->control()->processes(),
         new Visualize($locateClass),
+        $toBeHighighted,
         Set::of(
             'object',
             $os,

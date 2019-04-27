@@ -5,6 +5,7 @@ namespace Tests\Innmind\Debug\Profiler\Section;
 
 use Innmind\Debug\Profiler\{
     Section\CaptureAppGraph,
+    Section\CaptureAppGraph\ToBeHighlighted,
     Section,
     Profile\Identity,
 };
@@ -27,7 +28,8 @@ class CaptureAppGraphTest extends TestCase
             new CaptureAppGraph(
                 $this->createMock(Server::class),
                 $this->createMock(Processes::class),
-                new Visualize
+                new Visualize,
+                new ToBeHighlighted
             )
         );
     }
@@ -37,7 +39,8 @@ class CaptureAppGraphTest extends TestCase
         $section = new CaptureAppGraph(
             $server = $this->createMock(Server::class),
             $processes = $this->createMock(Processes::class),
-            new Visualize
+            new Visualize,
+            new ToBeHighlighted
         );
         $server
             ->expects($this->never())
@@ -54,7 +57,8 @@ class CaptureAppGraphTest extends TestCase
         $section = new CaptureAppGraph(
             $server = $this->createMock(Server::class),
             $processes = $this->createMock(Processes::class),
-            new Visualize
+            new Visualize,
+            new ToBeHighlighted
         );
         $server
             ->expects($this->never())
@@ -72,7 +76,8 @@ class CaptureAppGraphTest extends TestCase
         $section = new CaptureAppGraph(
             $server = $this->createMock(Server::class),
             $processes = $this->createMock(Processes::class),
-            new Visualize
+            new Visualize,
+            new ToBeHighlighted
         );
         $server
             ->expects($this->never())
@@ -91,7 +96,8 @@ class CaptureAppGraphTest extends TestCase
         $section = new CaptureAppGraph(
             $server = $this->createMock(Server::class),
             $processes = $this->createMock(Processes::class),
-            new Visualize
+            new Visualize,
+            new ToBeHighlighted
         );
         $server
             ->expects($this->never())
@@ -110,7 +116,8 @@ class CaptureAppGraphTest extends TestCase
         $section = new CaptureAppGraph(
             $server = $this->createMock(Server::class),
             $processes = $this->createMock(Processes::class),
-            new Visualize
+            new Visualize,
+            new ToBeHighlighted
         );
         $server
             ->expects($this->once())
@@ -166,6 +173,7 @@ class CaptureAppGraphTest extends TestCase
             $server = $this->createMock(Server::class),
             $processes = $this->createMock(Processes::class),
             new Visualize,
+            new ToBeHighlighted,
             Set::of('object', $dependency)
         );
         $server
@@ -201,6 +209,86 @@ class CaptureAppGraphTest extends TestCase
             ->willReturn('<graph-output/>');
 
         $this->assertNull($section->start(new Identity('profile-uuid')));
+        $this->assertNull($section->capture($object));
+        $this->assertNull($section->finish(new Identity('profile-uuid')));
+    }
+
+    public function testObjectsToBeHighlightedClearedOnProfileStart()
+    {
+        $section = new CaptureAppGraph(
+            $server = $this->createMock(Server::class),
+            $processes = $this->createMock(Processes::class),
+            new Visualize,
+            $toBeHighlighted = new ToBeHighlighted
+        );
+        $toBeHighlighted->add(new \stdClass);
+
+        $this->assertNull($section->start(new Identity('profile-uuid')));
+        $this->assertCount(0, $toBeHighlighted->get());
+    }
+
+    public function testHighlightGraph()
+    {
+        $object = new class {
+            public $should;
+            public $shouldNot;
+        };
+        $dependency = new class {
+            public $should;
+        };
+        $alt = new class {
+            public $shouldNot;
+        };
+        $subDependency = new class {
+        };
+        $object->should = $dependency;
+        $object->shouldNot = $alt;
+        $dependency->should = $subDependency;
+        $alt->shouldNot = $subDependency;
+
+        $section = new CaptureAppGraph(
+            $server = $this->createMock(Server::class),
+            $processes = $this->createMock(Processes::class),
+            new Visualize,
+            $toBeHighlighted = new ToBeHighlighted,
+            Set::of('object', $subDependency)
+        );
+        $server
+            ->expects($this->once())
+            ->method('create')
+            ->with($this->callback(static function($resource): bool {
+                return $resource->name() === 'api.section.app_graph' &&
+                    $resource->properties()->contains('profile') &&
+                    $resource->properties()->contains('graph') &&
+                    $resource->properties()->get('profile')->value() === 'profile-uuid' &&
+                    $resource->properties()->get('graph')->value() === '<graph-output/>';
+            }));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(static function($command) use ($subDependency): bool {
+                return (string) $command === "dot '-Tsvg'" &&
+                    !empty((string) $command->input()) &&
+                    \substr_count((string) $command->input(), '[label="should", style="bold", color="#00ff00"]') === 2 &&
+                    \substr_count((string) $command->input(), ', color="#00ff00"') === 4; // 2 nodes and 2 relations
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->expects($this->once())
+            ->method('output')
+            ->willReturn($output = $this->createMock(Output::class));
+        $output
+            ->expects($this->once())
+            ->method('__toString')
+            ->willReturn('<graph-output/>');
+
+        $this->assertNull($section->start(new Identity('profile-uuid')));
+        $toBeHighlighted->add($subDependency);
+        $toBeHighlighted->add($dependency);
         $this->assertNull($section->capture($object));
         $this->assertNull($section->finish(new Identity('profile-uuid')));
     }
