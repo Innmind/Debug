@@ -18,8 +18,7 @@ class CaptureCallGraphTest extends TestCase
 {
     public function testInterface()
     {
-        $this->assertInternalType(
-            'callable',
+        $this->assertIsCallable(
             new CaptureCallGraph(
                 function(){},
                 new CallGraph(

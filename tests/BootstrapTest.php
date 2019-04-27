@@ -45,15 +45,15 @@ class BootstrapTest extends TestCase
             Url::fromString('http://localhost:8000/')
         );
 
-        $this->assertInternalType('array', $debug);
-        $this->assertInternalType('callable', $debug['http']);
-        $this->assertInternalType('callable', $debug['cli']);
-        $this->assertInternalType('callable', $debug['os']);
-        $this->assertInternalType('callable', $debug['call_graph']);
-        $this->assertInternalType('callable', $debug['controller']);
-        $this->assertInternalType('callable', $debug['command_bus']);
-        $this->assertInternalType('callable', $debug['event_bus']);
-        $this->assertInternalType('callable', $debug['callable']);
+        $this->assertIsArray($debug);
+        $this->assertIsCallable($debug['http']);
+        $this->assertIsCallable($debug['cli']);
+        $this->assertIsCallable($debug['os']);
+        $this->assertIsCallable($debug['call_graph']);
+        $this->assertIsCallable($debug['controller']);
+        $this->assertIsCallable($debug['command_bus']);
+        $this->assertIsCallable($debug['event_bus']);
+        $this->assertIsCallable($debug['callable']);
 
         $stack = Stack::of(
             OperatingSystem\CallGraph\OperatingSystem::class,
