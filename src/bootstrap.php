@@ -83,7 +83,7 @@ function bootstrap(
     $callGraph = new CallGraph($captureCallGraph, $os->clock());
 
     $debugOS = new OS\Debug\OperatingSystem(
-        $os,
+        new OS\ToBeHighlighted\OperatingSystem($os, $toBeHighighted),
         $localProcesses,
         $remoteProcesses,
         $renderProcess,
