@@ -64,6 +64,8 @@ function bootstrap(
     );
     $server = $rest->server((string) $profiler);
 
+    $toBeHighighted = new Profiler\Section\CaptureAppGraph\ToBeHighlighted;
+
     $renderProcess = new OS\Debug\Control\RenderProcess\Remote(
         new OS\Debug\Control\RenderProcess\Local
     );
@@ -81,7 +83,7 @@ function bootstrap(
     $callGraph = new CallGraph($captureCallGraph, $os->clock());
 
     $debugOS = new OS\Debug\OperatingSystem(
-        $os,
+        new OS\ToBeHighlighted\OperatingSystem($os, $toBeHighighted),
         $localProcesses,
         $remoteProcesses,
         $renderProcess,
@@ -98,7 +100,22 @@ function bootstrap(
     $captureAppGraph = new Profiler\Section\CaptureAppGraph(
         $server,
         $os->control()->processes(),
-        new Visualize($locateClass)
+        new Visualize($locateClass),
+        $toBeHighighted,
+        Set::of(
+            'object',
+            $os,
+            $os->clock(),
+            $os->filesystem(),
+            $os->status(),
+            $os->control(),
+            $os->ports(),
+            $os->sockets(),
+            $os->remote(),
+            $os->remote()->http(),
+            $os->process(),
+            $os->process()->signals()
+        )
     );
 
     $sections = Set::of(
@@ -130,6 +147,9 @@ function bootstrap(
     );
 
     return [
+        'profiler' => static function() use ($profiler): Profiler {
+            return $profiler;
+        },
         'os' => static function() use ($debugOS): OperatingSystem {
             return $debugOS;
         },
@@ -173,6 +193,9 @@ function bootstrap(
         'call_graph' => function() use ($callGraph): CallGraph {
             return $callGraph;
         },
+        'to_be_highlighted' => function() use ($toBeHighighted): Profiler\Section\CaptureAppGraph\ToBeHighlighted {
+            return $toBeHighighted;
+        },
         'controller' => static function(Controller $controller) use ($callGraph): Controller {
             return new HttpFramework\CaptureController($controller, $callGraph);
         },
@@ -182,8 +205,8 @@ function bootstrap(
         'event_bus' => static function(EventBusInterface $bus) use ($callGraph): EventBusInterface {
             return new EventBus\CaptureCallGraph($bus, $callGraph);
         },
-        'callable' => static function(callable $fn) use ($callGraph): callable {
-            return new Closure\CaptureCallGraph($fn, $callGraph);
+        'callable' => static function(callable $fn) use ($callGraph, $toBeHighighted): callable {
+            return new Closure\CaptureCallGraph($fn, $callGraph, $toBeHighighted);
         },
     ];
 }

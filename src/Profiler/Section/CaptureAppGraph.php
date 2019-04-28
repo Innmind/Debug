@@ -19,13 +19,27 @@ use Innmind\Server\Control\Server\{
 use Innmind\ObjectGraph\{
     Visualize,
     Graph,
+    Node,
+    Visitor\FlagDependencies,
+    Visitor\RemoveDependenciesSubGraph,
+    Visitor\AccessObjectNode,
+    Exception\ObjectNotFound,
 };
+use Innmind\Immutable\{
+    SetInterface,
+    Set,
+};
+use function Innmind\Immutable\assertSet;
 
 final class CaptureAppGraph implements Section
 {
     private $server;
     private $processes;
     private $render;
+    private $toBeHighlighted;
+    private $dependencies;
+    private $flagDependencies;
+    private $removeDependencies;
     private $graph;
     private $profile;
     private $app;
@@ -33,11 +47,21 @@ final class CaptureAppGraph implements Section
     public function __construct(
         Server $server,
         Processes $processes,
-        Visualize $render
+        Visualize $render,
+        CaptureAppGraph\ToBeHighlighted $toBeHighlighted = null,
+        SetInterface $dependencies = null
     ) {
+        $toBeHighlighted = $toBeHighlighted ?? new CaptureAppGraph\ToBeHighlighted;
+        $dependencies = $dependencies ?? Set::of('object');
+        assertSet('object', $dependencies, 4);
+
         $this->server = $server;
         $this->processes = $processes;
         $this->render = $render;
+        $this->toBeHighlighted = $toBeHighlighted;
+        $this->dependencies = $dependencies;
+        $this->flagDependencies = new FlagDependencies(...$dependencies);
+        $this->removeDependencies = new RemoveDependenciesSubGraph;
         $this->graph = new Graph;
     }
 
@@ -45,6 +69,7 @@ final class CaptureAppGraph implements Section
     {
         $this->profile = $identity;
         $this->app = null;
+        $this->toBeHighlighted->clear();
     }
 
     public function capture(object $app): void
@@ -58,6 +83,11 @@ final class CaptureAppGraph implements Section
             return;
         }
 
+        $graph = ($this->graph)($this->app);
+        ($this->flagDependencies)($graph);
+        ($this->removeDependencies)($graph);
+        $this->highlight($graph);
+
         $this->server->create(HttpResource::of(
             'api.section.app_graph',
             new Property('profile', (string) $this->profile),
@@ -69,9 +99,7 @@ final class CaptureAppGraph implements Section
                         Command::foreground('dot')
                             ->withShortOption('Tsvg')
                             ->withInput(
-                                ($this->render)(
-                                    ($this->graph)($this->app)
-                                )
+                                ($this->render)($graph)
                             )
                     )
                     ->wait()
@@ -80,5 +108,33 @@ final class CaptureAppGraph implements Section
         ));
         $this->profile = null;
         $this->app = null;
+    }
+
+    private function highlight(Node $graph): void
+    {
+        $dependencies = $this
+            ->dependencies
+            ->intersect($this->toBeHighlighted->get());
+        // paths to the dependencies is highlighted only if an object calling it
+        // has been highlighted to avoid highlighting too many paths leading to
+        // the dependency
+        $this
+            ->toBeHighlighted
+            ->get()
+            ->diff($this->dependencies)
+            ->foreach(static function(object $object) use ($graph): void {
+                $graph->highlightPathTo($object);
+            })
+            ->foreach(static function(object $object) use ($dependencies, $graph): void {
+                try {
+                    $node = (new AccessObjectNode($object))($graph);
+                } catch (ObjectNotFound $e) {
+                    return;
+                }
+
+                $dependencies->foreach(static function(object $dependency) use ($node): void {
+                    $node->highlightPathTo($dependency);
+                });
+            });
     }
 }

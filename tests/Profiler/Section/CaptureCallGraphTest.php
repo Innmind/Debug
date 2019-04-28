@@ -21,7 +21,7 @@ class CaptureCallGraphTest extends TestCase
 {
     private $node;
 
-    public function setUp()
+    public function setUp(): void
     {
         $clock = $this->createMock(TimeContinuumInterface::class);
         $clock

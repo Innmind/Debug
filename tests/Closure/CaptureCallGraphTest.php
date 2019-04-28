@@ -7,6 +7,7 @@ use Innmind\Debug\{
     Closure\CaptureCallGraph,
     CallGraph,
     Profiler\Section\CaptureCallGraph as Section,
+    Profiler\Section\CaptureAppGraph\ToBeHighlighted,
     Profiler\Profile\Identity,
 };
 use Innmind\Rest\Client\Server;
@@ -18,8 +19,7 @@ class CaptureCallGraphTest extends TestCase
 {
     public function testInterface()
     {
-        $this->assertInternalType(
-            'callable',
+        $this->assertIsCallable(
             new CaptureCallGraph(
                 function(){},
                 new CallGraph(
@@ -146,5 +146,51 @@ class CaptureCallGraphTest extends TestCase
             $graph->end();
             $section->finish(new Identity('profile-uuid'));
         }
+    }
+
+    public function testMarkObjectToBeHighlighted()
+    {
+        $call = new CaptureCallGraph(
+            $inner = new class {
+                public function __invoke(...$arguments)
+                {
+                    return $arguments;
+                }
+            },
+            new CallGraph(
+                new Section(
+                    $this->createMock(Server::class)
+                ),
+                $this->createMock(TimeContinuumInterface::class)
+            ),
+            $toBeHighlighted = new ToBeHighlighted
+        );
+
+        $this->assertFalse($toBeHighlighted->get()->contains($inner));
+        $this->assertSame(['foo', 'bar'], $call('foo', 'bar'));
+        $this->assertTrue($toBeHighlighted->get()->contains($inner));
+    }
+
+    public function testDoesntTryToHighlightWhenNotAnObject()
+    {
+        $call = new CaptureCallGraph(
+            $inner = [$this, 'forward'],
+            new CallGraph(
+                new Section(
+                    $this->createMock(Server::class)
+                ),
+                $this->createMock(TimeContinuumInterface::class)
+            ),
+            $toBeHighlighted = new ToBeHighlighted
+        );
+
+        $this->assertFalse($toBeHighlighted->get()->contains($inner));
+        $this->assertSame(['foo', 'bar'], $call('foo', 'bar'));
+        $this->assertFalse($toBeHighlighted->get()->contains($inner));
+    }
+
+    public function forward(...$arguments)
+    {
+        return $arguments;
     }
 }
