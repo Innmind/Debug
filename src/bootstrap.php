@@ -193,6 +193,9 @@ function bootstrap(
         'call_graph' => function() use ($callGraph): CallGraph {
             return $callGraph;
         },
+        'to_be_highlighted' => function() use ($toBeHighighted): Profiler\Section\CaptureAppGraph\ToBeHighlighted {
+            return $toBeHighighted;
+        },
         'controller' => static function(Controller $controller) use ($callGraph): Controller {
             return new HttpFramework\CaptureController($controller, $callGraph);
         },

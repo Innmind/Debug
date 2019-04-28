@@ -6,6 +6,7 @@ namespace Tests\Innmind\Debug;
 use function Innmind\Debug\bootstrap;
 use Innmind\Debug\{
     Profiler,
+    Profiler\Section\CaptureAppGraph\ToBeHighlighted,
     HttpFramework,
     CLI,
     OperatingSystem,
@@ -52,12 +53,14 @@ class BootstrapTest extends TestCase
         $this->assertIsCallable($debug['cli']);
         $this->assertIsCallable($debug['os']);
         $this->assertIsCallable($debug['call_graph']);
+        $this->assertIsCallable($debug['to_be_highlighted']);
         $this->assertIsCallable($debug['controller']);
         $this->assertIsCallable($debug['command_bus']);
         $this->assertIsCallable($debug['event_bus']);
         $this->assertIsCallable($debug['callable']);
 
         $this->assertInstanceOf(Profiler::class, $debug['profiler']());
+        $this->assertInstanceOf(ToBeHighlighted::class, $debug['to_be_highlighted']());
 
         $stack = Stack::of(
             OperatingSystem\CallGraph\OperatingSystem::class,
