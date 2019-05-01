@@ -113,8 +113,7 @@ function bootstrap(
             $os->sockets(),
             $os->remote(),
             $os->remote()->http(),
-            $os->process(),
-            $os->process()->signals()
+            $os->process()
         )
     );
 
