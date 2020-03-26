@@ -10,8 +10,8 @@ use Innmind\Debug\{
 use Innmind\OperatingSystem\Remote as RemoteInterface;
 use Innmind\Server\Control\Server;
 use Innmind\Url\{
-    UrlInterface,
-    AuthorityInterface,
+    Url,
+    Authority,
 };
 use Innmind\Socket\{
     Client,
@@ -32,11 +32,11 @@ class RemoteTest extends TestCase
         $this->assertInstanceOf(RemoteInterface::class, $remote);
         $this->assertInstanceOf(
             Server::class,
-            $remote->ssh($this->createMock(UrlInterface::class))
+            $remote->ssh(Url::of('ssh://example.com'))
         );
         $this->assertInstanceOf(
             Client::class,
-            $remote->socket(Transport::tcp(), $this->createMock(AuthorityInterface::class))
+            $remote->socket(Transport::tcp(), Authority::none())
         );
         $this->assertInstanceOf(HttpTransport::class, $remote->http());
     }

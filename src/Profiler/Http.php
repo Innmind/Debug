@@ -14,20 +14,20 @@ use Innmind\Rest\Client\{
     Identity\Identity as RestIdentity,
 };
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    Format\ISO8601,
+    Clock,
+    Earth\Format\ISO8601,
 };
 use Innmind\Immutable\Set;
 
 final class Http implements Profiler
 {
     private Server $server;
-    private TimeContinuumInterface $clock;
+    private Clock $clock;
     private Set $sections;
 
     public function __construct(
         Server $server,
-        TimeContinuumInterface $clock,
+        Clock $clock,
         Section ...$sections
     ) {
         $this->server = $server;
@@ -42,7 +42,7 @@ final class Http implements Profiler
             new Property('name', $name),
             new Property('started_at', $this->clock->now()->format(new ISO8601))
         ));
-        $identity = new Identity((string) $identity);
+        $identity = new Identity($identity->toString());
 
         $this->sections->foreach(static function(Section $section) use ($identity): void {
             $section->start($identity);

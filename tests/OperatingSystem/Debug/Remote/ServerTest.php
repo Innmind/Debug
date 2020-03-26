@@ -18,6 +18,7 @@ use Innmind\Server\Control\{
 };
 use Innmind\Rest\Client\Server as RestServer;
 use Innmind\Url\Url;
+use function Innmind\Immutable\first;
 use PHPUnit\Framework\TestCase;
 
 class ServerTest extends TestCase
@@ -29,7 +30,7 @@ class ServerTest extends TestCase
         );
         $server = new Server(
             $this->createMock(ServerInterface::class),
-            Url::fromString('ssh://user:pwd@example.com:2242/'),
+            Url::of('ssh://user:pwd@example.com:2242/'),
             $render,
             $state = new State(
                 $render,
@@ -43,7 +44,7 @@ class ServerTest extends TestCase
             ->method('create')
             ->with($this->callback(static function($resource): bool {
                 return $resource->properties()->get('processes')->value()->size() === 1 &&
-                    $resource->properties()->get('processes')->value()->current() === "ssh: user:pwd@example.com:2242\n[background] echo\n";
+                    first($resource->properties()->get('processes')->value()) === "ssh: user:pwd@example.com:2242\n[background] echo\n";
             }));
 
         $this->assertInstanceOf(ServerInterface::class, $server);

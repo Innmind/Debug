@@ -18,9 +18,8 @@ use Innmind\Server\Control\{
     Server\Command,
 };
 use Innmind\Url\{
-    UrlInterface,
     Url,
-    AuthorityInterface,
+    Authority,
 };
 use Innmind\Socket\{
     Client,
@@ -30,9 +29,9 @@ use Innmind\HttpTransport\Transport as HttpTransport;
 use Innmind\Http\{
     Message\Request\Request,
     Message\Response\Response,
-    Message\StatusCode\StatusCode,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
+    Message\StatusCode,
+    Message\Method,
+    ProtocolVersion,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -60,11 +59,11 @@ class RemoteTest extends TestCase
         $this->assertInstanceOf(RemoteInterface::class, $remote);
         $this->assertInstanceOf(
             Remote\Server::class,
-            $remote->ssh($this->createMock(UrlInterface::class))
+            $remote->ssh(Url::of('ssh://example.com'))
         );
         $this->assertInstanceOf(
             Client::class,
-            $remote->socket(Transport::tcp(), $this->createMock(AuthorityInterface::class))
+            $remote->socket(Transport::tcp(), Authority::none())
         );
         $this->assertInstanceOf(Http::class, $remote->http());
         $this->assertSame($remote->http(), $remote->http());
@@ -93,7 +92,7 @@ class RemoteTest extends TestCase
             ->method('http')
             ->willReturn($http = $this->createMock(HttpTransport::class));
         $request = new Request(
-            Url::fromString('http://example.com/foo'),
+            Url::of('http://example.com/foo'),
             Method::get(),
             new ProtocolVersion(2, 0)
         );
@@ -134,7 +133,7 @@ class RemoteTest extends TestCase
                 )
             )
         );
-        $location = Url::fromString('ssh://example.com');
+        $location = Url::of('ssh://example.com');
         $command = Command::background('echo');
         $inner
             ->expects($this->once())

@@ -28,7 +28,7 @@ final class Http implements Transport
         try {
             $this->graph->enter(\sprintf(
                 'http(%s)',
-                $request->url()
+                $request->url()->toString(),
             ));
 
             return ($this->fulfill)($request);

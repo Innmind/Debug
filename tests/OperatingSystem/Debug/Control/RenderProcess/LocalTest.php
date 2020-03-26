@@ -13,6 +13,7 @@ use Innmind\Server\Control\Server\{
     Process\ExitCode,
     Process\Output,
 };
+use Innmind\Url\Path;
 use PHPUnit\Framework\TestCase;
 
 class LocalTest extends TestCase
@@ -66,7 +67,7 @@ class LocalTest extends TestCase
             ->willReturn($output = $this->createMock(Output::class));
         $output
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn('some output');
 
         $this->assertSame("[127] sleep '42000'\nsome output", $render($command, $process));
@@ -77,7 +78,7 @@ class LocalTest extends TestCase
         $render = new Local;
         $command = Command::background('sleep')
             ->withArgument('42000')
-            ->withWorkingDirectory('/home/some-user');
+            ->withWorkingDirectory(Path::of('/home/some-user'));
         $process = $this->createMock(Process::class);
 
         $this->assertSame(

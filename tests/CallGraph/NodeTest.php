@@ -8,8 +8,8 @@ use Innmind\Debug\{
     Exception\LogicException,
 };
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    PointInTime\Earth\PointInTime,
+    Clock,
+    Earth\PointInTime\PointInTime,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +17,7 @@ class NodeTest extends TestCase
 {
     public function testNormalizeWhenNeverEnteredACall()
     {
-        $clock = $this->createMock(TimeContinuumInterface::class);
+        $clock = $this->createMock(Clock::class);
         $clock
             ->expects($this->at(0))
             ->method('now')
@@ -43,7 +43,7 @@ class NodeTest extends TestCase
 
     public function testNestingCalls()
     {
-        $clock = $this->createMock(TimeContinuumInterface::class);
+        $clock = $this->createMock(Clock::class);
         $clock
             ->expects($this->at(0))
             ->method('now')
@@ -118,7 +118,7 @@ class NodeTest extends TestCase
 
     public function testNodeAreAutomaticallyEndedAtNormalization()
     {
-        $clock = $this->createMock(TimeContinuumInterface::class);
+        $clock = $this->createMock(Clock::class);
         $clock
             ->expects($this->at(0))
             ->method('now')
@@ -176,7 +176,7 @@ class NodeTest extends TestCase
     public function testThrowWhenEnteringACallWhenGraphEnded()
     {
         $root = Node::root(
-            $this->createMock(TimeContinuumInterface::class),
+            $this->createMock(Clock::class),
             'root'
         );
 
@@ -190,7 +190,7 @@ class NodeTest extends TestCase
     public function testThrowWhenLeavingACallWhenGraphEnded()
     {
         $root = Node::root(
-            $this->createMock(TimeContinuumInterface::class),
+            $this->createMock(Clock::class),
             'root'
         );
 

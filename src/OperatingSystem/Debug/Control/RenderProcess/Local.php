@@ -18,21 +18,21 @@ final class Local implements RenderProcess
         } elseif ($process->isRunning()) {
             $status = 'still-running';
         } else {
-            $status = (string) $process->exitCode();
+            $status = $process->exitCode()->toString();
         }
 
         $directory = '';
 
         if ($command->hasWorkingDirectory()) {
-            $directory = $command->workingDirectory().': ';
+            $directory = $command->workingDirectory()->toString().': ';
         }
 
         return \sprintf(
             "[%s] %s%s\n%s",
             $status,
             $directory,
-            $command,
-            $command->toBeRunInBackground() || $process->isRunning() ? '' : $process->output()
+            $command->toString(),
+            $command->toBeRunInBackground() || $process->isRunning() ? '' : $process->output()->toString()
         );
     }
 }

@@ -10,8 +10,8 @@ use Innmind\Debug\{
     CallGraph\Node,
 };
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    PointInTime\Earth\PointInTime,
+    Clock,
+    Earth\PointInTime\PointInTime,
 };
 use Innmind\Rest\Client\Server;
 use Innmind\Json\Json;
@@ -23,7 +23,7 @@ class CaptureCallGraphTest extends TestCase
 
     public function setUp(): void
     {
-        $clock = $this->createMock(TimeContinuumInterface::class);
+        $clock = $this->createMock(Clock::class);
         $clock
             ->expects($this->at(0))
             ->method('now')

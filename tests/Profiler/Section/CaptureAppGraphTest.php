@@ -133,21 +133,20 @@ class CaptureAppGraphTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(static function($command): bool {
-                return (string) $command === "dot '-Tsvg'" &&
-                    !empty((string) $command->input());
+                return $command->toString() === "dot '-Tsvg'" &&
+                    !empty($command->input()->toString());
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->expects($this->once())
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
         $output
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn('<graph-output/>');
 
         $this->assertNull($section->start(new Identity('profile-uuid')));
@@ -190,22 +189,21 @@ class CaptureAppGraphTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(static function($command) use ($subDependency): bool {
-                return (string) $command === "dot '-Tsvg'" &&
-                    !empty((string) $command->input()) &&
-                    \substr_count((string) $command->input(), \spl_object_hash($subDependency)) === 0;
+                return $command->toString() === "dot '-Tsvg'" &&
+                    !empty($command->input()->toString()) &&
+                    \substr_count($command->input()->toString(), \spl_object_hash($subDependency)) === 0;
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->expects($this->once())
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
         $output
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn('<graph-output/>');
 
         $this->assertNull($section->start(new Identity('profile-uuid')));
@@ -267,23 +265,22 @@ class CaptureAppGraphTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(static function($command) use ($subDependency): bool {
-                return (string) $command === "dot '-Tsvg'" &&
-                    !empty((string) $command->input()) &&
-                    \substr_count((string) $command->input(), '[label="should", style="bold", color="#00ff00"]') === 2 &&
-                    \substr_count((string) $command->input(), ', color="#00ff00"') === 4; // 2 nodes and 2 relations
+                return $command->toString() === "dot '-Tsvg'" &&
+                    !empty($command->input()->toString()) &&
+                    \substr_count($command->input()->toString(), '[label="should", style="bold", color="#00ff00"]') === 2 &&
+                    \substr_count($command->input()->toString(), ', color="#00ff00"') === 4; // 2 nodes and 2 relations
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->expects($this->once())
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
         $output
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn('<graph-output/>');
 
         $this->assertNull($section->start(new Identity('profile-uuid')));

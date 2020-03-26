@@ -12,17 +12,17 @@ use Innmind\Rest\Client\{
     HttpResource,
     HttpResource\Property,
 };
-use Innmind\Immutable\Stream;
+use Innmind\Immutable\Sequence;
 
 final class CaptureHttp implements Section
 {
     private Server $server;
-    private Stream $pairs;
+    private Sequence $pairs;
 
     public function __construct(Server $server)
     {
         $this->server = $server;
-        $this->pairs = Stream::of('array');
+        $this->pairs = Sequence::of('array');
     }
 
     public function start(Identity $identity): void

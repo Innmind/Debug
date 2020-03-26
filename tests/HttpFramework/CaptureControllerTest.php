@@ -11,7 +11,7 @@ use Innmind\Debug\{
 };
 use Innmind\HttpFramework\Controller;
 use Innmind\Rest\Client\Server;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\Router\Route;
 use Innmind\Http\Message\{
     ServerRequest,
@@ -19,7 +19,7 @@ use Innmind\Http\Message\{
 };
 use Innmind\Json\Json;
 use Innmind\Immutable\{
-    MapInterface,
+    Map,
     Str,
 };
 use PHPUnit\Framework\TestCase;
@@ -36,7 +36,7 @@ class CaptureControllerTest extends TestCase
                     new CaptureCallGraph(
                         $this->createMock(Server::class)
                     ),
-                    $this->createMock(TimeContinuumInterface::class)
+                    $this->createMock(Clock::class)
                 )
             )
         );
@@ -50,12 +50,12 @@ class CaptureControllerTest extends TestCase
                 $section = new CaptureCallGraph(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $request = $this->createMock(ServerRequest::class);
         $route = Route::of(new Route\Name('route_name'), Str::of('GET /foo'));
-        $arguments = $this->createMock(MapInterface::class);
+        $arguments = Map::of('string', 'string');
         $response = $this->createMock(Response::class);
         $server
             ->expects($this->once())
@@ -93,12 +93,12 @@ class CaptureControllerTest extends TestCase
                 $section = new CaptureCallGraph(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $request = $this->createMock(ServerRequest::class);
         $route = Route::of(new Route\Name('route_name'), Str::of('GET /foo'));
-        $arguments = $this->createMock(MapInterface::class);
+        $arguments = Map::of('string', 'string');
         $server
             ->expects($this->once())
             ->method('create')

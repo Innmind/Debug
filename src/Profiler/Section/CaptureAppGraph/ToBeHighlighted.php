@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Debug\Profiler\Section\CaptureAppGraph;
 
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class ToBeHighlighted
 {
@@ -28,9 +25,9 @@ final class ToBeHighlighted
     }
 
     /**
-     * @return SetInterface<object>
+     * @return Set<object>
      */
-    public function get(): SetInterface
+    public function get(): Set
     {
         return $this->set;
     }

@@ -25,11 +25,11 @@ use Innmind\ObjectGraph\{
     Visitor\AccessObjectNode,
     Exception\ObjectNotFound,
 };
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\{
+    assertSet,
+    unwrap,
 };
-use function Innmind\Immutable\assertSet;
 
 final class CaptureAppGraph implements Section
 {
@@ -37,7 +37,7 @@ final class CaptureAppGraph implements Section
     private Processes $processes;
     private Visualize $render;
     private CaptureAppGraph\ToBeHighlighted $toBeHighlighted;
-    private SetInterface $dependencies;
+    private Set $dependencies;
     private FlagDependencies $flagDependencies;
     private RemoveDependenciesSubGraph $removeDependencies;
     private Graph $graph;
@@ -49,7 +49,7 @@ final class CaptureAppGraph implements Section
         Processes $processes,
         Visualize $render,
         CaptureAppGraph\ToBeHighlighted $toBeHighlighted = null,
-        SetInterface $dependencies = null
+        Set $dependencies = null
     ) {
         $toBeHighlighted ??= new CaptureAppGraph\ToBeHighlighted;
         $dependencies ??= Set::of('object');
@@ -60,7 +60,7 @@ final class CaptureAppGraph implements Section
         $this->render = $render;
         $this->toBeHighlighted = $toBeHighlighted;
         $this->dependencies = $dependencies;
-        $this->flagDependencies = new FlagDependencies(...$dependencies);
+        $this->flagDependencies = new FlagDependencies(...unwrap($dependencies));
         $this->removeDependencies = new RemoveDependenciesSubGraph;
         $this->graph = new Graph;
     }
@@ -88,22 +88,21 @@ final class CaptureAppGraph implements Section
         ($this->removeDependencies)($graph);
         $this->highlight($graph);
 
+        $process = $this->processes->execute(
+            Command::foreground('dot')
+                ->withShortOption('Tsvg')
+                ->withInput(
+                    ($this->render)($graph)
+                )
+        );
+        $process->wait();
+
         $this->server->create(HttpResource::of(
             'api.section.app_graph',
             new Property('profile', (string) $this->profile),
             new Property(
                 'graph',
-                (string) $this
-                    ->processes
-                    ->execute(
-                        Command::foreground('dot')
-                            ->withShortOption('Tsvg')
-                            ->withInput(
-                                ($this->render)($graph)
-                            )
-                    )
-                    ->wait()
-                    ->output()
+                $process->output()->toString(),
             )
         ));
         $this->profile = null;
@@ -118,23 +117,20 @@ final class CaptureAppGraph implements Section
         // paths to the dependencies is highlighted only if an object calling it
         // has been highlighted to avoid highlighting too many paths leading to
         // the dependency
-        $this
-            ->toBeHighlighted
-            ->get()
-            ->diff($this->dependencies)
-            ->foreach(static function(object $object) use ($graph): void {
-                $graph->highlightPathTo($object);
-            })
-            ->foreach(static function(object $object) use ($dependencies, $graph): void {
-                try {
-                    $node = (new AccessObjectNode($object))($graph);
-                } catch (ObjectNotFound $e) {
-                    return;
-                }
+        $toBeHighlighted = $this->toBeHighlighted->get()->diff($this->dependencies);
+        $toBeHighlighted->foreach(static function(object $object) use ($graph): void {
+            $graph->highlightPathTo($object);
+        });
+        $toBeHighlighted->foreach(static function(object $object) use ($dependencies, $graph): void {
+            try {
+                $node = (new AccessObjectNode($object))($graph);
+            } catch (ObjectNotFound $e) {
+                return;
+            }
 
-                $dependencies->foreach(static function(object $dependency) use ($node): void {
-                    $node->highlightPathTo($dependency);
-                });
+            $dependencies->foreach(static function(object $dependency) use ($node): void {
+                $node->highlightPathTo($dependency);
             });
+        });
     }
 }

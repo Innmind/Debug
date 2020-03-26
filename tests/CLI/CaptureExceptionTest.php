@@ -48,10 +48,10 @@ class CaptureExceptionTest extends TestCase
         );
         $inner
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn('foo');
 
-        $this->assertSame('foo', (string) $handle);
+        $this->assertSame('foo', $handle->toString());
     }
 
     public function testDoNothingWhenNoExceptionThrown()

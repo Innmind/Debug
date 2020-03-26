@@ -38,8 +38,8 @@ final class StartCallGraph implements Command
         }
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
-        return (string) $this->handle;
+        return $this->handle->toString();
     }
 }

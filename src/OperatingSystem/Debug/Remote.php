@@ -11,8 +11,8 @@ use Innmind\Socket\{
     Client,
 };
 use Innmind\Url\{
-    UrlInterface,
-    AuthorityInterface,
+    Url,
+    Authority,
 };
 use Innmind\HttpTransport\Transport as HttpTransport;
 
@@ -36,7 +36,7 @@ final class Remote implements RemoteInterface
         $this->remoteProcesses = $remoteProcesses;
     }
 
-    public function ssh(UrlInterface $server): Server
+    public function ssh(Url $server): Server
     {
         return new Remote\Server(
             $this->remote->ssh($server),
@@ -46,7 +46,7 @@ final class Remote implements RemoteInterface
         );
     }
 
-    public function socket(Transport $transport, AuthorityInterface $authority): Client
+    public function socket(Transport $transport, Authority $authority): Client
     {
         return $this->remote->socket($transport, $authority);
     }

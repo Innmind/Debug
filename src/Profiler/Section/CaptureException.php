@@ -56,22 +56,21 @@ final class CaptureException implements Section
             return;
         }
 
+        $process = $this->processes->execute(
+            Command::foreground('dot')
+                ->withShortOption('Tsvg')
+                ->withInput(
+                    ($this->render)(new StackTrace($this->exception))
+                )
+        );
+        $process->wait();
+
         $this->server->create(HttpResource::of(
             'api.section.exception',
             new Property('profile', (string) $this->profile),
             new Property(
                 'graph',
-                (string) $this
-                    ->processes
-                    ->execute(
-                        Command::foreground('dot')
-                            ->withShortOption('Tsvg')
-                            ->withInput(
-                                ($this->render)(new StackTrace($this->exception))
-                            )
-                    )
-                    ->wait()
-                    ->output()
+                $process->output()->toString(),
             )
         ));
         $this->profile = null;

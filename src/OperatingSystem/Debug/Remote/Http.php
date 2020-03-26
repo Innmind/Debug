@@ -28,8 +28,8 @@ final class Http implements Transport
         $response = ($this->fulfill)($request);
 
         $this->section->capture(
-            (string) new Request\Stringable($request),
-            (string) new Response\Stringable($response)
+            (new Request\Stringable($request))->toString(),
+            (new Response\Stringable($response))->toString(),
         );
 
         return $response;

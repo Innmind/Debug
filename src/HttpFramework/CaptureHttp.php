@@ -25,11 +25,11 @@ final class CaptureHttp implements RequestHandler
 
     public function __invoke(ServerRequest $request): Response
     {
-        $this->section->received((string) new ServerRequest\Stringable($request));
+        $this->section->received((new ServerRequest\Stringable($request))->toString());
 
         $response = ($this->handle)($request);
 
-        $this->section->respondedWith((string) new Response\Stringable($response));
+        $this->section->respondedWith((new Response\Stringable($response))->toString());
 
         return $response;
     }

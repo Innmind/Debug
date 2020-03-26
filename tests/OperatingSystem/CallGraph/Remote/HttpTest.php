@@ -13,17 +13,17 @@ use Innmind\HttpTransport\Transport;
 use Innmind\Http\{
     Message\Request\Request,
     Message\Response\Response,
-    Message\StatusCode\StatusCode,
-    Message\Method\Method,
-    ProtocolVersion\ProtocolVersion,
+    Message\StatusCode,
+    Message\Method,
+    ProtocolVersion,
 };
 use Innmind\Url\Url;
 use Innmind\Rest\Client\Server;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\Json\Json;
 use PHPUnit\Framework\TestCase;
 
-class CaptureTest extends TestCase
+class HttpTest extends TestCase
 {
     public function testInterface()
     {
@@ -33,11 +33,11 @@ class CaptureTest extends TestCase
                 $section = new CaptureCallGraph(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $request = new Request(
-            Url::fromString('http://example.com/foo'),
+            Url::of('http://example.com/foo'),
             Method::get(),
             new ProtocolVersion(2, 0)
         );

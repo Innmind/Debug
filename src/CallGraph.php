@@ -4,17 +4,17 @@ declare(strict_types = 1);
 namespace Innmind\Debug;
 
 use Innmind\Debug\Profiler\Section\CaptureCallGraph;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 
 final class CallGraph
 {
     private CaptureCallGraph $section;
-    private TimeContinuumInterface $clock;
+    private Clock $clock;
     private ?CallGraph\Node $graph = null;
 
     public function __construct(
         CaptureCallGraph $section,
-        TimeContinuumInterface $clock
+        Clock $clock
     ) {
         $this->section = $section;
         $this->clock = $clock;

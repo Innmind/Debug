@@ -24,4 +24,19 @@ final class Control implements Server
             $this->state
         );
     }
+
+    public function volumes(): Server\Volumes
+    {
+        return $this->server->volumes();
+    }
+
+    public function reboot(): void
+    {
+        $this->server->reboot();
+    }
+
+    public function shutdown(): void
+    {
+        $this->server->shutdown();
+    }
 }

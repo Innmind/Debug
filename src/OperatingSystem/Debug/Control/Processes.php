@@ -32,10 +32,8 @@ final class Processes implements ProcessesInterface
         return $process;
     }
 
-    public function kill(Pid $pid, Signal $signal): ProcessesInterface
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this->processes->kill($pid, $signal);
-
-        return $this;
     }
 }

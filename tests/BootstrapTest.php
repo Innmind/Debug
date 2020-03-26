@@ -35,7 +35,7 @@ use Innmind\StackTrace\{
     Render,
     Link,
 };
-use Innmind\Immutable\StreamInterface;
+use Innmind\Immutable\Sequence;
 use PHPUnit\Framework\TestCase;
 
 class BootstrapTest extends TestCase
@@ -44,7 +44,7 @@ class BootstrapTest extends TestCase
     {
         $debug = bootstrap(
             Factory::build(),
-            Url::fromString('http://localhost:8000/')
+            Url::of('http://localhost:8000/')
         );
 
         $this->assertIsArray($debug);
@@ -101,7 +101,7 @@ class BootstrapTest extends TestCase
             $this->createMock(Command::class),
             $this->createMock(Command::class)
         );
-        $this->assertInstanceOf(StreamInterface::class, $commands);
+        $this->assertInstanceOf(Sequence::class, $commands);
         $this->assertSame(Command::class, (string) $commands->type());
         $this->assertCount(2, $commands);
         $command = $commands->first();
@@ -119,7 +119,7 @@ class BootstrapTest extends TestCase
     {
         $debug = bootstrap(
             Factory::build(),
-            Url::fromString('http://localhost:8000/'),
+            Url::of('http://localhost:8000/'),
             null,
             CodeEditor::sublimeText()
         );
@@ -143,7 +143,7 @@ class BootstrapTest extends TestCase
     {
         $debug = bootstrap(
             Factory::build(),
-            Url::fromString('http://localhost:8000/')
+            Url::of('http://localhost:8000/')
         );
 
         $handler = $debug['http']($this->createMock(RequestHandler::class));

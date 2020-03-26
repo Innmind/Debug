@@ -12,9 +12,9 @@ use Innmind\HttpFramework\RequestHandler;
 use Innmind\Http\{
     Message\ServerRequest\ServerRequest,
     Message\Response,
-    Message\Method\Method,
-    Message\StatusCode\StatusCode,
-    ProtocolVersion\ProtocolVersion,
+    Message\Method,
+    Message\StatusCode,
+    ProtocolVersion,
 };
 use Innmind\Url\Url;
 use PHPUnit\Framework\TestCase;
@@ -39,7 +39,7 @@ class StartProfileTest extends TestCase
             $profiler = $this->createMock(Profiler::class)
         );
         $request = new ServerRequest(
-            Url::fromString('/foo/bar'),
+            Url::of('/foo/bar'),
             Method::post(),
             new ProtocolVersion(2, 0)
         );
@@ -48,6 +48,10 @@ class StartProfileTest extends TestCase
             ->method('__invoke')
             ->with($request)
             ->willReturn($response = $this->createMock(Response::class));
+        $response
+            ->expects($this->any())
+            ->method('statusCode')
+            ->willReturn(new StatusCode(200));
         $profiler
             ->expects($this->once())
             ->method('start')
@@ -64,7 +68,7 @@ class StartProfileTest extends TestCase
             $profiler = $this->createMock(Profiler::class)
         );
         $request = new ServerRequest(
-            Url::fromString('/foo/bar'),
+            Url::of('/foo/bar'),
             Method::post(),
             new ProtocolVersion(2, 0)
         );
@@ -95,7 +99,7 @@ class StartProfileTest extends TestCase
             $profiler = $this->createMock(Profiler::class)
         );
         $request = new ServerRequest(
-            Url::fromString('/foo/bar'),
+            Url::of('/foo/bar'),
             Method::post(),
             new ProtocolVersion(2, 0)
         );
@@ -128,7 +132,7 @@ class StartProfileTest extends TestCase
             $profiler = $this->createMock(Profiler::class)
         );
         $request = new ServerRequest(
-            Url::fromString('/foo/bar'),
+            Url::of('/foo/bar'),
             Method::post(),
             new ProtocolVersion(2, 0)
         );

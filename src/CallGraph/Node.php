@@ -5,29 +5,29 @@ namespace Innmind\Debug\CallGraph;
 
 use Innmind\Debug\Exception\LogicException;
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    PointInTimeInterface,
+    Clock,
+    PointInTime,
 };
-use Innmind\Immutable\Stream;
+use Innmind\Immutable\Sequence;
 
 final class Node
 {
-    private TimeContinuumInterface $clock;
+    private Clock $clock;
     private string $name;
-    private ?PointInTimeInterface $startedAt = null;
-    private ?PointInTimeInterface $endedAt = null;
-    private Stream $children;
-    private Stream $stack;
+    private ?PointInTime $startedAt = null;
+    private ?PointInTime $endedAt = null;
+    private Sequence $children;
+    private Sequence $stack;
 
-    private function __construct(TimeContinuumInterface $clock, string $name)
+    private function __construct(Clock $clock, string $name)
     {
         $this->clock = $clock;
         $this->name = $name;
-        $this->children = Stream::of(self::class);
-        $this->stack = Stream::of(self::class);
+        $this->children = Sequence::of(self::class);
+        $this->stack = Sequence::of(self::class);
     }
 
-    public static function root(TimeContinuumInterface $clock, string $name): self
+    public static function root(Clock $clock, string $name): self
     {
         return new self($clock, $name);
     }
@@ -96,12 +96,12 @@ final class Node
 
     private function started(): bool
     {
-        return $this->startedAt instanceof PointInTimeInterface;
+        return $this->startedAt instanceof PointInTime;
     }
 
     private function ended(): bool
     {
-        return $this->endedAt instanceof PointInTimeInterface;
+        return $this->endedAt instanceof PointInTime;
     }
 
     private function add(self $child): void

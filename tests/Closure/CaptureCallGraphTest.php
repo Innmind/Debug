@@ -11,7 +11,7 @@ use Innmind\Debug\{
     Profiler\Profile\Identity,
 };
 use Innmind\Rest\Client\Server;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\Json\Json;
 use PHPUnit\Framework\TestCase;
 
@@ -26,7 +26,7 @@ class CaptureCallGraphTest extends TestCase
                     new Section(
                         $this->createMock(Server::class)
                     ),
-                    $this->createMock(TimeContinuumInterface::class)
+                    $this->createMock(Clock::class)
                 )
             )
         );
@@ -45,7 +45,7 @@ class CaptureCallGraphTest extends TestCase
                 $section = new Section(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $server
@@ -81,7 +81,7 @@ class CaptureCallGraphTest extends TestCase
                 $section = new Section(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $server
@@ -117,7 +117,7 @@ class CaptureCallGraphTest extends TestCase
                 $section = new Section(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $server
@@ -161,7 +161,7 @@ class CaptureCallGraphTest extends TestCase
                 new Section(
                     $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             ),
             $toBeHighlighted = new ToBeHighlighted
         );
@@ -179,14 +179,14 @@ class CaptureCallGraphTest extends TestCase
                 new Section(
                     $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             ),
             $toBeHighlighted = new ToBeHighlighted
         );
 
-        $this->assertFalse($toBeHighlighted->get()->contains($inner));
+        $this->assertFalse($toBeHighlighted->get()->contains(\Closure::fromCallable($inner)));
         $this->assertSame(['foo', 'bar'], $call('foo', 'bar'));
-        $this->assertFalse($toBeHighlighted->get()->contains($inner));
+        $this->assertFalse($toBeHighlighted->get()->contains(\Closure::fromCallable($inner)));
     }
 
     public function forward(...$arguments)
