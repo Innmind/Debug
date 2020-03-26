@@ -68,7 +68,7 @@ class HttpTest extends TestCase
         $identity = $profiler->start('foo');
 
         $this->assertInstanceOf(Identity::class, $identity);
-        $this->assertSame('some-uuid', (string) $identity);
+        $this->assertSame('some-uuid', $identity->toString());
     }
 
     public function testFail()

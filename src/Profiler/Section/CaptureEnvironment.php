@@ -42,7 +42,7 @@ final class CaptureEnvironment implements Section
         $this->server->create(HttpResource::of(
             'api.section.environment',
             new Property('pairs', $this->environment),
-            new Property('profile', (string) $identity)
+            new Property('profile', $identity->toString()),
         ));
     }
 }

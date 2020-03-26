@@ -99,7 +99,7 @@ final class CaptureAppGraph implements Section
 
         $this->server->create(HttpResource::of(
             'api.section.app_graph',
-            new Property('profile', (string) $this->profile),
+            new Property('profile', $this->profile->toString()),
             new Property(
                 'graph',
                 $process->output()->toString(),

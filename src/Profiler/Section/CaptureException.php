@@ -67,7 +67,7 @@ final class CaptureException implements Section
 
         $this->server->create(HttpResource::of(
             'api.section.exception',
-            new Property('profile', (string) $this->profile),
+            new Property('profile', $this->profile->toString()),
             new Property(
                 'graph',
                 $process->output()->toString(),

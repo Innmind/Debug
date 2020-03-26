@@ -54,7 +54,7 @@ final class CaptureProcesses implements Section
         $this->server->create(HttpResource::of(
             $this->resource,
             new Property('processes', $this->processes),
-            new Property('profile', (string) $identity)
+            new Property('profile', $identity->toString()),
         ));
     }
 }

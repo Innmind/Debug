@@ -68,7 +68,7 @@ final class Http implements Profiler
         });
 
         $this->server->update(
-            new RestIdentity((string) $identity),
+            new RestIdentity($identity->toString()),
             HttpResource::of(
                 'api.profile',
                 new Property('success', $success),

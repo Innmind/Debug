@@ -44,7 +44,7 @@ final class CaptureHttp implements Section
         [$request, $response] = $this->pairs->first();
         $section = $this->server->create(HttpResource::of(
             'api.section.remote.http',
-            new Property('profile', (string) $identity),
+            new Property('profile', $identity->toString()),
             new Property('request', $request),
             new Property('response', $response)
         ));
@@ -58,7 +58,7 @@ final class CaptureHttp implements Section
                     $section,
                     HttpResource::of(
                         'api.section.remote.http',
-                        new Property('profile', (string) $identity),
+                        new Property('profile', $identity->toString()),
                         new Property('request', $request),
                         new Property('response', $response)
                     )

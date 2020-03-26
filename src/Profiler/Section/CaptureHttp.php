@@ -39,7 +39,7 @@ final class CaptureHttp implements Section
         $this->identity = $this->server->create(HttpResource::of(
             'api.section.http',
             new Property('request', $request),
-            new Property('profile', (string) $this->profile)
+            new Property('profile', $this->profile->toString()),
         ));
     }
 
