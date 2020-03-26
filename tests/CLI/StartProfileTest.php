@@ -15,7 +15,7 @@ use Innmind\CLI\{
     Environment,
     Environment\ExitCode,
 };
-use Innmind\Immutable\Stream;
+use Innmind\Immutable\Sequence;
 use PHPUnit\Framework\TestCase;
 
 class StartProfileTest extends TestCase
@@ -39,10 +39,10 @@ class StartProfileTest extends TestCase
         );
         $inner
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn('foo');
 
-        $this->assertSame('foo', (string) $handle);
+        $this->assertSame('foo', $handle->toString());
     }
 
     public function testStart()
@@ -61,7 +61,7 @@ class StartProfileTest extends TestCase
         $env
             ->expects($this->once())
             ->method('arguments')
-            ->willReturn(Stream::of('string', 'foo', 'bar', 'baz'));
+            ->willReturn(Sequence::of('string', 'foo', 'bar', 'baz'));
         $inner
             ->expects($this->once())
             ->method('__invoke')
@@ -87,7 +87,7 @@ class StartProfileTest extends TestCase
         $env
             ->expects($this->once())
             ->method('arguments')
-            ->willReturn(Stream::of('string', 'foo', 'bar', 'baz'));
+            ->willReturn(Sequence::of('string', 'foo', 'bar', 'baz'));
         $inner
             ->expects($this->once())
             ->method('__invoke')
@@ -120,7 +120,7 @@ class StartProfileTest extends TestCase
         $env
             ->expects($this->once())
             ->method('arguments')
-            ->willReturn(Stream::of('string', 'foo', 'bar', 'baz'));
+            ->willReturn(Sequence::of('string', 'foo', 'bar', 'baz'));
         $env
             ->expects($this->once())
             ->method('exitCode')
@@ -154,7 +154,7 @@ class StartProfileTest extends TestCase
         $env
             ->expects($this->once())
             ->method('arguments')
-            ->willReturn(Stream::of('string', 'foo', 'bar', 'baz'));
+            ->willReturn(Sequence::of('string', 'foo', 'bar', 'baz'));
         $env
             ->expects($this->once())
             ->method('exitCode')

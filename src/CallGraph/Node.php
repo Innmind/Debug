@@ -5,29 +5,33 @@ namespace Innmind\Debug\CallGraph;
 
 use Innmind\Debug\Exception\LogicException;
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    PointInTimeInterface,
+    Clock,
+    PointInTime,
 };
-use Innmind\Immutable\Stream;
+use Innmind\Immutable\Sequence;
 
 final class Node
 {
-    private $clock;
-    private $name;
-    private $startedAt;
-    private $endedAt;
-    private $children;
-    private $stack;
+    private Clock $clock;
+    private string $name;
+    private ?PointInTime $startedAt = null;
+    private ?PointInTime $endedAt = null;
+    /** @var Sequence<self> */
+    private Sequence $children;
+    /** @var Sequence<self> */
+    private Sequence $stack;
 
-    private function __construct(TimeContinuumInterface $clock, string $name)
+    private function __construct(Clock $clock, string $name)
     {
         $this->clock = $clock;
         $this->name = $name;
-        $this->children = Stream::of(self::class);
-        $this->stack = Stream::of(self::class);
+        /** @var Sequence<self> */
+        $this->children = Sequence::of(self::class);
+        /** @var Sequence<self> */
+        $this->stack = Sequence::of(self::class);
     }
 
-    public static function root(TimeContinuumInterface $clock, string $name): self
+    public static function root(Clock $clock, string $name): self
     {
         return new self($clock, $name);
     }
@@ -43,7 +47,7 @@ final class Node
         $child = new self($this->clock, $name);
         $child->start();
         $this->add($child);
-        $this->stack = $this->stack->add($child);
+        $this->stack = ($this->stack)($child);
     }
 
     public function leave(): void
@@ -62,6 +66,10 @@ final class Node
     {
         $this->finish();
 
+        /**
+         * @psalm-suppress PossiblyNullArgument
+         * @psalm-suppress PossiblyNullReference
+         */
         return [
             'name' => $this->name,
             'value' => $this->endedAt->elapsedSince($this->startedAt)->milliseconds(),
@@ -96,12 +104,12 @@ final class Node
 
     private function started(): bool
     {
-        return $this->startedAt instanceof PointInTimeInterface;
+        return $this->startedAt instanceof PointInTime;
     }
 
     private function ended(): bool
     {
-        return $this->endedAt instanceof PointInTimeInterface;
+        return $this->endedAt instanceof PointInTime;
     }
 
     private function add(self $child): void
@@ -112,7 +120,7 @@ final class Node
             $parent = $this->stack->last();
         }
 
-        $parent->children = $parent->children->add($child);
+        $parent->children = ($parent->children)($child);
     }
 
     /**

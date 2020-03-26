@@ -14,9 +14,9 @@ use Innmind\Rest\Client\{
     Identity\Identity as RestIdentity,
 };
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    PointInTimeInterface,
-    Format\ISO8601,
+    Clock,
+    PointInTime,
+    Earth\Format\ISO8601,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -28,7 +28,7 @@ class HttpTest extends TestCase
             Profiler::class,
             new Http(
                 $this->createMock(Server::class),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
     }
@@ -37,7 +37,7 @@ class HttpTest extends TestCase
     {
         $profiler = new Http(
             $server = $this->createMock(Server::class),
-            $clock = $this->createMock(TimeContinuumInterface::class),
+            $clock = $this->createMock(Clock::class),
             $section = $this->createMock(Section::class)
         );
         $server
@@ -54,7 +54,7 @@ class HttpTest extends TestCase
         $clock
             ->expects($this->once())
             ->method('now')
-            ->willReturn($now = $this->createMock(PointInTimeInterface::class));
+            ->willReturn($now = $this->createMock(PointInTime::class));
         $now
             ->expects($this->once())
             ->method('format')
@@ -68,14 +68,14 @@ class HttpTest extends TestCase
         $identity = $profiler->start('foo');
 
         $this->assertInstanceOf(Identity::class, $identity);
-        $this->assertSame('some-uuid', (string) $identity);
+        $this->assertSame('some-uuid', $identity->toString());
     }
 
     public function testFail()
     {
         $profiler = new Http(
             $server = $this->createMock(Server::class),
-            $clock = $this->createMock(TimeContinuumInterface::class),
+            $clock = $this->createMock(Clock::class),
             $section = $this->createMock(Section::class)
         );
         $server
@@ -106,7 +106,7 @@ class HttpTest extends TestCase
     {
         $profiler = new Http(
             $server = $this->createMock(Server::class),
-            $clock = $this->createMock(TimeContinuumInterface::class),
+            $clock = $this->createMock(Clock::class),
             $section = $this->createMock(Section::class)
         );
         $server

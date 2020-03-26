@@ -13,8 +13,8 @@ use Innmind\CLI\{
 
 final class CaptureException implements Command
 {
-    private $handle;
-    private $section;
+    private Command $handle;
+    private Section $section;
 
     public function __construct(
         Command $handle,
@@ -35,8 +35,8 @@ final class CaptureException implements Command
         }
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
-        return (string) $this->handle;
+        return $this->handle->toString();
     }
 }

@@ -13,11 +13,12 @@ use Innmind\CLI\{
     Command\Options,
     Environment,
 };
+use function Innmind\Immutable\join;
 
 final class StartProfile implements Command
 {
-    private $handle;
-    private $profiler;
+    private Command $handle;
+    private Profiler $profiler;
 
     public function __construct(
         Command $handle,
@@ -30,7 +31,7 @@ final class StartProfile implements Command
     public function __invoke(Environment $env, Arguments $arguments, Options $options): void
     {
         $profile = $this->profiler->start(
-            (string) $env->arguments()->join(' ')
+            join(' ', $env->arguments())->toString(),
         );
 
         try {
@@ -44,9 +45,9 @@ final class StartProfile implements Command
         }
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
-        return (string) $this->handle;
+        return $this->handle->toString();
     }
 
     private function end(Identity $profile, Environment $env): void

@@ -11,13 +11,14 @@ use Innmind\OperatingSystem\{
     CurrentProcess\Signals,
     Exception\ForkFailed,
 };
-use Innmind\Server\Status\Server\Process\Pid;
-use Innmind\TimeContinuum\PeriodInterface;
+use Innmind\Server\Control\Server\Process\Pid;
+use Innmind\Server\Status\Server\Memory\Bytes;
+use Innmind\TimeContinuum\Period;
 
 final class CurrentProcess implements CurrentProcessInterface
 {
-    private $process;
-    private $graph;
+    private CurrentProcessInterface $process;
+    private CallGraph $graph;
 
     public function __construct(CurrentProcessInterface $process, CallGraph $graph)
     {
@@ -30,9 +31,6 @@ final class CurrentProcess implements CurrentProcessInterface
         return $this->process->id();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function fork(): ForkSide
     {
         $this->graph->enter('fork()');
@@ -62,12 +60,17 @@ final class CurrentProcess implements CurrentProcessInterface
         return $this->process->signals();
     }
 
-    public function halt(PeriodInterface $period): void
+    public function halt(Period $period): void
     {
         $this->graph->enter('halt()');
 
         $this->process->halt($period);
 
         $this->graph->leave();
+    }
+
+    public function memory(): Bytes
+    {
+        return $this->process->memory();
     }
 }

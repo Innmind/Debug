@@ -16,15 +16,15 @@ use Innmind\OperatingSystem\{
 };
 use Innmind\Server\Status\Server as ServerStatus;
 use Innmind\Server\Control\Server as ServerControl;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 
 /**
  * Highlight os objects when accessed by the app
  */
 final class OperatingSystem implements OperatingSystemInterface
 {
-    private $os;
-    private $toBeHighlighted;
+    private OperatingSystemInterface $os;
+    private ToBeHighlighted $toBeHighlighted;
 
     public function __construct(
         OperatingSystemInterface $os,
@@ -34,7 +34,7 @@ final class OperatingSystem implements OperatingSystemInterface
         $this->toBeHighlighted = $toBeHighlighted;
     }
 
-    public function clock(): TimeContinuumInterface
+    public function clock(): Clock
     {
         $clock = $this->os->clock();
         $this->toBeHighlighted->add($clock);

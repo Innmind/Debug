@@ -12,13 +12,11 @@ use Innmind\Http\Message\{
 
 final class Http implements Transport
 {
-    private $fulfill;
-    private $graph;
+    private Transport $fulfill;
+    private CallGraph $graph;
 
-    public function __construct(
-        Transport $fulfill,
-        CallGraph $graph
-    ) {
+    public function __construct(Transport $fulfill, CallGraph $graph)
+    {
         $this->fulfill = $fulfill;
         $this->graph = $graph;
     }
@@ -28,7 +26,7 @@ final class Http implements Transport
         try {
             $this->graph->enter(\sprintf(
                 'http(%s)',
-                $request->url()
+                $request->url()->toString(),
             ));
 
             return ($this->fulfill)($request);

@@ -10,7 +10,7 @@ use Innmind\HttpFramework\{
     Controller,
 };
 use Innmind\CLI\Command;
-use Innmind\Url\UrlInterface;
+use Innmind\Url\Url;
 use Innmind\UrlResolver\UrlResolver;
 use Innmind\StackTrace\{
     Render,
@@ -20,30 +20,30 @@ use Innmind\ObjectGraph\{
     Visualize,
     LocationRewriter,
 };
-use Innmind\Filesystem\Adapter\MemoryAdapter;
+use Innmind\Filesystem\Adapter\InMemory;
 use Innmind\CommandBus\CommandBus as CommandBusInterface;
 use Innmind\EventBus\EventBus as EventBusInterface;
 use Innmind\Immutable\{
-    MapInterface,
     Map,
-    SetInterface,
     Set,
-    StreamInterface,
-    Stream,
+    Sequence,
 };
+use function Innmind\Immutable\unwrap;
 use function Innmind\Rest\Client\bootstrap as client;
 
 /**
- * @param  SetInterface<string>|null $disable
+ * @param Set<string>|null $disable
+ *
+ * @return array{profiler: callable(): Profiler, os: callable(): OperatingSystem, http: callable(RequestHandler): RequestHandler, cli: callable(Command...): Sequence<Command>, call_graph: callable(): CallGraph, to_be_highlighted: callable(): Profiler\Section\CaptureAppGraph\ToBeHighlighted, controller: callable(Controller): Controller, command_bus: callable(CommandBusInterface): CommandBusInterface, event_bus: callable(EventBusInterface): EventBusInterface, callable: callable(callable): callable}
  */
 function bootstrap(
     OperatingSystem $os,
-    UrlInterface $profiler,
-    MapInterface $environmentVariables = null,
+    Url $profiler,
+    Map $environmentVariables = null,
     CodeEditor $codeEditor = null,
-    SetInterface $disable = null
+    Set $disable = null
 ): array {
-    $environmentVariables = $environmentVariables ?? Map::of('string', 'scalar');
+    $environmentVariables ??= Map::of('string', 'scalar');
 
     switch ($codeEditor) {
         case CodeEditor::sublimeText():
@@ -60,22 +60,22 @@ function bootstrap(
     $rest = client(
         $os->remote()->http(),
         new UrlResolver,
-        new MemoryAdapter
+        new InMemory,
     );
-    $server = $rest->server((string) $profiler);
+    $server = $rest->server($profiler->toString());
 
     $toBeHighighted = new Profiler\Section\CaptureAppGraph\ToBeHighlighted;
 
     $renderProcess = new OS\Debug\Control\RenderProcess\Remote(
-        new OS\Debug\Control\RenderProcess\Local
+        new OS\Debug\Control\RenderProcess\Local,
     );
     $localProcesses = new OS\Debug\Control\Processes\State(
         $renderProcess,
-        new Profiler\Section\CaptureProcesses($server)
+        new Profiler\Section\CaptureProcesses($server),
     );
     $remoteProcesses = new OS\Debug\Control\Processes\State(
         $renderProcess,
-        Profiler\Section\CaptureProcesses::remote($server)
+        Profiler\Section\CaptureProcesses::remote($server),
     );
 
     $captureRemoteHttp = new Profiler\Section\Remote\CaptureHttp($server);
@@ -87,7 +87,7 @@ function bootstrap(
         $localProcesses,
         $remoteProcesses,
         $renderProcess,
-        $captureRemoteHttp
+        $captureRemoteHttp,
     );
     $debugOS = new OS\CallGraph\OperatingSystem($debugOS, $callGraph);
 
@@ -95,15 +95,14 @@ function bootstrap(
     $captureException = new Profiler\Section\CaptureException(
         $server,
         $os->control()->processes(),
-        new Render($linkException)
+        new Render($linkException),
     );
     $captureAppGraph = new Profiler\Section\CaptureAppGraph(
         $server,
         $os->control()->processes(),
         new Visualize($locateClass),
         $toBeHighighted,
-        Set::of(
-            'object',
+        Set::objects(
             $os,
             $os->clock(),
             $os->filesystem(),
@@ -113,8 +112,8 @@ function bootstrap(
             $os->sockets(),
             $os->remote(),
             $os->remote()->http(),
-            $os->process()
-        )
+            $os->process(),
+        ),
     );
 
     $sections = Set::of(
@@ -128,21 +127,19 @@ function bootstrap(
         $captureRemoteHttp,
         new Profiler\Section\CaptureEnvironment(
             $server,
-            $environmentVariables->reduce(
-                Set::of('string'),
-                static function(SetInterface $environment, $key, $value): SetInterface {
-                    return $environment->add("$key=$value");
-                }
-            )
-        )
+            $environmentVariables->toSetOf(
+                'string',
+                static fn(string $key, $value): \Generator => yield "$key=$value",
+            ),
+        ),
     );
 
     $profiler = new Profiler\Http(
         $server,
         $os->clock(),
-        ...$sections->filter(static function(object $section) use ($disable): bool {
+        ...unwrap($sections->filter(static function(object $section) use ($disable): bool {
             return $disable === null || !$disable->contains(\get_class($section));
-        })
+        })),
     );
 
     return [
@@ -159,33 +156,33 @@ function bootstrap(
                         new HttpFramework\StartCallGraph( // above app graph to not show debug stuff in the graph
                             new HttpFramework\CaptureAppGraph(
                                 $handler,
-                                $captureAppGraph
+                                $captureAppGraph,
                             ),
                             $callGraph,
-                            \get_class($handler)
+                            \get_class($handler),
                         ),
-                        $captureException
+                        $captureException,
                     ),
-                    $captureHttp
+                    $captureHttp,
                 ),
-                $profiler
+                $profiler,
             );
         },
-        'cli' => static function(Command ...$commands) use ($profiler, $captureException, $captureAppGraph, $callGraph): StreamInterface {
-            return Stream::of(Command::class, ...$commands)->map(static function($command) use ($profiler, $captureException, $captureAppGraph, $callGraph): Command {
+        'cli' => static function(Command ...$commands) use ($profiler, $captureException, $captureAppGraph, $callGraph): Sequence {
+            return Sequence::of(Command::class, ...$commands)->map(static function($command) use ($profiler, $captureException, $captureAppGraph, $callGraph): Command {
                 return new CLI\StartProfile(
                     new CLI\CaptureException(
                         new CLI\StartCallGraph( // above app graph to not show debug stuff in the graph
                             new CLI\CaptureAppGraph(
                                 $command,
-                                $captureAppGraph
+                                $captureAppGraph,
                             ),
                             $callGraph,
-                            \get_class($command)
+                            \get_class($command),
                         ),
-                        $captureException
+                        $captureException,
                     ),
-                    $profiler
+                    $profiler,
                 );
             });
         },

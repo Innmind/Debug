@@ -127,8 +127,8 @@ class CaptureExceptionTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(static function($command) use ($e): bool {
-                return (string) $command === "dot '-Tsvg'" &&
-                    !empty((string) $command->input());
+                return $command->toString() === "dot '-Tsvg'" &&
+                    !empty($command->input()->toString());
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
@@ -141,7 +141,7 @@ class CaptureExceptionTest extends TestCase
             ->willReturn($output = $this->createMock(Output::class));
         $output
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn('<graph-output/>');
 
         $this->assertNull($section->start(new Identity('profile-uuid')));

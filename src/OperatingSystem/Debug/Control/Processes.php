@@ -13,8 +13,8 @@ use Innmind\Server\Control\Server\{
 
 final class Processes implements ProcessesInterface
 {
-    private $processes;
-    private $state;
+    private ProcessesInterface $processes;
+    private Processes\State $state;
 
     public function __construct(
         ProcessesInterface $processes,
@@ -32,10 +32,8 @@ final class Processes implements ProcessesInterface
         return $process;
     }
 
-    public function kill(Pid $pid, Signal $signal): ProcessesInterface
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this->processes->kill($pid, $signal);
-
-        return $this;
     }
 }

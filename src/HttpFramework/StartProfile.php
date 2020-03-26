@@ -16,13 +16,11 @@ use Innmind\Immutable\Str;
 
 final class StartProfile implements RequestHandler
 {
-    private $handle;
-    private $profiler;
+    private RequestHandler $handle;
+    private Profiler $profiler;
 
-    public function __construct(
-        RequestHandler $handle,
-        Profiler $profiler
-    ) {
+    public function __construct(RequestHandler $handle, Profiler $profiler)
+    {
         $this->handle = $handle;
         $this->profiler = $profiler;
     }
@@ -32,7 +30,7 @@ final class StartProfile implements RequestHandler
         $raw = new ServerRequest\Stringable($request);
 
         $profile = $this->profiler->start(
-            (string) Str::of((string) $raw)->split("\n")->first()
+            Str::of($raw->toString())->split("\n")->first()->toString(),
         );
 
         try {
@@ -53,9 +51,9 @@ final class StartProfile implements RequestHandler
         $code = $response->statusCode();
 
         if ($code->value() >= 400) {
-            $this->profiler->fail($profile, (string) $code);
+            $this->profiler->fail($profile, $code->toString());
         } else {
-            $this->profiler->succeed($profile, (string) $code);
+            $this->profiler->succeed($profile, $code->toString());
         }
     }
 }

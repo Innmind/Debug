@@ -8,8 +8,8 @@ use Innmind\EventBus\EventBus;
 
 final class CaptureCallGraph implements EventBus
 {
-    private $dispatch;
-    private $graph;
+    private EventBus $dispatch;
+    private CallGraph $graph;
 
     public function __construct(EventBus $dispatch, CallGraph $graph)
     {
@@ -17,14 +17,12 @@ final class CaptureCallGraph implements EventBus
         $this->graph = $graph;
     }
 
-    public function __invoke(object $event): EventBus
+    public function __invoke(object $event): void
     {
         try {
             $this->graph->enter(\get_class($event));
 
             ($this->dispatch)($event);
-
-            return $this;
         } finally {
             $this->graph->leave();
         }

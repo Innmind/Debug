@@ -13,9 +13,9 @@ use Innmind\CLI\{
 
 final class StartCallGraph implements Command
 {
-    private $handle;
-    private $graph;
-    private $name;
+    private Command $handle;
+    private CallGraph $graph;
+    private string $name;
 
     public function __construct(
         Command $handle,
@@ -38,8 +38,8 @@ final class StartCallGraph implements Command
         }
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
-        return (string) $this->handle;
+        return $this->handle->toString();
     }
 }

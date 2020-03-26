@@ -14,18 +14,18 @@ use Innmind\Server\Control\Server\{
     Command,
     Signal,
 };
-use Innmind\Url\UrlInterface;
+use Innmind\Url\Url;
 
 final class Processes implements ProcessesInterface
 {
-    private $processes;
-    private $location;
-    private $render;
-    private $state;
+    private ProcessesInterface $processes;
+    private Url $location;
+    private Remote $render;
+    private State $state;
 
     public function __construct(
         ProcessesInterface $processes,
-        UrlInterface $location,
+        Url $location,
         Remote $render,
         State $state
     ) {
@@ -44,10 +44,8 @@ final class Processes implements ProcessesInterface
         return $process;
     }
 
-    public function kill(Pid $pid, Signal $signal): ProcessesInterface
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this->processes->kill($pid, $signal);
-
-        return $this;
     }
 }

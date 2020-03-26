@@ -16,11 +16,11 @@ use Innmind\OperatingSystem\{
     CurrentProcess\Signals,
     Exception\ForkFailed,
 };
-use Innmind\Server\Status\Server\Process\Pid;
+use Innmind\Server\Control\Server\Process\Pid;
 use Innmind\Rest\Client\Server;
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    PeriodInterface,
+    Clock,
+    Period,
 };
 use Innmind\Json\Json;
 use PHPUnit\Framework\TestCase;
@@ -37,7 +37,7 @@ class CurrentProcessTest extends TestCase
                     new CaptureCallGraph(
                         $this->createMock(Server::class)
                     ),
-                    $this->createMock(TimeContinuumInterface::class)
+                    $this->createMock(Clock::class)
                 )
             )
         );
@@ -51,7 +51,7 @@ class CurrentProcessTest extends TestCase
                 new CaptureCallGraph(
                     $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $inner
@@ -70,7 +70,7 @@ class CurrentProcessTest extends TestCase
                 new CaptureCallGraph(
                     $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $inner
@@ -89,10 +89,10 @@ class CurrentProcessTest extends TestCase
                 $section = new CaptureCallGraph(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
-        $period = $this->createMock(PeriodInterface::class);
+        $period = $this->createMock(Period::class);
         $server
             ->expects($this->once())
             ->method('create')
@@ -126,7 +126,7 @@ class CurrentProcessTest extends TestCase
                 $section = new CaptureCallGraph(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $server
@@ -162,7 +162,7 @@ class CurrentProcessTest extends TestCase
                 $section = new CaptureCallGraph(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $server
@@ -202,7 +202,7 @@ class CurrentProcessTest extends TestCase
                 new CaptureCallGraph(
                     $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
         $inner

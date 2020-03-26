@@ -10,12 +10,12 @@ use Innmind\Http\Message\{
     ServerRequest,
     Response,
 };
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 
 final class CaptureController implements Controller
 {
-    private $handle;
-    private $graph;
+    private Controller $handle;
+    private CallGraph $graph;
 
     public function __construct(Controller $handle, CallGraph $graph)
     {
@@ -23,19 +23,16 @@ final class CaptureController implements Controller
         $this->graph = $graph;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __invoke(
         ServerRequest $request,
         Route $route,
-        MapInterface $arguments
+        Map $arguments
     ): Response {
         try {
             $this->graph->enter(\sprintf(
                 '%s(%s)',
                 \get_class($this->handle),
-                $route->name()
+                $route->name()->toString(),
             ));
 
             return ($this->handle)($request, $route, $arguments);

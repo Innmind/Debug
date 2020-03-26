@@ -1,10 +1,8 @@
 # Debug
 
-| `develop` |
-|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Debug/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Debug/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Debug/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Debug/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/Debug/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Debug/build-status/develop) |
+[![Build Status](https://github.com/Innmind/Debug/workflows/CI/badge.svg)](https://github.com/Innmind/Debug/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/Innmind/Debug/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/Debug)
+[![Type Coverage](https://shepherd.dev/github/Innmind/Debug/coverage.svg)](https://shepherd.dev/github/Innmind/Debug)
 
 [Profiler](https://github.com/Innmind/Profiler) client to help debug applications.
 
@@ -23,20 +21,26 @@ use Innmind\HttpServer\Main;
 use Innmind\Http\Message\{
     ServerRequest,
     Response,
+    Environment,
 };
 use Innmind\OperatingSystem\OperatingSystem;
 use Innmind\Url\Url;
 use function Innmind\Debug\bootstrap;
 
 new class extends Main {
-    protected function main(ServerRequest $request, OperatingSystem $os): Response
+    private $handle;
+
+    protected function preload(OperatingSystem $os, Environment $env): void
     {
-        $debug = debug($os, Url::fromString('http://localhost:8000')); // replace with the profiler url
+        $debug = debug($os, Url::of('http://localhost:8000')); // replace with the profiler url
 
         $handle = bootstrapYourApp($debug['os']()); // $handle must be an instance of Innmind\HttpFramework\RequestHandler
-        $handle = $debug['http']($handle);
+        $this->handle = $debug['http']($handle);
+    }
 
-        return $handle($request);
+    protected function main(ServerRequest $request): Response
+    {
+        return ($this->handle)($request);
     }
 };
 ```
@@ -57,16 +61,17 @@ use Innmind\CLI\{
 };
 use Innmind\OperatingSystem\OperatingSystem;
 use Innmind\Url\Url;
+use function Innmind\Immutable\unwrap;
 use function Innmind\Debug\bootstrap;
 
 new class extends Main {
     protected function main(Environment $env, OperatingSystem $os): void
     {
-        $debug = debug($os, Url::fromString('http://localhost:8000')); // replace with the profiler url
+        $debug = debug($os, Url::of('http://localhost:8000')); // replace with the profiler url
 
         $commands = bootstrapYourCommands($debug['os']()); // $commands bus be a set<Innmind\CLI\Command>
 
-        $run = new Commands(...$debug['cli'](...$commands));
+        $run = new Commands(...unwrap($debug['cli'](...$commands)));
         $run($env);
     }
 };

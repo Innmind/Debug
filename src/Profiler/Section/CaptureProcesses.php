@@ -16,9 +16,9 @@ use Innmind\Immutable\Set;
 
 final class CaptureProcesses implements Section
 {
-    private $server;
-    private $processes;
-    private $resource;
+    private Server $server;
+    private Set $processes;
+    private string $resource;
 
     public function __construct(Server $server)
     {
@@ -42,7 +42,7 @@ final class CaptureProcesses implements Section
 
     public function capture(string $process): void
     {
-        $this->processes = $this->processes->add($process);
+        $this->processes = ($this->processes)($process);
     }
 
     public function finish(Identity $identity): void
@@ -54,7 +54,7 @@ final class CaptureProcesses implements Section
         $this->server->create(HttpResource::of(
             $this->resource,
             new Property('processes', $this->processes),
-            new Property('profile', (string) $identity)
+            new Property('profile', $identity->toString()),
         ));
     }
 }

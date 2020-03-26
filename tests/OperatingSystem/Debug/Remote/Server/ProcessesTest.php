@@ -19,10 +19,7 @@ use Innmind\Server\Control\Server\{
     Signal,
 };
 use Innmind\Rest\Client\Server;
-use Innmind\Url\{
-    UrlInterface,
-    Url,
-};
+use Innmind\Url\Url;
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 
@@ -35,7 +32,7 @@ class ProcessesTest extends TestCase
         );
         $processes = new Processes(
             $this->createMock(ProcessesInterface::class),
-            $this->createMock(UrlInterface::class),
+            Url::of('ssh://example.com'),
             $render,
             new State(
                 $render,
@@ -55,7 +52,7 @@ class ProcessesTest extends TestCase
         );
         $processes = new Processes(
             $inner = $this->createMock(ProcessesInterface::class),
-            $this->createMock(UrlInterface::class),
+            Url::of('ssh://example.com'),
             $render,
             new State(
                 $render,
@@ -81,7 +78,7 @@ class ProcessesTest extends TestCase
         );
         $processes = new Processes(
             $inner = $this->createMock(ProcessesInterface::class),
-            $this->createMock(UrlInterface::class),
+            Url::of('ssh://example.com'),
             $render,
             new State(
                 $render,
@@ -94,10 +91,9 @@ class ProcessesTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('kill')
-            ->with($pid, Signal::kill())
-            ->will($this->returnSelf());
+            ->with($pid, Signal::kill());
 
-        $this->assertSame($processes, $processes->kill($pid, Signal::kill()));
+        $this->assertNull($processes->kill($pid, Signal::kill()));
     }
 
     public function testProcessesStartedBeforeProfilingStartAreNotSent()
@@ -107,7 +103,7 @@ class ProcessesTest extends TestCase
         );
         $processes = new Processes(
             $inner = $this->createMock(ProcessesInterface::class),
-            $this->createMock(UrlInterface::class),
+            Url::of('ssh://example.com'),
             $render,
             $state = new State(
                 $render,
@@ -132,7 +128,7 @@ class ProcessesTest extends TestCase
         );
         $processes = new Processes(
             $inner = $this->createMock(ProcessesInterface::class),
-            Url::fromString('ssh://user:pwd@example.com:2242/'),
+            Url::of('ssh://user:pwd@example.com:2242/'),
             $render,
             $state = new State(
                 $render,

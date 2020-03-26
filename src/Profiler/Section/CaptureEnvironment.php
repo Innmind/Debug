@@ -12,15 +12,15 @@ use Innmind\Rest\Client\{
     HttpResource,
     HttpResource\Property,
 };
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\assertSet;
 
 final class CaptureEnvironment implements Section
 {
-    private $server;
-    private $environment;
+    private Server $server;
+    private Set $environment;
 
-    public function __construct(Server $server, SetInterface $environment)
+    public function __construct(Server $server, Set $environment)
     {
         assertSet('string', $environment, 2);
 
@@ -42,7 +42,7 @@ final class CaptureEnvironment implements Section
         $this->server->create(HttpResource::of(
             'api.section.environment',
             new Property('pairs', $this->environment),
-            new Property('profile', (string) $identity)
+            new Property('profile', $identity->toString()),
         ));
     }
 }

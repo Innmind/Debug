@@ -12,13 +12,11 @@ use Innmind\Http\Message\{
 
 final class Http implements Transport
 {
-    private $fulfill;
-    private $section;
+    private Transport $fulfill;
+    private CaptureHttp $section;
 
-    public function __construct(
-        Transport $fulfill,
-        CaptureHttp $section
-    ) {
+    public function __construct(Transport $fulfill, CaptureHttp $section)
+    {
         $this->fulfill = $fulfill;
         $this->section = $section;
     }
@@ -28,8 +26,8 @@ final class Http implements Transport
         $response = ($this->fulfill)($request);
 
         $this->section->capture(
-            (string) new Request\Stringable($request),
-            (string) new Response\Stringable($response)
+            (new Request\Stringable($request))->toString(),
+            (new Response\Stringable($response))->toString(),
         );
 
         return $response;

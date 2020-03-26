@@ -3,18 +3,16 @@ declare(strict_types = 1);
 
 namespace Innmind\Debug\Profiler\Section\CaptureAppGraph;
 
-use Innmind\Immutable\{
-    SetInterface,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 final class ToBeHighlighted
 {
-    private $set;
+    /** @var Set<object> */
+    private Set $set;
 
     public function __construct()
     {
-        $this->set = Set::of('object');
+        $this->set = Set::objects();
     }
 
     public function clear(): void
@@ -24,13 +22,13 @@ final class ToBeHighlighted
 
     public function add(object $object): void
     {
-        $this->set = $this->set->add($object);
+        $this->set = ($this->set)($object);
     }
 
     /**
-     * @return SetInterface<object>
+     * @return Set<object>
      */
-    public function get(): SetInterface
+    public function get(): Set
     {
         return $this->set;
     }

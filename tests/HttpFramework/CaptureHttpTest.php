@@ -16,9 +16,9 @@ use Innmind\Rest\Client\{
 use Innmind\Http\{
     Message\ServerRequest,
     Message\Response,
-    Message\Method\Method,
-    Message\StatusCode\StatusCode,
-    ProtocolVersion\ProtocolVersion,
+    Message\Method,
+    Message\StatusCode,
+    ProtocolVersion,
 };
 use Innmind\Url\Url;
 use PHPUnit\Framework\TestCase;
@@ -47,7 +47,7 @@ class CaptureHttpTest extends TestCase
             )
         );
         $request = new ServerRequest\ServerRequest(
-            Url::fromString('/foo/bar'),
+            Url::of('/foo/bar'),
             Method::get(),
             new ProtocolVersion(1, 0)
         );
@@ -90,7 +90,11 @@ class CaptureHttpTest extends TestCase
                 $server = $this->createMock(Server::class)
             )
         );
-        $request = $this->createMock(ServerRequest::class);
+        $request = new ServerRequest\ServerRequest(
+            Url::of('http://example.com'),
+            Method::get(),
+            new ProtocolVersion(2, 0),
+        );
         $inner
             ->expects($this->once())
             ->method('__invoke')

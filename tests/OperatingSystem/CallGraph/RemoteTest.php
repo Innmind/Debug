@@ -18,16 +18,15 @@ use Innmind\Server\Control\{
     Server\Command,
 };
 use Innmind\Url\{
-    UrlInterface,
     Url,
-    AuthorityInterface,
+    Authority,
 };
 use Innmind\Socket\{
     Client,
     Internet\Transport,
 };
 use Innmind\HttpTransport\Transport as HttpTransport;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use PHPUnit\Framework\TestCase;
 
 class RemoteTest extends TestCase
@@ -40,18 +39,18 @@ class RemoteTest extends TestCase
                 new CaptureCallGraph(
                     $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             )
         );
 
         $this->assertInstanceOf(RemoteInterface::class, $remote);
         $this->assertInstanceOf(
             ServerControl::class,
-            $remote->ssh($this->createMock(UrlInterface::class))
+            $remote->ssh(Url::of('ssh://example.com'))
         );
         $this->assertInstanceOf(
             Client::class,
-            $remote->socket(Transport::tcp(), $this->createMock(AuthorityInterface::class))
+            $remote->socket(Transport::tcp(), Authority::none())
         );
         $this->assertInstanceOf(Http::class, $remote->http());
         $this->assertSame($remote->http(), $remote->http());

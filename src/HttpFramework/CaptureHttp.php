@@ -12,24 +12,22 @@ use Innmind\Http\Message\{
 
 final class CaptureHttp implements RequestHandler
 {
-    private $handle;
-    private $section;
+    private RequestHandler $handle;
+    private Section $section;
 
-    public function __construct(
-        RequestHandler $handle,
-        Section $section
-    ) {
+    public function __construct(RequestHandler $handle, Section $section)
+    {
         $this->handle = $handle;
         $this->section = $section;
     }
 
     public function __invoke(ServerRequest $request): Response
     {
-        $this->section->received((string) new ServerRequest\Stringable($request));
+        $this->section->received((new ServerRequest\Stringable($request))->toString());
 
         $response = ($this->handle)($request);
 
-        $this->section->respondedWith((string) new Response\Stringable($response));
+        $this->section->respondedWith((new Response\Stringable($response))->toString());
 
         return $response;
     }

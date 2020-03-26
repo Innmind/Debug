@@ -15,7 +15,7 @@ use Innmind\Http\Message\{
     Response,
 };
 use Innmind\Rest\Client\Server;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use PHPUnit\Framework\TestCase;
 
 class StartCallGraphTest extends TestCase
@@ -30,7 +30,7 @@ class StartCallGraphTest extends TestCase
                     new CaptureCallGraph(
                         $this->createMock(Server::class)
                     ),
-                    $this->createMock(TimeContinuumInterface::class)
+                    $this->createMock(Clock::class)
                 ),
                 'Class fqcn'
             )
@@ -45,7 +45,7 @@ class StartCallGraphTest extends TestCase
                 $section = new CaptureCallGraph(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             ),
             'Class fqcn'
         );
@@ -72,7 +72,7 @@ class StartCallGraphTest extends TestCase
                 $section = new CaptureCallGraph(
                     $server = $this->createMock(Server::class)
                 ),
-                $this->createMock(TimeContinuumInterface::class)
+                $this->createMock(Clock::class)
             ),
             'Class fqcn'
         );

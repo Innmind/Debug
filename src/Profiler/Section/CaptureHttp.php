@@ -9,15 +9,16 @@ use Innmind\Debug\Profiler\{
 };
 use Innmind\Rest\Client\{
     Server,
+    Identity as ResourceIdentity,
     HttpResource,
     HttpResource\Property,
 };
 
 final class CaptureHttp implements Section
 {
-    private $server;
-    private $profile;
-    private $identity;
+    private Server $server;
+    private ?Identity $profile = null;
+    private ?ResourceIdentity $identity = null;
 
     public function __construct(Server $server)
     {
@@ -38,7 +39,7 @@ final class CaptureHttp implements Section
         $this->identity = $this->server->create(HttpResource::of(
             'api.section.http',
             new Property('request', $request),
-            new Property('profile', (string) $this->profile)
+            new Property('profile', $this->profile->toString()),
         ));
     }
 
@@ -52,8 +53,8 @@ final class CaptureHttp implements Section
             $this->identity,
             HttpResource::of(
                 'api.section.http',
-                new Property('response', $response)
-            )
+                new Property('response', $response),
+            ),
         );
     }
 

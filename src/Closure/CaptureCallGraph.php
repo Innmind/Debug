@@ -18,8 +18,8 @@ use Innmind\Debug\{
 final class CaptureCallGraph
 {
     private $call;
-    private $graph;
-    private $toBeHighlighted;
+    private CallGraph $graph;
+    private ?ToBeHighlighted $toBeHighlighted;
 
     public function __construct(
         callable $call,
@@ -31,11 +31,16 @@ final class CaptureCallGraph
         $this->toBeHighlighted = $toBeHighlighted;
     }
 
+    /**
+     * @param mixed $arguments
+     *
+     * @return mixed
+     */
     public function __invoke(...$arguments)
     {
         try {
             $this->graph->enter(
-                \is_object($this->call) ? \get_class($this->call) : 'Closure'
+                \is_object($this->call) ? \get_class($this->call) : 'Closure',
             );
 
             if ($this->toBeHighlighted && \is_object($this->call)) {

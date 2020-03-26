@@ -18,20 +18,20 @@ use Innmind\OperatingSystem\{
 };
 use Innmind\Server\Status\Server as ServerStatus;
 use Innmind\Server\Control\Server as ServerControl;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 
 /**
  * Capture operations done via the os
  */
 final class OperatingSystem implements OperatingSystemInterface
 {
-    private $os;
-    private $localProcesses;
-    private $remoteProcesses;
-    private $render;
-    private $captureHttp;
-    private $control;
-    private $remote;
+    private OperatingSystemInterface $os;
+    private State $localProcesses;
+    private State $remoteProcesses;
+    private Control\RenderProcess\Remote $render;
+    private CaptureHttp $captureHttp;
+    private ?Control $control = null;
+    private ?Remote $remote = null;
 
     public function __construct(
         OperatingSystemInterface $os,
@@ -47,7 +47,7 @@ final class OperatingSystem implements OperatingSystemInterface
         $this->captureHttp = $captureHttp;
     }
 
-    public function clock(): TimeContinuumInterface
+    public function clock(): Clock
     {
         return $this->os->clock();
     }
@@ -64,9 +64,9 @@ final class OperatingSystem implements OperatingSystemInterface
 
     public function control(): ServerControl
     {
-        return $this->control ?? $this->control = new Control(
+        return $this->control ??= new Control(
             $this->os->control(),
-            $this->localProcesses
+            $this->localProcesses,
         );
     }
 
@@ -82,11 +82,11 @@ final class OperatingSystem implements OperatingSystemInterface
 
     public function remote(): RemoteInterface
     {
-        return $this->remote ?? $this->remote = new Remote(
+        return $this->remote ??= new Remote(
             $this->os->remote(),
             $this->captureHttp,
             $this->render,
-            $this->remoteProcesses
+            $this->remoteProcesses,
         );
     }
 

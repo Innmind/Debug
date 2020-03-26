@@ -57,7 +57,7 @@ class RemoteTest extends TestCase
 
         $this->assertNull($render->locate(
             $command,
-            Url::fromString('ssh://user:pwd@example.com:2242/foo')
+            Url::of('ssh://user:pwd@example.com:2242/foo')
         ));
         $this->assertSame(
             "ssh: user:pwd@example.com:2242\nprocess",

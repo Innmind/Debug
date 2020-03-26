@@ -12,17 +12,19 @@ use Innmind\Rest\Client\{
     HttpResource,
     HttpResource\Property,
 };
-use Innmind\Immutable\Stream;
+use Innmind\Immutable\Sequence;
 
 final class CaptureHttp implements Section
 {
-    private $server;
-    private $pairs;
+    private Server $server;
+    /** @var Sequence<array{0: string, 1: string}> */
+    private Sequence $pairs;
 
     public function __construct(Server $server)
     {
         $this->server = $server;
-        $this->pairs = Stream::of('array');
+        /** @var Sequence<array{0: string, 1: string}> */
+        $this->pairs = Sequence::of('array');
     }
 
     public function start(Identity $identity): void
@@ -32,7 +34,7 @@ final class CaptureHttp implements Section
 
     public function capture(string $request, string $response): void
     {
-        $this->pairs = $this->pairs->add([$request, $response]);
+        $this->pairs = ($this->pairs)([$request, $response]);
     }
 
     public function finish(Identity $identity): void
@@ -44,7 +46,7 @@ final class CaptureHttp implements Section
         [$request, $response] = $this->pairs->first();
         $section = $this->server->create(HttpResource::of(
             'api.section.remote.http',
-            new Property('profile', (string) $identity),
+            new Property('profile', $identity->toString()),
             new Property('request', $request),
             new Property('response', $response)
         ));
@@ -58,10 +60,10 @@ final class CaptureHttp implements Section
                     $section,
                     HttpResource::of(
                         'api.section.remote.http',
-                        new Property('profile', (string) $identity),
+                        new Property('profile', $identity->toString()),
                         new Property('request', $request),
-                        new Property('response', $response)
-                    )
+                        new Property('response', $response),
+                    ),
                 );
             });
     }

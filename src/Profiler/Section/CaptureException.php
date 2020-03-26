@@ -23,11 +23,11 @@ use Innmind\StackTrace\{
 
 final class CaptureException implements Section
 {
-    private $server;
-    private $processes;
-    private $render;
-    private $profile;
-    private $exception;
+    private Server $server;
+    private Processes $processes;
+    private Render $render;
+    private ?Identity $profile = null;
+    private ?\Throwable $exception = null;
 
     public function __construct(
         Server $server,
@@ -56,23 +56,22 @@ final class CaptureException implements Section
             return;
         }
 
+        $process = $this->processes->execute(
+            Command::foreground('dot')
+                ->withShortOption('Tsvg')
+                ->withInput(
+                    ($this->render)(new StackTrace($this->exception)),
+                ),
+        );
+        $process->wait();
+
         $this->server->create(HttpResource::of(
             'api.section.exception',
-            new Property('profile', (string) $this->profile),
+            new Property('profile', $this->profile->toString()),
             new Property(
                 'graph',
-                (string) $this
-                    ->processes
-                    ->execute(
-                        Command::foreground('dot')
-                            ->withShortOption('Tsvg')
-                            ->withInput(
-                                ($this->render)(new StackTrace($this->exception))
-                            )
-                    )
-                    ->wait()
-                    ->output()
-            )
+                $process->output()->toString(),
+            ),
         ));
         $this->profile = null;
         $this->exception = null;

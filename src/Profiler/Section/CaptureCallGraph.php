@@ -17,8 +17,8 @@ use Innmind\Json\Json;
 
 final class CaptureCallGraph implements Section
 {
-    private $server;
-    private $graph;
+    private Server $server;
+    private ?array $graph = null;
 
     public function __construct(Server $server)
     {
@@ -44,7 +44,7 @@ final class CaptureCallGraph implements Section
         $this->server->create(HttpResource::of(
             'api.section.call_graph',
             new Property('graph', Json::encode($this->graph)),
-            new Property('profile', (string) $identity)
+            new Property('profile', $identity->toString()),
         ));
     }
 }

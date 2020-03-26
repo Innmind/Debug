@@ -12,20 +12,21 @@ use Innmind\Debug\{
 use Innmind\Server\Control\{
     Server as ServerInterface,
     Server\Processes as ProcessesInterface,
+    Server\Volumes as VolumesInterface,
 };
-use Innmind\Url\UrlInterface;
+use Innmind\Url\Url;
 
 final class Server implements ServerInterface
 {
-    private $server;
-    private $location;
-    private $render;
-    private $remoteProcesses;
-    private $processes;
+    private ServerInterface $server;
+    private Url $location;
+    private Remote $render;
+    private State $remoteProcesses;
+    private ?Server\Processes $processes = null;
 
     public function __construct(
         ServerInterface $server,
-        UrlInterface $location,
+        Url $location,
         Remote $render,
         State $remoteProcesses
     ) {
@@ -37,11 +38,26 @@ final class Server implements ServerInterface
 
     public function processes(): ProcessesInterface
     {
-        return $this->processes ?? $this->processes = new Server\Processes(
+        return $this->processes ??= new Server\Processes(
             $this->server->processes(),
             $this->location,
             $this->render,
-            $this->remoteProcesses
+            $this->remoteProcesses,
         );
+    }
+
+    public function volumes(): VolumesInterface
+    {
+        return $this->server->volumes();
+    }
+
+    public function reboot(): void
+    {
+        $this->server->reboot();
+    }
+
+    public function shutdown(): void
+    {
+        $this->server->shutdown();
     }
 }

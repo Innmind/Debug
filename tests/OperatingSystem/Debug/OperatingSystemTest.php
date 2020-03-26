@@ -19,7 +19,7 @@ use Innmind\OperatingSystem\{
     Sockets,
     CurrentProcess,
 };
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Innmind\Server\Status\Server as ServerStatus;
 use Innmind\Rest\Client\Server;
 use PHPUnit\Framework\TestCase;
@@ -55,7 +55,7 @@ class DebugTest extends TestCase
         $this->assertInstanceOf(Remote::class, $os->remote());
         $this->assertSame($os->control(), $os->control());
         $this->assertSame($os->remote(), $os->remote());
-        $this->assertInstanceOf(TimeContinuumInterface::class, $os->clock());
+        $this->assertInstanceOf(Clock::class, $os->clock());
         $this->assertInstanceOf(Filesystem::class, $os->filesystem());
         $this->assertInstanceOf(ServerStatus::class, $os->status());
         $this->assertInstanceOf(Ports::class, $os->ports());

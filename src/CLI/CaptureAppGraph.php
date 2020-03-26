@@ -13,8 +13,8 @@ use Innmind\CLI\{
 
 final class CaptureAppGraph implements Command
 {
-    private $handle;
-    private $section;
+    private Command $handle;
+    private Section $section;
 
     public function __construct(
         Command $handle,
@@ -33,8 +33,8 @@ final class CaptureAppGraph implements Command
         }
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
-        return (string) $this->handle;
+        return $this->handle->toString();
     }
 }

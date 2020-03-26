@@ -11,18 +11,18 @@ use Innmind\Socket\{
     Client,
 };
 use Innmind\Url\{
-    UrlInterface,
-    AuthorityInterface,
+    Url,
+    Authority,
 };
 use Innmind\HttpTransport\Transport as HttpTransport;
 
 final class Remote implements RemoteInterface
 {
-    private $remote;
-    private $captureHttp;
-    private $render;
-    private $remoteProcesses;
-    private $http;
+    private RemoteInterface $remote;
+    private CaptureHttp $captureHttp;
+    private Control\RenderProcess\Remote $render;
+    private Control\Processes\State $remoteProcesses;
+    private ?Remote\Http $http = null;
 
     public function __construct(
         RemoteInterface $remote,
@@ -36,26 +36,26 @@ final class Remote implements RemoteInterface
         $this->remoteProcesses = $remoteProcesses;
     }
 
-    public function ssh(UrlInterface $server): Server
+    public function ssh(Url $server): Server
     {
         return new Remote\Server(
             $this->remote->ssh($server),
             $server,
             $this->render,
-            $this->remoteProcesses
+            $this->remoteProcesses,
         );
     }
 
-    public function socket(Transport $transport, AuthorityInterface $authority): Client
+    public function socket(Transport $transport, Authority $authority): Client
     {
         return $this->remote->socket($transport, $authority);
     }
 
     public function http(): HttpTransport
     {
-        return $this->http ?? $this->http = new Remote\Http(
+        return $this->http ??= new Remote\Http(
             $this->remote->http(),
-            $this->captureHttp
+            $this->captureHttp,
         );
     }
 }

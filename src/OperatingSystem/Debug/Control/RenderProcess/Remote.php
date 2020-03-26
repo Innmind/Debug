@@ -8,23 +8,25 @@ use Innmind\Server\Control\Server\{
     Command,
     Process,
 };
-use Innmind\Url\UrlInterface;
+use Innmind\Url\Url;
 use Innmind\Immutable\Map;
 
 final class Remote implements RenderProcess
 {
-    private $render;
-    private $commands;
+    private RenderProcess $render;
+    /** @var Map<Command, Url> */
+    private Map $commands;
 
     public function __construct(RenderProcess $render)
     {
         $this->render = $render;
-        $this->commands = Map::of(Command::class, UrlInterface::class);
+        /** @var Map<Command, Url> */
+        $this->commands = Map::of(Command::class, Url::class);
     }
 
-    public function locate(Command $command, UrlInterface $location): void
+    public function locate(Command $command, Url $location): void
     {
-        $this->commands = $this->commands->put($command, $location);
+        $this->commands = ($this->commands)($command, $location);
     }
 
     public function __invoke(Command $command, Process $process): string
@@ -34,8 +36,8 @@ final class Remote implements RenderProcess
         if ($this->commands->contains($command)) {
             $string = \sprintf(
                 "ssh: %s\n%s",
-                $this->commands->get($command)->authority(),
-                $string
+                $this->commands->get($command)->authority()->toString(),
+                $string,
             );
         }
 
