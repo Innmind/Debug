@@ -12,10 +12,8 @@ final class CallGraph
     private Clock $clock;
     private ?CallGraph\Node $graph = null;
 
-    public function __construct(
-        CaptureCallGraph $section,
-        Clock $clock
-    ) {
+    public function __construct(CaptureCallGraph $section, Clock $clock)
+    {
         $this->section = $section;
         $this->clock = $clock;
     }

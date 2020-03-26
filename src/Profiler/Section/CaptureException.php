@@ -60,8 +60,8 @@ final class CaptureException implements Section
             Command::foreground('dot')
                 ->withShortOption('Tsvg')
                 ->withInput(
-                    ($this->render)(new StackTrace($this->exception))
-                )
+                    ($this->render)(new StackTrace($this->exception)),
+                ),
         );
         $process->wait();
 
@@ -71,7 +71,7 @@ final class CaptureException implements Section
             new Property(
                 'graph',
                 $process->output()->toString(),
-            )
+            ),
         ));
         $this->profile = null;
         $this->exception = null;

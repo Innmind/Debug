@@ -64,9 +64,9 @@ final class OperatingSystem implements OperatingSystemInterface
 
     public function control(): ServerControl
     {
-        return $this->control ?? $this->control = new Control(
+        return $this->control ??= new Control(
             $this->os->control(),
-            $this->localProcesses
+            $this->localProcesses,
         );
     }
 
@@ -82,11 +82,11 @@ final class OperatingSystem implements OperatingSystemInterface
 
     public function remote(): RemoteInterface
     {
-        return $this->remote ?? $this->remote = new Remote(
+        return $this->remote ??= new Remote(
             $this->os->remote(),
             $this->captureHttp,
             $this->render,
-            $this->remoteProcesses
+            $this->remoteProcesses,
         );
     }
 

@@ -22,10 +22,8 @@ final class Remote implements RemoteInterface
     private CallGraph $graph;
     private ?Remote\Http $http = null;
 
-    public function __construct(
-        RemoteInterface $remote,
-        CallGraph $graph
-    ) {
+    public function __construct(RemoteInterface $remote, CallGraph $graph)
+    {
         $this->remote = $remote;
         $this->graph = $graph;
     }
@@ -44,7 +42,7 @@ final class Remote implements RemoteInterface
     {
         return $this->http ??= new Remote\Http(
             $this->remote->http(),
-            $this->graph
+            $this->graph,
         );
     }
 }

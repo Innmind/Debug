@@ -34,7 +34,7 @@ final class CaptureHttp implements Section
 
     public function capture(string $request, string $response): void
     {
-        $this->pairs = $this->pairs->add([$request, $response]);
+        $this->pairs = ($this->pairs)([$request, $response]);
     }
 
     public function finish(Identity $identity): void
@@ -62,8 +62,8 @@ final class CaptureHttp implements Section
                         'api.section.remote.http',
                         new Property('profile', $identity->toString()),
                         new Property('request', $request),
-                        new Property('response', $response)
-                    )
+                        new Property('response', $response),
+                    ),
                 );
             });
     }

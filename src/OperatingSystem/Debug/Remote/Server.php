@@ -42,7 +42,7 @@ final class Server implements ServerInterface
             $this->server->processes(),
             $this->location,
             $this->render,
-            $this->remoteProcesses
+            $this->remoteProcesses,
         );
     }
 

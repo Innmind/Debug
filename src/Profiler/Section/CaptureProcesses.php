@@ -42,7 +42,7 @@ final class CaptureProcesses implements Section
 
     public function capture(string $process): void
     {
-        $this->processes = $this->processes->add($process);
+        $this->processes = ($this->processes)($process);
     }
 
     public function finish(Identity $identity): void

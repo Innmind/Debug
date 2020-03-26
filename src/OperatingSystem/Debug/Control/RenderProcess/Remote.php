@@ -26,7 +26,7 @@ final class Remote implements RenderProcess
 
     public function locate(Command $command, Url $location): void
     {
-        $this->commands = $this->commands->put($command, $location);
+        $this->commands = ($this->commands)($command, $location);
     }
 
     public function __invoke(Command $command, Process $process): string
@@ -37,7 +37,7 @@ final class Remote implements RenderProcess
             $string = \sprintf(
                 "ssh: %s\n%s",
                 $this->commands->get($command)->authority()->toString(),
-                $string
+                $string,
             );
         }
 

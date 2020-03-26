@@ -15,10 +15,8 @@ final class Http implements Transport
     private Transport $fulfill;
     private CaptureHttp $section;
 
-    public function __construct(
-        Transport $fulfill,
-        CaptureHttp $section
-    ) {
+    public function __construct(Transport $fulfill, CaptureHttp $section)
+    {
         $this->fulfill = $fulfill;
         $this->section = $section;
     }

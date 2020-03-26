@@ -15,10 +15,8 @@ final class Http implements Transport
     private Transport $fulfill;
     private CallGraph $graph;
 
-    public function __construct(
-        Transport $fulfill,
-        CallGraph $graph
-    ) {
+    public function __construct(Transport $fulfill, CallGraph $graph)
+    {
         $this->fulfill = $fulfill;
         $this->graph = $graph;
     }

@@ -22,7 +22,7 @@ final class ToBeHighlighted
 
     public function add(object $object): void
     {
-        $this->set = $this->set->add($object);
+        $this->set = ($this->set)($object);
     }
 
     /**

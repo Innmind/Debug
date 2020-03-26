@@ -32,7 +32,7 @@ use function Innmind\Immutable\unwrap;
 use function Innmind\Rest\Client\bootstrap as client;
 
 /**
- * @param  Set<string>|null $disable
+ * @param Set<string>|null $disable
  */
 function bootstrap(
     OperatingSystem $os,
@@ -41,7 +41,7 @@ function bootstrap(
     CodeEditor $codeEditor = null,
     Set $disable = null
 ): array {
-    $environmentVariables = $environmentVariables ?? Map::of('string', 'scalar');
+    $environmentVariables ??= Map::of('string', 'scalar');
 
     switch ($codeEditor) {
         case CodeEditor::sublimeText():
@@ -58,22 +58,22 @@ function bootstrap(
     $rest = client(
         $os->remote()->http(),
         new UrlResolver,
-        new InMemory
+        new InMemory,
     );
     $server = $rest->server($profiler->toString());
 
     $toBeHighighted = new Profiler\Section\CaptureAppGraph\ToBeHighlighted;
 
     $renderProcess = new OS\Debug\Control\RenderProcess\Remote(
-        new OS\Debug\Control\RenderProcess\Local
+        new OS\Debug\Control\RenderProcess\Local,
     );
     $localProcesses = new OS\Debug\Control\Processes\State(
         $renderProcess,
-        new Profiler\Section\CaptureProcesses($server)
+        new Profiler\Section\CaptureProcesses($server),
     );
     $remoteProcesses = new OS\Debug\Control\Processes\State(
         $renderProcess,
-        Profiler\Section\CaptureProcesses::remote($server)
+        Profiler\Section\CaptureProcesses::remote($server),
     );
 
     $captureRemoteHttp = new Profiler\Section\Remote\CaptureHttp($server);
@@ -85,7 +85,7 @@ function bootstrap(
         $localProcesses,
         $remoteProcesses,
         $renderProcess,
-        $captureRemoteHttp
+        $captureRemoteHttp,
     );
     $debugOS = new OS\CallGraph\OperatingSystem($debugOS, $callGraph);
 
@@ -93,7 +93,7 @@ function bootstrap(
     $captureException = new Profiler\Section\CaptureException(
         $server,
         $os->control()->processes(),
-        new Render($linkException)
+        new Render($linkException),
     );
     $captureAppGraph = new Profiler\Section\CaptureAppGraph(
         $server,
@@ -110,8 +110,8 @@ function bootstrap(
             $os->sockets(),
             $os->remote(),
             $os->remote()->http(),
-            $os->process()
-        )
+            $os->process(),
+        ),
     );
 
     $sections = Set::of(
@@ -125,13 +125,11 @@ function bootstrap(
         $captureRemoteHttp,
         new Profiler\Section\CaptureEnvironment(
             $server,
-            $environmentVariables->reduce(
-                Set::of('string'),
-                static function(Set $environment, $key, $value): Set {
-                    return $environment->add("$key=$value");
-                }
-            )
-        )
+            $environmentVariables->toSetOf(
+                'string',
+                static fn(string $key, $value): \Generator => yield "$key=$value",
+            ),
+        ),
     );
 
     $profiler = new Profiler\Http(
@@ -156,16 +154,16 @@ function bootstrap(
                         new HttpFramework\StartCallGraph( // above app graph to not show debug stuff in the graph
                             new HttpFramework\CaptureAppGraph(
                                 $handler,
-                                $captureAppGraph
+                                $captureAppGraph,
                             ),
                             $callGraph,
-                            \get_class($handler)
+                            \get_class($handler),
                         ),
-                        $captureException
+                        $captureException,
                     ),
-                    $captureHttp
+                    $captureHttp,
                 ),
-                $profiler
+                $profiler,
             );
         },
         'cli' => static function(Command ...$commands) use ($profiler, $captureException, $captureAppGraph, $callGraph): Sequence {
@@ -175,14 +173,14 @@ function bootstrap(
                         new CLI\StartCallGraph( // above app graph to not show debug stuff in the graph
                             new CLI\CaptureAppGraph(
                                 $command,
-                                $captureAppGraph
+                                $captureAppGraph,
                             ),
                             $callGraph,
-                            \get_class($command)
+                            \get_class($command),
                         ),
-                        $captureException
+                        $captureException,
                     ),
-                    $profiler
+                    $profiler,
                 );
             });
         },

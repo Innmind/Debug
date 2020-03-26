@@ -40,7 +40,7 @@ final class CaptureCallGraph
     {
         try {
             $this->graph->enter(
-                \is_object($this->call) ? \get_class($this->call) : 'Closure'
+                \is_object($this->call) ? \get_class($this->call) : 'Closure',
             );
 
             if ($this->toBeHighlighted && \is_object($this->call)) {

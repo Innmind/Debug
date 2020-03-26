@@ -40,7 +40,7 @@ final class Http implements Profiler
         $identity = $this->server->create(HttpResource::of(
             'api.profile',
             new Property('name', $name),
-            new Property('started_at', $this->clock->now()->format(new ISO8601))
+            new Property('started_at', $this->clock->now()->format(new ISO8601)),
         ));
         $identity = new Identity($identity->toString());
 
@@ -72,8 +72,8 @@ final class Http implements Profiler
             HttpResource::of(
                 'api.profile',
                 new Property('success', $success),
-                new Property('exit', $exit)
-            )
+                new Property('exit', $exit),
+            ),
         );
     }
 }

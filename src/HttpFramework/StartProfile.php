@@ -19,10 +19,8 @@ final class StartProfile implements RequestHandler
     private RequestHandler $handle;
     private Profiler $profiler;
 
-    public function __construct(
-        RequestHandler $handle,
-        Profiler $profiler
-    ) {
+    public function __construct(RequestHandler $handle, Profiler $profiler)
+    {
         $this->handle = $handle;
         $this->profiler = $profiler;
     }

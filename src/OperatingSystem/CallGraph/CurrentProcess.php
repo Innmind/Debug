@@ -31,9 +31,6 @@ final class CurrentProcess implements CurrentProcessInterface
         return $this->process->id();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function fork(): ForkSide
     {
         $this->graph->enter('fork()');

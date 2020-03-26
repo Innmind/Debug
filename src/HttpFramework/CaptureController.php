@@ -23,9 +23,6 @@ final class CaptureController implements Controller
         $this->graph = $graph;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __invoke(
         ServerRequest $request,
         Route $route,

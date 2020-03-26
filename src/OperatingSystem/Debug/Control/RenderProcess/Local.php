@@ -32,7 +32,7 @@ final class Local implements RenderProcess
             $status,
             $directory,
             $command->toString(),
-            $command->toBeRunInBackground() || $process->isRunning() ? '' : $process->output()->toString()
+            $command->toBeRunInBackground() || $process->isRunning() ? '' : $process->output()->toString(),
         );
     }
 }

@@ -21,7 +21,7 @@ final class Control implements Server
     {
         return $this->processes ??= new Control\Processes(
             $this->server->processes(),
-            $this->state
+            $this->state,
         );
     }
 

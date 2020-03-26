@@ -15,10 +15,8 @@ final class CaptureHttp implements RequestHandler
     private RequestHandler $handle;
     private Section $section;
 
-    public function __construct(
-        RequestHandler $handle,
-        Section $section
-    ) {
+    public function __construct(RequestHandler $handle, Section $section)
+    {
         $this->handle = $handle;
         $this->section = $section;
     }

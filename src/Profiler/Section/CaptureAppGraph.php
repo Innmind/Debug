@@ -97,8 +97,8 @@ final class CaptureAppGraph implements Section
             Command::foreground('dot')
                 ->withShortOption('Tsvg')
                 ->withInput(
-                    ($this->render)($graph)
-                )
+                    ($this->render)($graph),
+                ),
         );
         $process->wait();
 
@@ -108,7 +108,7 @@ final class CaptureAppGraph implements Section
             new Property(
                 'graph',
                 $process->output()->toString(),
-            )
+            ),
         ));
         $this->profile = null;
         $this->app = null;

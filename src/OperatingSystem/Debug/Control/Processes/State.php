@@ -21,10 +21,8 @@ final class State implements Section
     private CaptureProcesses $section;
     private Map $processes;
 
-    public function __construct(
-        RenderProcess $render,
-        CaptureProcesses $section
-    ) {
+    public function __construct(RenderProcess $render, CaptureProcesses $section)
+    {
         $this->render = $render;
         $this->section = $section;
         $this->processes = Map::of(Command::class, Process::class);
@@ -32,7 +30,7 @@ final class State implements Section
 
     public function register(Command $command, Process $process): void
     {
-        $this->processes = $this->processes->put($command, $process);
+        $this->processes = ($this->processes)($command, $process);
     }
 
     public function start(Identity $identity): void
@@ -45,7 +43,7 @@ final class State implements Section
     {
         $this->processes->foreach(function(Command $command, Process $process): void {
             $this->section->capture(
-                ($this->render)($command, $process)
+                ($this->render)($command, $process),
             );
         });
         $this->section->finish($identity);

@@ -53,8 +53,8 @@ final class CaptureHttp implements Section
             $this->identity,
             HttpResource::of(
                 'api.section.http',
-                new Property('response', $response)
-            )
+                new Property('response', $response),
+            ),
         );
     }
 

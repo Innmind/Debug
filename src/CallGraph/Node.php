@@ -47,7 +47,7 @@ final class Node
         $child = new self($this->clock, $name);
         $child->start();
         $this->add($child);
-        $this->stack = $this->stack->add($child);
+        $this->stack = ($this->stack)($child);
     }
 
     public function leave(): void
@@ -120,7 +120,7 @@ final class Node
             $parent = $this->stack->last();
         }
 
-        $parent->children = $parent->children->add($child);
+        $parent->children = ($parent->children)($child);
     }
 
     /**
