@@ -16,14 +16,18 @@ final class Node
     private string $name;
     private ?PointInTime $startedAt = null;
     private ?PointInTime $endedAt = null;
+    /** @var Sequence<self> */
     private Sequence $children;
+    /** @var Sequence<self> */
     private Sequence $stack;
 
     private function __construct(Clock $clock, string $name)
     {
         $this->clock = $clock;
         $this->name = $name;
+        /** @var Sequence<self> */
         $this->children = Sequence::of(self::class);
+        /** @var Sequence<self> */
         $this->stack = Sequence::of(self::class);
     }
 
@@ -62,6 +66,10 @@ final class Node
     {
         $this->finish();
 
+        /**
+         * @psalm-suppress PossiblyNullArgument
+         * @psalm-suppress PossiblyNullReference
+         */
         return [
             'name' => $this->name,
             'value' => $this->endedAt->elapsedSince($this->startedAt)->milliseconds(),

@@ -37,6 +37,7 @@ final class CaptureAppGraph implements Section
     private Processes $processes;
     private Visualize $render;
     private CaptureAppGraph\ToBeHighlighted $toBeHighlighted;
+    /** @var Set<object> */
     private Set $dependencies;
     private FlagDependencies $flagDependencies;
     private RemoveDependenciesSubGraph $removeDependencies;
@@ -44,6 +45,9 @@ final class CaptureAppGraph implements Section
     private ?Identity $profile = null;
     private ?object $app = null;
 
+    /**
+     * @param Set<object>|null $dependencies
+     */
     public function __construct(
         Server $server,
         Processes $processes,
@@ -52,6 +56,7 @@ final class CaptureAppGraph implements Section
         Set $dependencies = null
     ) {
         $toBeHighlighted ??= new CaptureAppGraph\ToBeHighlighted;
+        /** @var Set<object> */
         $dependencies ??= Set::of('object');
         assertSet('object', $dependencies, 4);
 

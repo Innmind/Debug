@@ -17,11 +17,13 @@ use Innmind\Immutable\Sequence;
 final class CaptureHttp implements Section
 {
     private Server $server;
+    /** @var Sequence<array{0: string, 1: string}> */
     private Sequence $pairs;
 
     public function __construct(Server $server)
     {
         $this->server = $server;
+        /** @var Sequence<array{0: string, 1: string}> */
         $this->pairs = Sequence::of('array');
     }
 

@@ -100,8 +100,7 @@ function bootstrap(
         $os->control()->processes(),
         new Visualize($locateClass),
         $toBeHighighted,
-        Set::of(
-            'object',
+        Set::objects(
             $os,
             $os->clock(),
             $os->filesystem(),

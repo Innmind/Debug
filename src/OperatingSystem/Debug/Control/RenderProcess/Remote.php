@@ -14,11 +14,13 @@ use Innmind\Immutable\Map;
 final class Remote implements RenderProcess
 {
     private RenderProcess $render;
+    /** @var Map<Command, Url> */
     private Map $commands;
 
     public function __construct(RenderProcess $render)
     {
         $this->render = $render;
+        /** @var Map<Command, Url> */
         $this->commands = Map::of(Command::class, Url::class);
     }
 

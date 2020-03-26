@@ -31,6 +31,11 @@ final class CaptureCallGraph
         $this->toBeHighlighted = $toBeHighlighted;
     }
 
+    /**
+     * @param mixed $arguments
+     *
+     * @return mixed
+     */
     public function __invoke(...$arguments)
     {
         try {

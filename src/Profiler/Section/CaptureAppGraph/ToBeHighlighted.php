@@ -7,11 +7,12 @@ use Innmind\Immutable\Set;
 
 final class ToBeHighlighted
 {
+    /** @var Set<object> */
     private Set $set;
 
     public function __construct()
     {
-        $this->set = Set::of('object');
+        $this->set = Set::objects();
     }
 
     public function clear(): void
