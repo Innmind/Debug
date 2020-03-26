@@ -33,6 +33,8 @@ use function Innmind\Rest\Client\bootstrap as client;
 
 /**
  * @param Set<string>|null $disable
+ *
+ * @return array{profiler: callable(): Profiler, os: callable(): OperatingSystem, http: callable(RequestHandler): RequestHandler, cli: callable(Command...): Sequence<Command>, call_graph: callable(): CallGraph, to_be_highlighted: callable(): Profiler\Section\CaptureAppGraph\ToBeHighlighted, controller: callable(Controller): Controller, command_bus: callable(CommandBusInterface): CommandBusInterface, event_bus: callable(EventBusInterface): EventBusInterface, callable: callable(callable): callable}
  */
 function bootstrap(
     OperatingSystem $os,
