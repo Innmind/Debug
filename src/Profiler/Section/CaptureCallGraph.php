@@ -17,8 +17,8 @@ use Innmind\Json\Json;
 
 final class CaptureCallGraph implements Section
 {
-    private $server;
-    private $graph;
+    private Server $server;
+    private ?array $graph = null;
 
     public function __construct(Server $server)
     {

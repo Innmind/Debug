@@ -23,11 +23,11 @@ use Innmind\StackTrace\{
 
 final class CaptureException implements Section
 {
-    private $server;
-    private $processes;
-    private $render;
-    private $profile;
-    private $exception;
+    private Server $server;
+    private Processes $processes;
+    private Render $render;
+    private ?Identity $profile = null;
+    private ?\Throwable $exception = null;
 
     public function __construct(
         Server $server,

@@ -7,9 +7,9 @@ use Innmind\Server\Control\Server;
 
 final class Control implements Server
 {
-    private $server;
-    private $state;
-    private $processes;
+    private Server $server;
+    private Control\Processes\State $state;
+    private ?Control\Processes $processes = null;
 
     public function __construct(Server $server, Control\Processes\State $state)
     {
@@ -19,7 +19,7 @@ final class Control implements Server
 
     public function processes(): Server\Processes
     {
-        return $this->processes ?? $this->processes = new Control\Processes(
+        return $this->processes ??= new Control\Processes(
             $this->server->processes(),
             $this->state
         );

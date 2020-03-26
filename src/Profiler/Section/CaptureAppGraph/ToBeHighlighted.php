@@ -10,7 +10,7 @@ use Innmind\Immutable\{
 
 final class ToBeHighlighted
 {
-    private $set;
+    private Set $set;
 
     public function __construct()
     {

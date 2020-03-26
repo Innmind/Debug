@@ -12,8 +12,8 @@ use Innmind\Http\Message\{
 
 final class Http implements Transport
 {
-    private $fulfill;
-    private $section;
+    private Transport $fulfill;
+    private CaptureHttp $section;
 
     public function __construct(
         Transport $fulfill,

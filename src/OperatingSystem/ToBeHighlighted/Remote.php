@@ -18,8 +18,8 @@ use Innmind\HttpTransport\Transport as HttpTransport;
 
 final class Remote implements RemoteInterface
 {
-    private $remote;
-    private $toBeHighlighted;
+    private RemoteInterface $remote;
+    private ToBeHighlighted $toBeHighlighted;
 
     public function __construct(
         RemoteInterface $remote,

@@ -13,9 +13,9 @@ use Innmind\CLI\{
 
 final class StartCallGraph implements Command
 {
-    private $handle;
-    private $graph;
-    private $name;
+    private Command $handle;
+    private CallGraph $graph;
+    private string $name;
 
     public function __construct(
         Command $handle,

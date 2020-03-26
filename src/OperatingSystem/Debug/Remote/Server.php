@@ -17,11 +17,11 @@ use Innmind\Url\UrlInterface;
 
 final class Server implements ServerInterface
 {
-    private $server;
-    private $location;
-    private $render;
-    private $remoteProcesses;
-    private $processes;
+    private ServerInterface $server;
+    private UrlInterface $location;
+    private Remote $render;
+    private State $remoteProcesses;
+    private ?Server\Processes $processes = null;
 
     public function __construct(
         ServerInterface $server,
@@ -37,7 +37,7 @@ final class Server implements ServerInterface
 
     public function processes(): ProcessesInterface
     {
-        return $this->processes ?? $this->processes = new Server\Processes(
+        return $this->processes ??= new Server\Processes(
             $this->server->processes(),
             $this->location,
             $this->render,

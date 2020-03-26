@@ -16,8 +16,8 @@ use Innmind\Immutable\Stream;
 
 final class CaptureHttp implements Section
 {
-    private $server;
-    private $pairs;
+    private Server $server;
+    private Stream $pairs;
 
     public function __construct(Server $server)
     {

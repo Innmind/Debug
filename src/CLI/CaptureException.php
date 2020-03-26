@@ -13,8 +13,8 @@ use Innmind\CLI\{
 
 final class CaptureException implements Command
 {
-    private $handle;
-    private $section;
+    private Command $handle;
+    private Section $section;
 
     public function __construct(
         Command $handle,

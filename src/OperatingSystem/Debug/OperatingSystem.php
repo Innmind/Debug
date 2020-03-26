@@ -25,13 +25,13 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
  */
 final class OperatingSystem implements OperatingSystemInterface
 {
-    private $os;
-    private $localProcesses;
-    private $remoteProcesses;
-    private $render;
-    private $captureHttp;
-    private $control;
-    private $remote;
+    private OperatingSystemInterface $os;
+    private State $localProcesses;
+    private State $remoteProcesses;
+    private Control\RenderProcess\Remote $render;
+    private CaptureHttp $captureHttp;
+    private ?Control $control = null;
+    private ?Remote $remote = null;
 
     public function __construct(
         OperatingSystemInterface $os,

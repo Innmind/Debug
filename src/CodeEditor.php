@@ -5,8 +5,8 @@ namespace Innmind\Debug;
 
 final class CodeEditor
 {
-    private static $sublimeText;
-    private $value;
+    private static ?self $sublimeText = null;
+    private string $value;
 
     private function __construct(string $value)
     {
@@ -15,6 +15,6 @@ final class CodeEditor
 
     public static function sublimeText(): self
     {
-        return self::$sublimeText ?? self::$sublimeText = new self('sublime_text');
+        return self::$sublimeText ??= new self('sublime_text');
     }
 }

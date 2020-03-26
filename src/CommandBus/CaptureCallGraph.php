@@ -8,8 +8,8 @@ use Innmind\CommandBus\CommandBus;
 
 final class CaptureCallGraph implements CommandBus
 {
-    private $handle;
-    private $graph;
+    private CommandBus $handle;
+    private CallGraph $graph;
 
     public function __construct(CommandBus $handle, CallGraph $graph)
     {

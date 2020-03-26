@@ -16,9 +16,9 @@ use Innmind\Immutable\Set;
 
 final class CaptureProcesses implements Section
 {
-    private $server;
-    private $processes;
-    private $resource;
+    private Server $server;
+    private Set $processes;
+    private string $resource;
 
     public function __construct(Server $server)
     {

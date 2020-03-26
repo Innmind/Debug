@@ -12,9 +12,9 @@ use Innmind\Http\Message\{
 
 final class StartCallGraph implements RequestHandler
 {
-    private $handle;
-    private $graph;
-    private $name;
+    private RequestHandler $handle;
+    private CallGraph $graph;
+    private string $name;
 
     public function __construct(RequestHandler $handle, CallGraph $graph, string $name)
     {

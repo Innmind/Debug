@@ -13,8 +13,8 @@ use Innmind\Server\Control\Server\{
 
 final class Processes implements ProcessesInterface
 {
-    private $processes;
-    private $state;
+    private ProcessesInterface $processes;
+    private Processes\State $state;
 
     public function __construct(
         ProcessesInterface $processes,

@@ -8,8 +8,8 @@ use Innmind\EventBus\EventBus;
 
 final class CaptureCallGraph implements EventBus
 {
-    private $dispatch;
-    private $graph;
+    private EventBus $dispatch;
+    private CallGraph $graph;
 
     public function __construct(EventBus $dispatch, CallGraph $graph)
     {

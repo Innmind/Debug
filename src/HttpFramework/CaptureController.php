@@ -14,8 +14,8 @@ use Innmind\Immutable\MapInterface;
 
 final class CaptureController implements Controller
 {
-    private $handle;
-    private $graph;
+    private Controller $handle;
+    private CallGraph $graph;
 
     public function __construct(Controller $handle, CallGraph $graph)
     {

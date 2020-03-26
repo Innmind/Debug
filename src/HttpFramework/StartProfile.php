@@ -16,8 +16,8 @@ use Innmind\Immutable\Str;
 
 final class StartProfile implements RequestHandler
 {
-    private $handle;
-    private $profiler;
+    private RequestHandler $handle;
+    private Profiler $profiler;
 
     public function __construct(
         RequestHandler $handle,

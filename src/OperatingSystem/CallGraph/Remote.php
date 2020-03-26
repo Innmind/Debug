@@ -18,9 +18,9 @@ use Innmind\HttpTransport\Transport as HttpTransport;
 
 final class Remote implements RemoteInterface
 {
-    private $remote;
-    private $graph;
-    private $http;
+    private RemoteInterface $remote;
+    private CallGraph $graph;
+    private ?Remote\Http $http = null;
 
     public function __construct(
         RemoteInterface $remote,
@@ -42,7 +42,7 @@ final class Remote implements RemoteInterface
 
     public function http(): HttpTransport
     {
-        return $this->http ?? $this->http = new Remote\Http(
+        return $this->http ??= new Remote\Http(
             $this->remote->http(),
             $this->graph
         );

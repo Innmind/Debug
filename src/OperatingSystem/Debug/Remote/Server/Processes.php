@@ -18,10 +18,10 @@ use Innmind\Url\UrlInterface;
 
 final class Processes implements ProcessesInterface
 {
-    private $processes;
-    private $location;
-    private $render;
-    private $state;
+    private ProcessesInterface $processes;
+    private UrlInterface $location;
+    private Remote $render;
+    private State $state;
 
     public function __construct(
         ProcessesInterface $processes,

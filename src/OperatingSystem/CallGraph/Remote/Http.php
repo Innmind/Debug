@@ -12,8 +12,8 @@ use Innmind\Http\Message\{
 
 final class Http implements Transport
 {
-    private $fulfill;
-    private $graph;
+    private Transport $fulfill;
+    private CallGraph $graph;
 
     public function __construct(
         Transport $fulfill,

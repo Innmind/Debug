@@ -16,8 +16,8 @@ use Innmind\TimeContinuum\PeriodInterface;
 
 final class CurrentProcess implements CurrentProcessInterface
 {
-    private $process;
-    private $graph;
+    private CurrentProcessInterface $process;
+    private CallGraph $graph;
 
     public function __construct(CurrentProcessInterface $process, CallGraph $graph)
     {

@@ -18,10 +18,10 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
 
 final class OperatingSystem implements OperatingSystemInterface
 {
-    private $os;
-    private $graph;
-    private $remote;
-    private $process;
+    private OperatingSystemInterface $os;
+    private CallGraph $graph;
+    private ?Remote $remote = null;
+    private ?CurrentProcess $process = null;
 
     public function __construct(OperatingSystemInterface $os, CallGraph $graph)
     {
@@ -61,17 +61,17 @@ final class OperatingSystem implements OperatingSystemInterface
 
     public function remote(): RemoteInterface
     {
-        return $this->remote ?? $this->remote = new Remote(
+        return $this->remote ??= new Remote(
             $this->os->remote(),
-            $this->graph
+            $this->graph,
         );
     }
 
     public function process(): CurrentProcessInterface
     {
-        return $this->process ?? $this->process = new CurrentProcess(
+        return $this->process ??= new CurrentProcess(
             $this->os->process(),
-            $this->graph
+            $this->graph,
         );
     }
 }

@@ -17,9 +17,9 @@ use Innmind\Immutable\Map;
 
 final class State implements Section
 {
-    private $render;
-    private $section;
-    private $processes;
+    private RenderProcess $render;
+    private CaptureProcesses $section;
+    private Map $processes;
 
     public function __construct(
         RenderProcess $render,

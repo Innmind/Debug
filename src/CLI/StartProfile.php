@@ -16,8 +16,8 @@ use Innmind\CLI\{
 
 final class StartProfile implements Command
 {
-    private $handle;
-    private $profiler;
+    private Command $handle;
+    private Profiler $profiler;
 
     public function __construct(
         Command $handle,

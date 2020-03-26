@@ -23,8 +23,8 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
  */
 final class OperatingSystem implements OperatingSystemInterface
 {
-    private $os;
-    private $toBeHighlighted;
+    private OperatingSystemInterface $os;
+    private ToBeHighlighted $toBeHighlighted;
 
     public function __construct(
         OperatingSystemInterface $os,

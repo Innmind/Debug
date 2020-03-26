@@ -21,9 +21,9 @@ use Innmind\Immutable\Set;
 
 final class Http implements Profiler
 {
-    private $server;
-    private $clock;
-    private $sections;
+    private Server $server;
+    private TimeContinuumInterface $clock;
+    private Set $sections;
 
     public function __construct(
         Server $server,

@@ -17,8 +17,8 @@ use function Innmind\Immutable\assertSet;
 
 final class CaptureEnvironment implements Section
 {
-    private $server;
-    private $environment;
+    private Server $server;
+    private SetInterface $environment;
 
     public function __construct(Server $server, SetInterface $environment)
     {

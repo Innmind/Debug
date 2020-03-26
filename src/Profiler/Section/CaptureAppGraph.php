@@ -33,16 +33,16 @@ use function Innmind\Immutable\assertSet;
 
 final class CaptureAppGraph implements Section
 {
-    private $server;
-    private $processes;
-    private $render;
-    private $toBeHighlighted;
-    private $dependencies;
-    private $flagDependencies;
-    private $removeDependencies;
-    private $graph;
-    private $profile;
-    private $app;
+    private Server $server;
+    private Processes $processes;
+    private Visualize $render;
+    private CaptureAppGraph\ToBeHighlighted $toBeHighlighted;
+    private SetInterface $dependencies;
+    private FlagDependencies $flagDependencies;
+    private RemoveDependenciesSubGraph $removeDependencies;
+    private Graph $graph;
+    private ?Identity $profile = null;
+    private ?object $app = null;
 
     public function __construct(
         Server $server,
@@ -51,8 +51,8 @@ final class CaptureAppGraph implements Section
         CaptureAppGraph\ToBeHighlighted $toBeHighlighted = null,
         SetInterface $dependencies = null
     ) {
-        $toBeHighlighted = $toBeHighlighted ?? new CaptureAppGraph\ToBeHighlighted;
-        $dependencies = $dependencies ?? Set::of('object');
+        $toBeHighlighted ??= new CaptureAppGraph\ToBeHighlighted;
+        $dependencies ??= Set::of('object');
         assertSet('object', $dependencies, 4);
 
         $this->server = $server;

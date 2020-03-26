@@ -12,8 +12,8 @@ use Innmind\Http\Message\{
 
 final class CaptureAppGraph implements RequestHandler
 {
-    private $handle;
-    private $section;
+    private RequestHandler $handle;
+    private Section $section;
 
     public function __construct(
         RequestHandler $handle,

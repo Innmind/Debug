@@ -18,8 +18,8 @@ use Innmind\Debug\{
 final class CaptureCallGraph
 {
     private $call;
-    private $graph;
-    private $toBeHighlighted;
+    private CallGraph $graph;
+    private ?ToBeHighlighted $toBeHighlighted;
 
     public function __construct(
         callable $call,

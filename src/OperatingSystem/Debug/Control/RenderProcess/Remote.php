@@ -13,8 +13,8 @@ use Innmind\Immutable\Map;
 
 final class Remote implements RenderProcess
 {
-    private $render;
-    private $commands;
+    private RenderProcess $render;
+    private Map $commands;
 
     public function __construct(RenderProcess $render)
     {

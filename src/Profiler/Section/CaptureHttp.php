@@ -9,15 +9,16 @@ use Innmind\Debug\Profiler\{
 };
 use Innmind\Rest\Client\{
     Server,
+    Identity as ResourceIdentity,
     HttpResource,
     HttpResource\Property,
 };
 
 final class CaptureHttp implements Section
 {
-    private $server;
-    private $profile;
-    private $identity;
+    private Server $server;
+    private ?Identity $profile = null;
+    private ?ResourceIdentity $identity = null;
 
     public function __construct(Server $server)
     {

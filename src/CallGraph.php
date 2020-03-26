@@ -8,9 +8,9 @@ use Innmind\TimeContinuum\TimeContinuumInterface;
 
 final class CallGraph
 {
-    private $section;
-    private $clock;
-    private $graph;
+    private CaptureCallGraph $section;
+    private TimeContinuumInterface $clock;
+    private ?CallGraph\Node $graph = null;
 
     public function __construct(
         CaptureCallGraph $section,

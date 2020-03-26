@@ -12,12 +12,12 @@ use Innmind\Immutable\Stream;
 
 final class Node
 {
-    private $clock;
-    private $name;
-    private $startedAt;
-    private $endedAt;
-    private $children;
-    private $stack;
+    private TimeContinuumInterface $clock;
+    private string $name;
+    private ?PointInTimeInterface $startedAt = null;
+    private ?PointInTimeInterface $endedAt = null;
+    private Stream $children;
+    private Stream $stack;
 
     private function __construct(TimeContinuumInterface $clock, string $name)
     {
