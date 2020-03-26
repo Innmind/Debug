@@ -1,10 +1,8 @@
 # Debug
 
-| `develop` |
-|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Debug/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Debug/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Debug/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Debug/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/Debug/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Debug/build-status/develop) |
+[![Build Status](https://github.com/Innmind/Debug/workflows/CI/badge.svg)](https://github.com/Innmind/Debug/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/Innmind/Debug/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/Debug)
+[![Type Coverage](https://shepherd.dev/github/Innmind/Debug/coverage.svg)](https://shepherd.dev/github/Innmind/Debug)
 
 [Profiler](https://github.com/Innmind/Profiler) client to help debug applications.
 
