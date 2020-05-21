@@ -19,12 +19,14 @@ final class State implements Section
 {
     private RenderProcess $render;
     private CaptureProcesses $section;
+    /** @var Map<Command, Process> */
     private Map $processes;
 
     public function __construct(RenderProcess $render, CaptureProcesses $section)
     {
         $this->render = $render;
         $this->section = $section;
+        /** @var Map<Command, Process> */
         $this->processes = Map::of(Command::class, Process::class);
     }
 
