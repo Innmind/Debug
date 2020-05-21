@@ -23,6 +23,7 @@ final class Http implements Profiler
 {
     private Server $server;
     private Clock $clock;
+    /** @var Set<Section> */
     private Set $sections;
 
     public function __construct(
@@ -32,6 +33,7 @@ final class Http implements Profiler
     ) {
         $this->server = $server;
         $this->clock = $clock;
+        /** @var Set<Section> */
         $this->sections = Set::of(Section::class, ...$sections);
     }
 

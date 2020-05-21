@@ -32,6 +32,7 @@ use function Innmind\Immutable\unwrap;
 use function Innmind\Rest\Client\bootstrap as client;
 
 /**
+ * @param Map<string, scalar>|null $environmentVariables
  * @param Set<string>|null $disable
  *
  * @return array{profiler: callable(): Profiler, os: callable(): OperatingSystem, http: callable(RequestHandler): RequestHandler, cli: callable(Command...): Sequence<Command>, call_graph: callable(): CallGraph, to_be_highlighted: callable(): Profiler\Section\CaptureAppGraph\ToBeHighlighted, controller: callable(Controller): Controller, command_bus: callable(CommandBusInterface): CommandBusInterface, event_bus: callable(EventBusInterface): EventBusInterface, callable: callable(callable): callable}
@@ -43,6 +44,7 @@ function bootstrap(
     CodeEditor $codeEditor = null,
     Set $disable = null
 ): array {
+    /** @var Map<string, scalar> */
     $environmentVariables ??= Map::of('string', 'scalar');
 
     switch ($codeEditor) {
