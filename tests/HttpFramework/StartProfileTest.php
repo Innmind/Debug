@@ -15,6 +15,7 @@ use Innmind\Http\{
     Message\Method,
     Message\StatusCode,
     ProtocolVersion,
+    Headers,
 };
 use Innmind\Url\Url;
 use PHPUnit\Framework\TestCase;
@@ -51,14 +52,24 @@ class StartProfileTest extends TestCase
         $response
             ->expects($this->any())
             ->method('statusCode')
-            ->willReturn(new StatusCode(200));
+            ->willReturn($expected = new StatusCode(200));
+        $response
+            ->expects($this->once())
+            ->method('headers')
+            ->willReturn(new Headers);
         $profiler
             ->expects($this->once())
             ->method('start')
             ->with('POST /foo/bar HTTP/2.0')
             ->willReturn(new Identity('some-uuid'));
 
-        $this->assertSame($response, $handle($request));
+        $response = $handle($request);
+
+        $this->assertSame($expected, $response->statusCode());
+        $this->assertSame(
+            'X-Profile: some-uuid',
+            $response->headers()->get('x-profile')->toString(),
+        );
     }
 
     public function testFailWhenExceptionThrown()
@@ -109,9 +120,13 @@ class StartProfileTest extends TestCase
             ->with($request)
             ->willReturn($response = $this->createMock(Response::class));
         $response
-            ->expects($this->once())
+            ->expects($this->any())
             ->method('statusCode')
-            ->willReturn(StatusCode::of('BAD_REQUEST'));
+            ->willReturn($expected = StatusCode::of('BAD_REQUEST'));
+        $response
+            ->expects($this->once())
+            ->method('headers')
+            ->willReturn(new Headers);
         $profiler
             ->expects($this->once())
             ->method('start')
@@ -122,7 +137,13 @@ class StartProfileTest extends TestCase
             ->method('fail')
             ->with($identity, '400');
 
-        $this->assertSame($response, $handle($request));
+        $response = $handle($request);
+
+        $this->assertSame($expected, $response->statusCode());
+        $this->assertSame(
+            'X-Profile: some-uuid',
+            $response->headers()->get('x-profile')->toString(),
+        );
     }
 
     public function testSucceedWhenResponseCodeUnder400()
@@ -142,9 +163,13 @@ class StartProfileTest extends TestCase
             ->with($request)
             ->willReturn($response = $this->createMock(Response::class));
         $response
-            ->expects($this->once())
+            ->expects($this->any())
             ->method('statusCode')
-            ->willReturn(StatusCode::of('OK'));
+            ->willReturn($expected = StatusCode::of('OK'));
+        $response
+            ->expects($this->once())
+            ->method('headers')
+            ->willReturn(new Headers);
         $profiler
             ->expects($this->once())
             ->method('start')
@@ -155,6 +180,12 @@ class StartProfileTest extends TestCase
             ->method('succeed')
             ->with($identity, '200');
 
-        $this->assertSame($response, $handle($request));
+        $response = $handle($request);
+
+        $this->assertSame($expected, $response->statusCode());
+        $this->assertSame(
+            'X-Profile: some-uuid',
+            $response->headers()->get('x-profile')->toString(),
+        );
     }
 }

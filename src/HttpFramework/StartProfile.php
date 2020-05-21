@@ -43,7 +43,7 @@ final class StartProfile implements RequestHandler
             throw $e;
         }
 
-        return $response;
+        return new ProfileResponse($response, $profile);
     }
 
     private function end(Identity $profile, Response $response): void
