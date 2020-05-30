@@ -53,8 +53,9 @@ class HttpTest extends TestCase
                     $resource->properties()->get('response')->value() === "HTTP/2.0 200 OK\n\n\n";
             }));
 
+        $section->start($identity = new Identity('profile-uuid'));
         $this->assertInstanceOf(Transport::class, $transport);
         $this->assertSame($response, $transport($request));
-        $section->finish(new Identity('profile-uuid'));
+        $section->finish($identity);
     }
 }

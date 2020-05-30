@@ -11,60 +11,57 @@ use Innmind\Rest\Client\{
     Server,
     HttpResource,
     HttpResource\Property,
+    Identity as RestIdentity,
 };
-use Innmind\Immutable\Sequence;
 
 final class CaptureHttp implements Section
 {
     private Server $server;
-    /** @var Sequence<array{0: string, 1: string}> */
-    private Sequence $pairs;
+    private ?Identity $identity = null;
+    private ?RestIdentity $section = null;
 
     public function __construct(Server $server)
     {
         $this->server = $server;
-        /** @var Sequence<array{0: string, 1: string}> */
-        $this->pairs = Sequence::of('array');
     }
 
     public function start(Identity $identity): void
     {
-        $this->pairs = $this->pairs->clear();
+        $this->identity = $identity;
+        $this->section = null;
     }
 
     public function capture(string $request, string $response): void
     {
-        $this->pairs = ($this->pairs)([$request, $response]);
+        if (\is_null($this->identity)) {
+            return;
+        }
+
+        if (\is_null($this->section)) {
+            $this->section = $this->server->create(HttpResource::of(
+                'api.section.remote.http',
+                new Property('profile', $this->identity->toString()),
+                new Property('request', $request),
+                new Property('response', $response)
+            ));
+
+            return;
+        }
+
+        $this->server->update(
+            $this->section,
+            HttpResource::of(
+                'api.section.remote.http',
+                new Property('profile', $this->identity->toString()),
+                new Property('request', $request),
+                new Property('response', $response),
+            ),
+        );
     }
 
     public function finish(Identity $identity): void
     {
-        if ($this->pairs->empty()) {
-            return;
-        }
-
-        [$request, $response] = $this->pairs->first();
-        $section = $this->server->create(HttpResource::of(
-            'api.section.remote.http',
-            new Property('profile', $identity->toString()),
-            new Property('request', $request),
-            new Property('response', $response)
-        ));
-        $this
-            ->pairs
-            ->drop(1)
-            ->foreach(function(array $pair) use ($identity, $section): void {
-                [$request, $response] = $pair;
-
-                $this->server->update(
-                    $section,
-                    HttpResource::of(
-                        'api.section.remote.http',
-                        new Property('profile', $identity->toString()),
-                        new Property('request', $request),
-                        new Property('response', $response),
-                    ),
-                );
-            });
+        $this->identity = null;
+        $this->section = null;
     }
 }

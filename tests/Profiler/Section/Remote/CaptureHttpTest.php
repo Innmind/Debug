@@ -72,10 +72,12 @@ class CaptureHttpTest extends TestCase
                 })
             );
 
+        $section->start($identity = new Identity('profile-uuid'));
+
         $section->capture('request1', 'response1');
         $section->capture('request2', 'response2');
 
-        $this->assertNull($section->finish(new Identity('profile-uuid')));
+        $this->assertNull($section->finish($identity));
     }
 
     public function testPairsAreResettedWhenStartingANewProfile()
