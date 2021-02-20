@@ -19,13 +19,12 @@ class NodeTest extends TestCase
     {
         $clock = $this->createMock(Clock::class);
         $clock
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.000+0000'));
-        $clock
-            ->expects($this->at(1))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.042+0000'));
+            ->will($this->onConsecutiveCalls(
+                new PointInTime('2019-01-01T12:00:00.000+0000'),
+                new PointInTime('2019-01-01T12:00:00.042+0000'),
+            ));
         $root = Node::root(
             $clock,
             'root'
@@ -45,37 +44,18 @@ class NodeTest extends TestCase
     {
         $clock = $this->createMock(Clock::class);
         $clock
-            ->expects($this->at(0))
+            ->expects($this->exactly(8))
             ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.000+0000')); // enter root
-        $clock
-            ->expects($this->at(1))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.000+0000')); // enter call 1
-        $clock
-            ->expects($this->at(2))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.000+0000')); // enter call 2
-        $clock
-            ->expects($this->at(3))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.025+0000')); // leave call 2
-        $clock
-            ->expects($this->at(4))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.050+0000')); // leave call 1
-        $clock
-            ->expects($this->at(5))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.060+0000')); // enter call 3
-        $clock
-            ->expects($this->at(6))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.090+0000')); // leave call 3
-        $clock
-            ->expects($this->at(7))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.100+0000'));
+            ->will($this->onConsecutiveCalls(
+                new PointInTime('2019-01-01T12:00:00.000+0000'), // enter root
+                new PointInTime('2019-01-01T12:00:00.000+0000'), // enter call 1
+                new PointInTime('2019-01-01T12:00:00.000+0000'), // enter call 2
+                new PointInTime('2019-01-01T12:00:00.025+0000'), // leave call 2
+                new PointInTime('2019-01-01T12:00:00.050+0000'), // leave call 1
+                new PointInTime('2019-01-01T12:00:00.060+0000'), // enter call 3
+                new PointInTime('2019-01-01T12:00:00.090+0000'), // leave call 3
+                new PointInTime('2019-01-01T12:00:00.100+0000'),
+            ));
         $root = Node::root(
             $clock,
             'root'
@@ -120,29 +100,16 @@ class NodeTest extends TestCase
     {
         $clock = $this->createMock(Clock::class);
         $clock
-            ->expects($this->at(0))
+            ->expects($this->exactly(6))
             ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.000+0000')); // enter root
-        $clock
-            ->expects($this->at(1))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.000+0000')); // enter call 1
-        $clock
-            ->expects($this->at(2))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.000+0000')); // enter call 2
-        $clock
-            ->expects($this->at(3))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.025+0000')); // leave call 2
-        $clock
-            ->expects($this->at(4))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.050+0000')); // leave call 1
-        $clock
-            ->expects($this->at(5))
-            ->method('now')
-            ->willReturn(new PointInTime('2019-01-01T12:00:00.100+0000'));
+            ->will($this->onConsecutiveCalls(
+                new PointInTime('2019-01-01T12:00:00.000+0000'), // enter root
+                new PointInTime('2019-01-01T12:00:00.000+0000'), // enter call 1
+                new PointInTime('2019-01-01T12:00:00.000+0000'), // enter call 2
+                new PointInTime('2019-01-01T12:00:00.025+0000'), // leave call 2
+                new PointInTime('2019-01-01T12:00:00.050+0000'), // leave call 1
+                new PointInTime('2019-01-01T12:00:00.100+0000'),
+            ));
         $root = Node::root(
             $clock,
             'root'
