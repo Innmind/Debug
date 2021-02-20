@@ -114,25 +114,21 @@ class ProcessesTest extends TestCase
         $command1 = Command::foreground('foo');
         $command2 = Command::foreground('foo');
         $inner
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->with($command1)
-            ->willReturn($process1 = $this->createMock(Process::class));
-        $inner
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($command2)
-            ->willReturn($process2 = $this->createMock(Process::class));
+            ->withConsecutive([$command1], [$command2])
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class),
+            ));
         $render
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('__invoke')
-            ->with($command1, $process1)
-            ->willReturn('foo');
-        $render
-            ->expects($this->at(1))
-            ->method('__invoke')
-            ->with($command2, $process2)
-            ->willReturn('bar');
+            ->withConsecutive(
+                [$command1, $process1],
+                [$command2, $process2],
+            )
+            ->will($this->onConsecutiveCalls('foo', 'bar'));
         $server
             ->expects($this->once())
             ->method('create')

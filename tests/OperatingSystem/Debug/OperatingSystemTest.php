@@ -24,7 +24,7 @@ use Innmind\Server\Status\Server as ServerStatus;
 use Innmind\Rest\Client\Server;
 use PHPUnit\Framework\TestCase;
 
-class DebugTest extends TestCase
+class OperatingSystemTest extends TestCase
 {
     public function testInterface()
     {

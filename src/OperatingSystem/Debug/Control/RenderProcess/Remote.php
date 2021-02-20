@@ -24,11 +24,6 @@ final class Remote implements RenderProcess
         $this->commands = Map::of(Command::class, Url::class);
     }
 
-    public function locate(Command $command, Url $location): void
-    {
-        $this->commands = ($this->commands)($command, $location);
-    }
-
     public function __invoke(Command $command, Process $process): string
     {
         $string = ($this->render)($command, $process);
@@ -42,5 +37,10 @@ final class Remote implements RenderProcess
         }
 
         return $string;
+    }
+
+    public function locate(Command $command, Url $location): void
+    {
+        $this->commands = ($this->commands)($command, $location);
     }
 }

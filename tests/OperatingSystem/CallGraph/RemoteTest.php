@@ -25,7 +25,6 @@ use Innmind\Socket\{
     Client,
     Internet\Transport,
 };
-use Innmind\HttpTransport\Transport as HttpTransport;
 use Innmind\TimeContinuum\Clock;
 use PHPUnit\Framework\TestCase;
 
