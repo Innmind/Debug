@@ -15,7 +15,7 @@
         "issues": "http://github.com/Innmind/Debug/issues"
     },
     "require": {
-        "php": "~7.4",
+        "php": "~7.4|~8.0",
         "innmind/rest-client": "~8.0",
         "innmind/http-framework": "~2.0",
         "innmind/stack-trace": "~3.0",
