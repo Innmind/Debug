@@ -20,7 +20,7 @@ use Innmind\Server\Status\Server as ServerStatus;
 use Innmind\Server\Control\Server as ServerControl;
 use PHPUnit\Framework\TestCase;
 
-class DebugTest extends TestCase
+class OperatingSystemTest extends TestCase
 {
     public function testInterface()
     {

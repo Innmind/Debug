@@ -83,7 +83,7 @@ class BootstrapTest extends TestCase
         );
         $this->assertInstanceOf(
             Closure\CaptureCallGraph::class,
-            $debug['callable'](function(){})
+            $debug['callable'](static function() {})
         );
 
         $handler = $debug['http']($this->createMock(RequestHandler::class));

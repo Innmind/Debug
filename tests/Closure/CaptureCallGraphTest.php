@@ -21,7 +21,7 @@ class CaptureCallGraphTest extends TestCase
     {
         $this->assertIsCallable(
             new CaptureCallGraph(
-                function(){},
+                static function() {},
                 new CallGraph(
                     new Section(
                         $this->createMock(Server::class)
@@ -74,7 +74,7 @@ class CaptureCallGraphTest extends TestCase
     public function testSendGraphWithAnonymousFunction()
     {
         $call = new CaptureCallGraph(
-            function(...$arguments) {
+            static function(...$arguments) {
                 return $arguments;
             },
             $graph = new CallGraph(
@@ -110,7 +110,7 @@ class CaptureCallGraphTest extends TestCase
     public function testSendGraphWhenExceptionThrown()
     {
         $call = new CaptureCallGraph(
-            function() {
+            static function() {
                 throw new \Exception;
             },
             $graph = new CallGraph(

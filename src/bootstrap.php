@@ -188,10 +188,10 @@ function bootstrap(
                 );
             });
         },
-        'call_graph' => function() use ($callGraph): CallGraph {
+        'call_graph' => static function() use ($callGraph): CallGraph {
             return $callGraph;
         },
-        'to_be_highlighted' => function() use ($toBeHighighted): Profiler\Section\CaptureAppGraph\ToBeHighlighted {
+        'to_be_highlighted' => static function() use ($toBeHighighted): Profiler\Section\CaptureAppGraph\ToBeHighlighted {
             return $toBeHighighted;
         },
         'controller' => static function(Controller $controller) use ($callGraph): Controller {
