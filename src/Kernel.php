@@ -22,7 +22,7 @@ final class Kernel implements Middleware
                 $os,
                 $beacon,
             ))
-            ->mapRequestHandler(static function($handler, $get) use ($beacon) {
+            ->mapRequestHandler(static function($handler, $get, $_, $env) use ($beacon) {
                 $recordAppGraph = new Http\RecordAppGraph(
                     new Record\Nothing,
                     $handler,
@@ -31,15 +31,21 @@ final class Kernel implements Middleware
                     new Record\Nothing,
                     $recordAppGraph,
                 );
+                $recordEnvironment = new Http\RecordEnvironment(
+                    new Record\Nothing,
+                    $recordException,
+                    $env,
+                );
 
                 return new Http\StartProfile(
                     $get('innmind/profiler'),
                     Recorder\All::of(
                         $recordAppGraph,
                         $recordException,
+                        $recordEnvironment,
                         $beacon,
                     ),
-                    $recordException,
+                    $recordEnvironment,
                 );
             });
     }

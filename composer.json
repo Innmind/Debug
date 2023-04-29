@@ -17,7 +17,7 @@
     "require": {
         "php": "~8.1",
         "innmind/profiler": "~3.0",
-        "innmind/framework": "~1.0"
+        "innmind/framework": "~1.2"
     },
     "autoload": {
         "psr-4": {

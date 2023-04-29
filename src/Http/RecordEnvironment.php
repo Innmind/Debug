@@ -7,24 +7,29 @@ use Innmind\Debug\{
     Recorder,
     Record,
 };
-use Innmind\Framework\Http\RequestHandler;
+use Innmind\Framework\{
+    Http\RequestHandler,
+    Environment,
+};
 use Innmind\Http\Message\{
     ServerRequest,
     Response,
 };
-use Innmind\Immutable\Map;
 
 final class RecordEnvironment implements RequestHandler, Recorder
 {
     private Record $record;
     private RequestHandler $inner;
+    private Environment $env;
 
     public function __construct(
         Record $record,
         RequestHandler $inner,
+        Environment $env,
     ) {
         $this->record = $record;
         $this->inner = $inner;
+        $this->env = $env;
     }
 
     public function __invoke(ServerRequest $request): Response
@@ -33,10 +38,10 @@ final class RecordEnvironment implements RequestHandler, Recorder
             return ($this->inner)($request);
         } catch (\Throwable $e) {
             ($this->record)(
-                static fn($mutation) => $mutation
+                fn($mutation) => $mutation
                     ->sections()
                     ->environment()
-                    ->record(Map::of()),
+                    ->record($this->env->all()),
             );
 
             throw $e;
