@@ -5,6 +5,7 @@ namespace Innmind\Debug;
 
 use Innmind\Debug\{
     OperatingSystem\Control,
+    OperatingSystem\Remote as RemoteDebug,
     Recorder\Beacon,
 };
 use Innmind\OperatingSystem\{
@@ -67,7 +68,7 @@ final class OperatingSystem implements OS
 
     public function remote(): Remote
     {
-        return $this->inner->remote();
+        return RemoteDebug::of($this->inner->remote(), $this->beacon);
     }
 
     public function process(): CurrentProcess
