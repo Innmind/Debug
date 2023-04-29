@@ -15,8 +15,14 @@ final class Kernel implements Middleware
 {
     public function __invoke(Application $app): Application
     {
+        $beacon = new Recorder\Beacon;
+
         return $app
-            ->mapRequestHandler(static function($handler, $get) {
+            ->mapOperatingSystem(static fn($os) => OperatingSystem::of(
+                $os,
+                $beacon,
+            ))
+            ->mapRequestHandler(static function($handler, $get) use ($beacon) {
                 $recordAppGraph = new Http\RecordAppGraph(
                     new Record\Nothing,
                     $handler,
@@ -31,6 +37,7 @@ final class Kernel implements Middleware
                     Recorder\All::of(
                         $recordAppGraph,
                         $recordException,
+                        $beacon,
                     ),
                     $recordException,
                 );
