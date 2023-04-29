@@ -5,6 +5,9 @@ namespace Innmind\Debug;
 
 use Innmind\Profiler\Profiler\Mutation;
 
+/**
+ * @internal
+ */
 interface Record
 {
     /**
