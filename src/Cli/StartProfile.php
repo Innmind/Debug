@@ -51,6 +51,13 @@ final class StartProfile implements Command
             );
 
             return $console;
+        } catch (\Throwable $e) {
+            $this->profiler->mutate(
+                $profile,
+                static fn($mutation) => $mutation->fail('crashed'),
+            );
+
+            throw $e;
         } finally {
             $this->recorder->push(new Record\Nothing);
         }
