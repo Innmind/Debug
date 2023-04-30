@@ -5,6 +5,7 @@ namespace Innmind\Debug\Kernel;
 
 use Innmind\Debug\{
     Http,
+    Cli,
     Recorder,
     IDE,
 };
@@ -44,6 +45,30 @@ final class App implements Middleware
                 $this->ide,
                 $this->formatPath,
             ))
+            ->mapCommand(static function($command, $get, $os, $env) {
+                $appGraph = $get('innmind/debug.appGraph');
+
+                $recordAppGraph = new Cli\RecordAppGraph(
+                    $command,
+                    $appGraph,
+                );
+                $all = [
+                    $appGraph,
+                ];
+
+                try {
+                    $all[] = $get('innmind/debug.beacon');
+                } catch (ServiceNotFound $e) {
+                    // pass
+                    // this means the user didn't use the OS kernel
+                }
+
+                return new Cli\StartProfile(
+                    $get('innmind/profiler'),
+                    Recorder\All::of(...$all),
+                    $recordAppGraph,
+                );
+            })
             ->mapRequestHandler(static function($handler, $get, $os, $env) {
                 $appGraph = $get('innmind/debug.appGraph');
                 $exception = $get('innmind/debug.exception');
