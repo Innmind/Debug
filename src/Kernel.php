@@ -8,45 +8,31 @@ use Innmind\Framework\{
     Middleware,
 };
 
-/**
- * @psalm-suppress ArgumentTypeCoercion
- */
 final class Kernel implements Middleware
 {
+    private function __construct()
+    {
+    }
+
     public function __invoke(Application $app): Application
     {
-        $beacon = new Recorder\Beacon;
-
         return $app
-            ->mapOperatingSystem(static fn($os) => OperatingSystem::of(
-                $os,
-                $beacon,
-            ))
-            ->mapRequestHandler(static function($handler, $get, $_, $env) use ($beacon) {
-                $recordAppGraph = new Http\RecordAppGraph(
-                    new Record\Nothing,
-                    $handler,
-                );
-                $recordException = new Http\RecordException(
-                    new Record\Nothing,
-                    $recordAppGraph,
-                );
-                $recordEnvironment = new Http\RecordEnvironment(
-                    new Record\Nothing,
-                    $recordException,
-                    $env,
-                );
+            ->map($this->operatingSystem())
+            ->map($this->app());
+    }
 
-                return new Http\StartProfile(
-                    $get('innmind/profiler'),
-                    Recorder\All::of(
-                        $recordAppGraph,
-                        $recordException,
-                        $recordEnvironment,
-                        $beacon,
-                    ),
-                    $recordEnvironment,
-                );
-            });
+    public static function inApp(): self
+    {
+        return new self;
+    }
+
+    public function operatingSystem(): Middleware
+    {
+        return new Kernel\OperatingSystem;
+    }
+
+    public function app(): Middleware
+    {
+        return new Kernel\App;
     }
 }
