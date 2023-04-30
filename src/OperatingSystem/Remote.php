@@ -5,7 +5,8 @@ namespace Innmind\Debug\OperatingSystem;
 
 use Innmind\Debug\{
     Recorder\Beacon,
-    OperatingSystem\Remote\Http
+    OperatingSystem\Remote\Http,
+    OperatingSystem\Remote\Sql,
 };
 use Innmind\OperatingSystem\Remote as RemoteInterface;
 use Innmind\Server\Control\Server;
@@ -54,6 +55,6 @@ final class Remote implements RemoteInterface
 
     public function sql(Url $server): Connection
     {
-        return $this->inner->sql($server);
+        return Sql::of($this->inner->sql($server), $this->beacon);
     }
 }
