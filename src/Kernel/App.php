@@ -6,7 +6,6 @@ namespace Innmind\Debug\Kernel;
 use Innmind\Debug\{
     Http,
     Recorder,
-    Record,
 };
 use Innmind\Framework\{
     Application,
@@ -24,23 +23,13 @@ final class App implements Middleware
     {
         return $app
             ->mapRequestHandler(static function($handler, $get, $_, $env) {
-                $recordAppGraph = new Http\RecordAppGraph(
-                    new Record\Nothing,
-                    $handler,
-                );
-                $recordException = new Http\RecordException(
-                    new Record\Nothing,
-                    $recordAppGraph,
-                );
+                $recordAppGraph = new Http\RecordAppGraph($handler);
+                $recordException = new Http\RecordException($recordAppGraph);
                 $recordEnvironment = new Http\RecordEnvironment(
-                    new Record\Nothing,
                     $recordException,
                     $env,
                 );
-                $recordCall = new Http\RecordCall(
-                    new Record\Nothing,
-                    $recordEnvironment,
-                );
+                $recordCall = new Http\RecordCall($recordEnvironment);
                 $all = [
                     $recordAppGraph,
                     $recordException,

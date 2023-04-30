@@ -21,9 +21,9 @@ final class RecordCall implements RequestHandler, Recorder
     private Record $record;
     private RequestHandler $inner;
 
-    public function __construct(Record $record, RequestHandler $inner)
+    public function __construct(RequestHandler $inner)
     {
-        $this->record = $record;
+        $this->record = new Record\Nothing;
         $this->inner = $inner;
     }
 

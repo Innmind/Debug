@@ -26,11 +26,10 @@ final class RecordEnvironment implements RequestHandler, Recorder
     private Environment $env;
 
     public function __construct(
-        Record $record,
         RequestHandler $inner,
         Environment $env,
     ) {
-        $this->record = $record;
+        $this->record = new Record\Nothing;
         $this->inner = $inner;
         $this->env = $env;
     }

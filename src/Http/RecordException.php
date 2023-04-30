@@ -22,11 +22,9 @@ final class RecordException implements RequestHandler, Recorder
     private Record $record;
     private RequestHandler $inner;
 
-    public function __construct(
-        Record $record,
-        RequestHandler $inner,
-    ) {
-        $this->record = $record;
+    public function __construct(RequestHandler $inner)
+    {
+        $this->record = new Record\Nothing;
         $this->inner = $inner;
     }
 
