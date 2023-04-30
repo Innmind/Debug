@@ -47,13 +47,19 @@ final class App implements Middleware
             ))
             ->mapCommand(static function($command, $get, $os, $env) {
                 $appGraph = $get('innmind/debug.appGraph');
+                $exception = $get('innmind/debug.exception');
 
                 $recordAppGraph = new Cli\RecordAppGraph(
                     $command,
                     $appGraph,
                 );
+                $recordException = new Cli\RecordException(
+                    $recordAppGraph,
+                    $exception,
+                );
                 $all = [
                     $appGraph,
+                    $exception,
                 ];
 
                 try {
