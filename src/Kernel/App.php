@@ -57,9 +57,14 @@ final class App implements Middleware
                     $recordAppGraph,
                     $exception,
                 );
+                $recordEnvironment = new Cli\RecordEnvironment(
+                    $recordException,
+                    $env,
+                );
                 $all = [
                     $appGraph,
                     $exception,
+                    $recordEnvironment,
                 ];
 
                 try {
@@ -72,7 +77,7 @@ final class App implements Middleware
                 return new Cli\StartProfile(
                     $get('innmind/profiler'),
                     Recorder\All::of(...$all),
-                    $recordAppGraph,
+                    $recordEnvironment,
                 );
             })
             ->mapRequestHandler(static function($handler, $get, $os, $env) {
