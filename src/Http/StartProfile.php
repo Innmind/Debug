@@ -35,6 +35,21 @@ final class StartProfile implements RequestHandler
 
     public function __invoke(ServerRequest $request): Response
     {
+        $inProfiler = \str_starts_with($request->url()->path()->toString(), '/_profiler');
+
+        return match ($inProfiler) {
+            true => $this->dontProfile($request),
+            false => $this->profile($request),
+        };
+    }
+
+    private function dontProfile(ServerRequest $request): Response
+    {
+        return ($this->inner)($request);
+    }
+
+    private function profile(ServerRequest $request): Response
+    {
         $profile = $this->profiler->start(\sprintf(
             '%s %s',
             $request->method()->toString(),
