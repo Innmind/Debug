@@ -14,6 +14,9 @@ use Innmind\Immutable\{
     Str,
 };
 
+/**
+ * @internal
+ */
 final class Sql implements Connection
 {
     private Connection $inner;

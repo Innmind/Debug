@@ -12,6 +12,9 @@ use Innmind\Framework\{
     Middleware,
 };
 
+/**
+ * @internal
+ */
 final class OperatingSystem implements Middleware
 {
     public function __invoke(Application $app): Application

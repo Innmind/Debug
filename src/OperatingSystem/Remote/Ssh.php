@@ -15,6 +15,9 @@ use Innmind\Server\Control\{
 use Innmind\Url\Url;
 use Innmind\Immutable\Either;
 
+/**
+ * @internal
+ */
 final class Ssh implements Server
 {
     private Server $inner;

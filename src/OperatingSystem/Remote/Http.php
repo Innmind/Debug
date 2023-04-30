@@ -21,6 +21,9 @@ use Innmind\Http\Message\{
 use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\Either;
 
+/**
+ * @internal
+ */
 final class Http implements Transport
 {
     private Transport $inner;

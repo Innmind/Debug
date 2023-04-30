@@ -20,6 +20,9 @@ use Innmind\TimeContinuum\Clock;
 use Innmind\Server\Status\Server as ServerStatus;
 use Innmind\Server\Control\Server as ServerControl;
 
+/**
+ * @internal
+ */
 final class OperatingSystem implements OS
 {
     private OS $inner;

@@ -8,6 +8,9 @@ use Innmind\Debug\{
     Record,
 };
 
+/**
+ * @internal
+ */
 final class All implements Recorder
 {
     /** @var list<Recorder> */

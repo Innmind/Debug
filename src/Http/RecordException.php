@@ -14,6 +14,9 @@ use Innmind\Http\Message\{
     Response,
 };
 
+/**
+ * @internal
+ */
 final class RecordException implements RequestHandler, Recorder
 {
     private Record $record;

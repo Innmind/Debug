@@ -14,6 +14,9 @@ use Innmind\Server\Control\{
 };
 use Innmind\Immutable\Either;
 
+/**
+ * @internal
+ */
 final class Control implements Server
 {
     private Server $inner;

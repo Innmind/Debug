@@ -8,6 +8,9 @@ use Innmind\Debug\{
     Record,
 };
 
+/**
+ * @internal
+ */
 final class Beacon implements Recorder
 {
     private Record $record;

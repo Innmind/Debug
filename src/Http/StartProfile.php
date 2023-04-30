@@ -14,6 +14,9 @@ use Innmind\Http\Message\{
     Response,
 };
 
+/**
+ * @internal
+ */
 final class StartProfile implements RequestHandler
 {
     private Profiler $profiler;

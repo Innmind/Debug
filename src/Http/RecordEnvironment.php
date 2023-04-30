@@ -16,6 +16,9 @@ use Innmind\Http\Message\{
     Response,
 };
 
+/**
+ * @internal
+ */
 final class RecordEnvironment implements RequestHandler, Recorder
 {
     private Record $record;

@@ -14,6 +14,9 @@ use Innmind\Http\Message\{
     Response,
 };
 
+/**
+ * @internal
+ */
 final class RecordAppGraph implements RequestHandler, Recorder
 {
     private Record $record;

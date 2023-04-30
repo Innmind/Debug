@@ -21,6 +21,9 @@ use Innmind\Immutable\{
     Str,
 };
 
+/**
+ * @internal
+ */
 final class Debug implements Process
 {
     private Url $server;

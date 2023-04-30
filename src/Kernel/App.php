@@ -15,6 +15,7 @@ use Innmind\Framework\{
 use Innmind\DI\Exception\ServiceNotFound;
 
 /**
+ * @internal
  * @psalm-suppress ArgumentTypeCoercion
  */
 final class App implements Middleware

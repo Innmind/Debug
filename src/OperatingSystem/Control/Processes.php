@@ -16,6 +16,9 @@ use Innmind\Server\Control\Server\{
 };
 use Innmind\Immutable\Either;
 
+/**
+ * @internal
+ */
 final class Processes implements ProcessesInterface
 {
     private ProcessesInterface $inner;

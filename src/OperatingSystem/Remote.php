@@ -23,6 +23,9 @@ use Innmind\HttpTransport\Transport as HttpTransport;
 use Innmind\Immutable\Maybe;
 use Formal\AccessLayer\Connection;
 
+/**
+ * @internal
+ */
 final class Remote implements RemoteInterface
 {
     private RemoteInterface $inner;

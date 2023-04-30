@@ -9,6 +9,9 @@ use Innmind\Profiler\{
     Profile\Id,
 };
 
+/**
+ * @internal
+ */
 final class Profile implements Record
 {
     private Profiler $profiler;

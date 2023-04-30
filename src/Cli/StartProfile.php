@@ -13,6 +13,9 @@ use Innmind\CLI\{
 };
 use Innmind\Profiler\Profiler;
 
+/**
+ * @internal
+ */
 final class StartProfile implements Command
 {
     private Profiler $profiler;
