@@ -10,8 +10,11 @@ use Innmind\Framework\{
 
 final class Kernel implements Middleware
 {
-    private function __construct()
+    private IDE $ide;
+
+    private function __construct(IDE $ide)
     {
+        $this->ide = $ide;
     }
 
     public function __invoke(Application $app): Application
@@ -23,7 +26,7 @@ final class Kernel implements Middleware
 
     public static function inApp(): self
     {
-        return new self;
+        return new self(IDE::unknown);
     }
 
     public function operatingSystem(): Middleware
@@ -33,6 +36,14 @@ final class Kernel implements Middleware
 
     public function app(): Middleware
     {
-        return new Kernel\App;
+        return new Kernel\App($this->ide);
+    }
+
+    /**
+     * @psalm-mutation-free
+     */
+    public function usingIDE(IDE $ide): self
+    {
+        return new self($ide);
     }
 }

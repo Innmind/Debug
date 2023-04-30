@@ -6,6 +6,7 @@ namespace Innmind\Debug\Kernel;
 use Innmind\Debug\{
     Http,
     Recorder,
+    IDE,
 };
 use Innmind\Framework\{
     Application,
@@ -19,12 +20,19 @@ use Innmind\DI\Exception\ServiceNotFound;
  */
 final class App implements Middleware
 {
+    private IDE $ide;
+
+    public function __construct(IDE $ide)
+    {
+        $this->ide = $ide;
+    }
+
     public function __invoke(Application $app): Application
     {
         return $app
-            ->mapRequestHandler(static function($handler, $get, $os, $env) {
-                $recordAppGraph = new Http\RecordAppGraph($handler, $os);
-                $recordException = new Http\RecordException($recordAppGraph, $os);
+            ->mapRequestHandler(function($handler, $get, $os, $env) {
+                $recordAppGraph = new Http\RecordAppGraph($handler, $os, $this->ide);
+                $recordException = new Http\RecordException($recordAppGraph, $os, $this->ide);
                 $recordEnvironment = new Http\RecordEnvironment(
                     $recordException,
                     $env,

@@ -6,6 +6,7 @@ namespace Innmind\Debug\Http;
 use Innmind\Debug\{
     Recorder,
     Record,
+    IDE,
 };
 use Innmind\Framework\Http\RequestHandler;
 use Innmind\OperatingSystem\OperatingSystem;
@@ -18,6 +19,7 @@ use Innmind\Http\Message\{
 use Innmind\ObjectGraph\{
     Lookup,
     Render,
+    RewriteLocation\SublimeHandler,
 };
 
 /**
@@ -31,12 +33,18 @@ final class RecordAppGraph implements RequestHandler, Recorder
     private Render $render;
     private Lookup $lookup;
 
-    public function __construct(RequestHandler $inner, OperatingSystem $os)
-    {
+    public function __construct(
+        RequestHandler $inner,
+        OperatingSystem $os,
+        IDE $ide,
+    ) {
         $this->inner = $inner;
         $this->os = $os;
         $this->record = new Record\Nothing;
-        $this->render = Render::of();
+        $this->render = Render::of(match ($ide) {
+            IDE::sublimeText => new SublimeHandler,
+            default => null,
+        });
         $this->lookup = Lookup::of();
     }
 

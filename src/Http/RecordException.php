@@ -6,6 +6,7 @@ namespace Innmind\Debug\Http;
 use Innmind\Debug\{
     Recorder,
     Record,
+    IDE,
 };
 use Innmind\Framework\Http\RequestHandler;
 use Innmind\OperatingSystem\OperatingSystem;
@@ -18,6 +19,7 @@ use Innmind\Http\Message\{
 use Innmind\StackTrace\{
     StackTrace,
     Render,
+    Link\SublimeHandler,
 };
 
 /**
@@ -28,12 +30,20 @@ final class RecordException implements RequestHandler, Recorder
     private RequestHandler $inner;
     private OperatingSystem $os;
     private Record $record;
+    private Render $render;
 
-    public function __construct(RequestHandler $inner, OperatingSystem $os)
-    {
+    public function __construct(
+        RequestHandler $inner,
+        OperatingSystem $os,
+        IDE $ide,
+    ) {
         $this->inner = $inner;
         $this->os = $os;
         $this->record = new Record\Nothing;
+        $this->render = Render::of(match ($ide) {
+            IDE::sublimeText => new SublimeHandler,
+            default => null,
+        });
     }
 
     public function __invoke(ServerRequest $request): Response
@@ -48,7 +58,7 @@ final class RecordException implements RequestHandler, Recorder
                 ->execute(
                     Command::foreground('dot')
                         ->withShortOption('Tsvg')
-                        ->withInput(Render::of()(StackTrace::of($e))),
+                        ->withInput(($this->render)(StackTrace::of($e))),
                 )
                 ->wait()
                 ->match(
