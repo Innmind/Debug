@@ -33,21 +33,28 @@ final class App implements Middleware
     public function __invoke(Application $app): Application
     {
         return $app
-            ->mapRequestHandler(function($handler, $get, $os, $env) {
-                $path = $env->all()->filter(static fn($name) => $name === 'PATH');
+            ->service('innmind/debug.appGraph', fn($get, $os, $env) => new Recorder\AppGraph(
+                $os,
+                $env->all()->filter(static fn($name) => $name === 'PATH'),
+                $this->ide,
+            ))
+            ->service('innmind/debug.exception', fn($get, $os, $env) => new Recorder\Exception(
+                $os,
+                $env->all()->filter(static fn($name) => $name === 'PATH'),
+                $this->ide,
+                $this->formatPath,
+            ))
+            ->mapRequestHandler(static function($handler, $get, $os, $env) {
+                $appGraph = $get('innmind/debug.appGraph');
+                $exception = $get('innmind/debug.exception');
 
                 $recordAppGraph = new Http\RecordAppGraph(
                     $handler,
-                    $os,
-                    $path,
-                    $this->ide,
+                    $appGraph,
                 );
                 $recordException = new Http\RecordException(
                     $recordAppGraph,
-                    $os,
-                    $path,
-                    $this->ide,
-                    $this->formatPath,
+                    $exception,
                 );
                 $recordEnvironment = new Http\RecordEnvironment(
                     $recordException,
@@ -55,8 +62,8 @@ final class App implements Middleware
                 );
                 $recordCall = new Http\RecordCall($recordEnvironment);
                 $all = [
-                    $recordAppGraph,
-                    $recordException,
+                    $appGraph,
+                    $exception,
                     $recordEnvironment,
                     $recordCall,
                 ];
