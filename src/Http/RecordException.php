@@ -48,7 +48,7 @@ final class RecordException implements RequestHandler, Recorder
     ) {
         $this->inner = $inner;
         $this->os = $os;
-        $this->env = $env;
+        $this->env = ($env)('X_INNMIND_DEBUG', 'true');
         $this->record = new Record\Nothing;
         $this->render = Render::of(
             match ($ide) {

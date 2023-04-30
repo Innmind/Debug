@@ -37,6 +37,10 @@ final class Processes implements ProcessesInterface
 
     public function execute(Command $command): Process
     {
+        if ($command->environment()->contains('X_INNMIND_DEBUG')) {
+            return $this->inner->execute($command);
+        }
+
         return Debug::of(
             $command,
             $this->inner->execute($command),
