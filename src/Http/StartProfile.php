@@ -9,7 +9,6 @@ use Innmind\Debug\{
 };
 use Innmind\Framework\Http\RequestHandler;
 use Innmind\Profiler\Profiler;
-use Innmind\Filesystem\File\Content;
 use Innmind\Http\Message\{
     ServerRequest,
     Response,
@@ -43,16 +42,18 @@ final class StartProfile implements RequestHandler
         try {
             $this->profiler->mutate(
                 $profile,
-                static fn($mutation) => $mutation->sections()->http()->received(Content\Lines::ofContent(
-                    (new ServerRequest\Stringable($request))->toString(),
-                )),
+                static fn($mutation) => $mutation
+                    ->sections()
+                    ->http()
+                    ->received(ServerRequest\Stringable::of($request)->asContent()),
             );
             $response = ($this->inner)($request);
             $this->profiler->mutate(
                 $profile,
-                static fn($mutation) => $mutation->sections()->http()->respondedWith(Content\Lines::ofContent(
-                    (new Response\Stringable($response))->toString(),
-                )),
+                static fn($mutation) => $mutation
+                    ->sections()
+                    ->http()
+                    ->respondedWith(Response\Stringable::of($response)->asContent()),
             );
             $this->profiler->mutate(
                 $profile,
