@@ -41,31 +41,30 @@ final class RecordException implements RequestHandler, Recorder
         try {
             return ($this->inner)($request);
         } catch (\Throwable $e) {
+            $graph = $this
+                ->os
+                ->control()
+                ->processes()
+                ->execute(
+                    Command::foreground('dot')
+                        ->withShortOption('Tsvg')
+                        ->withInput(Render::of()(StackTrace::of($e))),
+                )
+                ->wait()
+                ->match(
+                    static fn($success) => Content\Chunks::of(
+                        $success
+                            ->output()
+                            ->chunks()
+                            ->map(static fn($pair) => $pair[0]),
+                    ),
+                    static fn() => Content\Lines::ofContent('Unable to render the exception graph'),
+                );
             ($this->record)(
-                fn($mutation) => $mutation
+                static fn($mutation) => $mutation
                     ->sections()
                     ->exception()
-                    ->record(
-                        $this
-                            ->os
-                            ->control()
-                            ->processes()
-                            ->execute(
-                                Command::foreground('dot')
-                                    ->withShortOption('Tsvg')
-                                    ->withInput(Render::of()(StackTrace::of($e))),
-                            )
-                            ->wait()
-                            ->match(
-                                static fn($success) => Content\Chunks::of(
-                                    $success
-                                        ->output()
-                                        ->chunks()
-                                        ->map(static fn($pair) => $pair[0]),
-                                ),
-                                static fn() => Content\Lines::ofContent('Unable to render the exception graph'),
-                            ),
-                    ),
+                    ->record($graph),
             );
 
             throw $e;

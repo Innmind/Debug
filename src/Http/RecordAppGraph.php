@@ -43,31 +43,31 @@ final class RecordAppGraph implements RequestHandler, Recorder
     public function __invoke(ServerRequest $request): Response
     {
         $response = ($this->inner)($request);
+
+        $graph = $this
+            ->os
+            ->control()
+            ->processes()
+            ->execute(
+                Command::foreground('dot')
+                    ->withShortOption('Tsvg')
+                    ->withInput(($this->render)(($this->lookup)($this->inner))),
+            )
+            ->wait()
+            ->match(
+                static fn($success) => Content\Chunks::of(
+                    $success
+                        ->output()
+                        ->chunks()
+                        ->map(static fn($pair) => $pair[0]),
+                ),
+                static fn() => Content\Lines::ofContent('Unable to render the app graph'),
+            );
         ($this->record)(
-            fn($mutation) => $mutation
+            static fn($mutation) => $mutation
                 ->sections()
                 ->appGraph()
-                ->record(
-                    $this
-                        ->os
-                        ->control()
-                        ->processes()
-                        ->execute(
-                            Command::foreground('dot')
-                                ->withShortOption('Tsvg')
-                                ->withInput(($this->render)(($this->lookup)($this->inner))),
-                        )
-                        ->wait()
-                        ->match(
-                            static fn($success) => Content\Chunks::of(
-                                $success
-                                    ->output()
-                                    ->chunks()
-                                    ->map(static fn($pair) => $pair[0]),
-                            ),
-                            static fn() => Content\Lines::ofContent('Unable to render the app graph'),
-                        ),
-                ),
+                ->record($graph),
         );
 
         return $response;
