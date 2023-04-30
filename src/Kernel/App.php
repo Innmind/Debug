@@ -37,10 +37,15 @@ final class App implements Middleware
                     $recordException,
                     $env,
                 );
+                $recordCall = new Http\RecordCall(
+                    new Record\Nothing,
+                    $recordEnvironment,
+                );
                 $all = [
                     $recordAppGraph,
                     $recordException,
                     $recordEnvironment,
+                    $recordCall,
                 ];
 
                 try {
@@ -53,7 +58,7 @@ final class App implements Middleware
                 return new Http\StartProfile(
                     $get('innmind/profiler'),
                     Recorder\All::of(...$all),
-                    $recordEnvironment,
+                    $recordCall,
                 );
             });
     }

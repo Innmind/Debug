@@ -43,21 +43,7 @@ final class StartProfile implements RequestHandler
         $this->recorder->push(Record\Profile::of($this->profiler, $profile));
 
         try {
-            $this->profiler->mutate(
-                $profile,
-                static fn($mutation) => $mutation
-                    ->sections()
-                    ->http()
-                    ->received(ServerRequest\Stringable::of($request)->asContent()),
-            );
             $response = ($this->inner)($request);
-            $this->profiler->mutate(
-                $profile,
-                static fn($mutation) => $mutation
-                    ->sections()
-                    ->http()
-                    ->respondedWith(Response\Stringable::of($response)->asContent()),
-            );
             $this->profiler->mutate(
                 $profile,
                 static fn($mutation) => match ($response->statusCode()->successful()) {
