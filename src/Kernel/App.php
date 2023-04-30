@@ -31,8 +31,20 @@ final class App implements Middleware
     {
         return $app
             ->mapRequestHandler(function($handler, $get, $os, $env) {
-                $recordAppGraph = new Http\RecordAppGraph($handler, $os, $this->ide);
-                $recordException = new Http\RecordException($recordAppGraph, $os, $this->ide);
+                $path = $env->all()->filter(static fn($name) => $name === 'PATH');
+
+                $recordAppGraph = new Http\RecordAppGraph(
+                    $handler,
+                    $os,
+                    $path,
+                    $this->ide,
+                );
+                $recordException = new Http\RecordException(
+                    $recordAppGraph,
+                    $os,
+                    $path,
+                    $this->ide,
+                );
                 $recordEnvironment = new Http\RecordEnvironment(
                     $recordException,
                     $env,

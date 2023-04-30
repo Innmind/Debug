@@ -21,6 +21,7 @@ use Innmind\StackTrace\{
     Render,
     Link\SublimeHandler,
 };
+use Innmind\Immutable\Map;
 
 /**
  * @internal
@@ -29,16 +30,23 @@ final class RecordException implements RequestHandler, Recorder
 {
     private RequestHandler $inner;
     private OperatingSystem $os;
+    /** @var Map<non-empty-string, string> */
+    private Map $env;
     private Record $record;
     private Render $render;
 
+    /**
+     * @param Map<non-empty-string, string> $env
+     */
     public function __construct(
         RequestHandler $inner,
         OperatingSystem $os,
+        Map $env,
         IDE $ide,
     ) {
         $this->inner = $inner;
         $this->os = $os;
+        $this->env = $env;
         $this->record = new Record\Nothing;
         $this->render = Render::of(match ($ide) {
             IDE::sublimeText => new SublimeHandler,
@@ -58,6 +66,7 @@ final class RecordException implements RequestHandler, Recorder
                 ->execute(
                     Command::foreground('dot')
                         ->withShortOption('Tsvg')
+                        ->withEnvironments($this->env)
                         ->withInput(($this->render)(StackTrace::of($e))),
                 )
                 ->wait()
