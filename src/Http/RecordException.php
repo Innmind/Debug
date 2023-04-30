@@ -20,6 +20,7 @@ use Innmind\StackTrace\{
     StackTrace,
     Render,
     Link\SublimeHandler,
+    FormatPath,
 };
 use Innmind\Immutable\Map;
 
@@ -43,15 +44,19 @@ final class RecordException implements RequestHandler, Recorder
         OperatingSystem $os,
         Map $env,
         IDE $ide,
+        FormatPath $formatPath,
     ) {
         $this->inner = $inner;
         $this->os = $os;
         $this->env = $env;
         $this->record = new Record\Nothing;
-        $this->render = Render::of(match ($ide) {
-            IDE::sublimeText => new SublimeHandler,
-            default => null,
-        });
+        $this->render = Render::of(
+            match ($ide) {
+                IDE::sublimeText => new SublimeHandler,
+                default => null,
+            },
+            $formatPath,
+        );
     }
 
     public function __invoke(ServerRequest $request): Response

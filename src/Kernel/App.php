@@ -13,6 +13,7 @@ use Innmind\Framework\{
     Middleware,
 };
 use Innmind\DI\Exception\ServiceNotFound;
+use Innmind\StackTrace\FormatPath;
 
 /**
  * @internal
@@ -21,10 +22,12 @@ use Innmind\DI\Exception\ServiceNotFound;
 final class App implements Middleware
 {
     private IDE $ide;
+    private FormatPath $formatPath;
 
-    public function __construct(IDE $ide)
+    public function __construct(IDE $ide, FormatPath $formatPath)
     {
         $this->ide = $ide;
+        $this->formatPath = $formatPath;
     }
 
     public function __invoke(Application $app): Application
@@ -44,6 +47,7 @@ final class App implements Middleware
                     $os,
                     $path,
                     $this->ide,
+                    $this->formatPath,
                 );
                 $recordEnvironment = new Http\RecordEnvironment(
                     $recordException,
