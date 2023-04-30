@@ -46,7 +46,7 @@ final class StartProfile implements Command
                         true => $mutation->succeed('0'),
                         false => $mutation->fail((string) $exit->toInt()),
                     },
-                    static fn() => null,
+                    static fn() => $mutation->succeed('0'),
                 ),
             );
 
