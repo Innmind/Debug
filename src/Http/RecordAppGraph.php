@@ -26,10 +26,10 @@ final class RecordAppGraph implements RequestHandler
 
     public function __invoke(ServerRequest $request): Response
     {
-        $response = ($this->inner)($request);
-
-        ($this->record)($this->inner);
-
-        return $response;
+        try {
+            return ($this->inner)($request);
+        } finally {
+            ($this->record)($this->inner);
+        }
     }
 }
