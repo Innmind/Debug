@@ -36,18 +36,16 @@ final class RecordEnvironment implements RequestHandler, Recorder
 
     public function __invoke(ServerRequest $request): Response
     {
-        try {
-            return ($this->inner)($request);
-        } catch (\Throwable $e) {
-            ($this->record)(
-                fn($mutation) => $mutation
-                    ->sections()
-                    ->environment()
-                    ->record($this->env->all()),
-            );
+        $response = ($this->inner)($request);
 
-            throw $e;
-        }
+        ($this->record)(
+            fn($mutation) => $mutation
+                ->sections()
+                ->environment()
+                ->record($this->env->all()),
+        );
+
+        return $response;
     }
 
     public function push(Record $record): void
