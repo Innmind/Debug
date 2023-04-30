@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Debug\OperatingSystem;
 
-use Innmind\Debug\Recorder\Beacon;
+use Innmind\Debug\{
+    Recorder\Beacon,
+    OperatingSystem\Remote\Http
+};
 use Innmind\OperatingSystem\Remote as RemoteInterface;
 use Innmind\Server\Control\Server;
 use Innmind\Socket\{
@@ -46,7 +49,7 @@ final class Remote implements RemoteInterface
 
     public function http(): HttpTransport
     {
-        return $this->inner->http();
+        return Http::of($this->inner->http(), $this->beacon);
     }
 
     public function sql(Url $server): Connection
