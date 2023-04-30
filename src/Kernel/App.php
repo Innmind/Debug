@@ -22,9 +22,9 @@ final class App implements Middleware
     public function __invoke(Application $app): Application
     {
         return $app
-            ->mapRequestHandler(static function($handler, $get, $_, $env) {
+            ->mapRequestHandler(static function($handler, $get, $os, $env) {
                 $recordAppGraph = new Http\RecordAppGraph($handler);
-                $recordException = new Http\RecordException($recordAppGraph);
+                $recordException = new Http\RecordException($recordAppGraph, $os);
                 $recordEnvironment = new Http\RecordEnvironment(
                     $recordException,
                     $env,
