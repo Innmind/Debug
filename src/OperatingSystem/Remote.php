@@ -7,6 +7,7 @@ use Innmind\Debug\{
     Recorder\Beacon,
     OperatingSystem\Remote\Http,
     OperatingSystem\Remote\Sql,
+    OperatingSystem\Remote\Ssh,
 };
 use Innmind\OperatingSystem\Remote as RemoteInterface;
 use Innmind\Server\Control\Server;
@@ -40,7 +41,7 @@ final class Remote implements RemoteInterface
 
     public function ssh(Url $server): Server
     {
-        return $this->inner->ssh($server);
+        return Ssh::of($this->inner->ssh($server), $this->beacon, $server);
     }
 
     public function socket(Transport $transport, Authority $authority): Maybe
