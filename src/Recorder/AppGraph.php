@@ -15,7 +15,9 @@ use Innmind\ObjectGraph\{
     Lookup,
     Render,
     RewriteLocation\SublimeHandler,
+    Graph,
 };
+use Innmind\DI\Container;
 use Innmind\Immutable\Map;
 
 /**
@@ -50,7 +52,9 @@ final class AppGraph implements Recorder
 
     public function __invoke(object $root): void
     {
-        $graph = $this
+        $graph = ($this->lookup)($root);
+        $graph = $this->clean($graph);
+        $svg = $this
             ->os
             ->control()
             ->processes()
@@ -58,7 +62,7 @@ final class AppGraph implements Recorder
                 Command::foreground('dot')
                     ->withShortOption('Tsvg')
                     ->withEnvironments($this->env)
-                    ->withInput(($this->render)(($this->lookup)($root))),
+                    ->withInput(($this->render)($graph)),
             )
             ->wait()
             ->match(
@@ -74,12 +78,43 @@ final class AppGraph implements Recorder
             static fn($mutation) => $mutation
                 ->sections()
                 ->appGraph()
-                ->record($graph),
+                ->record($svg),
         );
     }
 
     public function push(Record $record): void
     {
         $this->record = $record;
+    }
+
+    private function clean(Graph $graph): Graph
+    {
+        if ($graph->root()->class()->toString() !== Container::class) {
+            return $graph;
+        }
+
+        $children = $graph->nodes()->remove($graph->root());
+        $unwanted = $graph
+            ->root()
+            ->relations()
+            ->filter(static fn($relation) => $relation->property()->toString() !== 'services')
+            ->map(static fn($relation) => $relation->reference());
+        $toRemove = $children
+            ->filter(static fn($node) => $unwanted->any(
+                static fn($reference) => $reference->equals($node->reference()),
+            ))
+            ->flatMap(static fn($node) => $node->relations())
+            ->map(static fn($relation) => $relation->reference())
+            ->merge($unwanted);
+        $children = $children->filter(static fn($node) => !$toRemove->any(
+            static fn($reference) => $reference->equals($node->reference()),
+        ));
+
+        return Graph::of(
+            $graph
+                ->root()
+                ->filterRelation(static fn($relation) => $relation->property()->toString() === 'services'),
+            $children,
+        );
     }
 }
