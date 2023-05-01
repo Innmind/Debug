@@ -78,9 +78,29 @@ class FunctionalTest extends TestCase
                             static fn() => null,
                         );
                     $os
+                        ->control()
+                        ->processes()
+                        ->execute(Command::foreground('echo hello'))
+                        ->wait()
+                        ->match(
+                            static fn() => null,
+                            static fn() => null,
+                        );
+                    $os
                         ->remote()
                         ->http()(new Request(
                             Url::of('https://github.com'),
+                            Method::get,
+                            ProtocolVersion::v11,
+                        ))
+                        ->match(
+                            static fn() => null,
+                            static fn() => null,
+                        );
+                    $os
+                        ->remote()
+                        ->http()(new Request(
+                            Url::of('http://example.com/unknown'),
                             Method::get,
                             ProtocolVersion::v11,
                         ))
@@ -613,5 +633,55 @@ class FunctionalTest extends TestCase
             ['Environment', 'App graph'],
             $sections,
         );
+    }
+
+    public function testMakeSureCorrectCommandIsRun()
+    {
+        $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
+            ->map(Profiler::inApp($this->storage))
+            ->map(Debug::inApp()->app())
+            ->command(static fn($_, $os) => new class($os) implements CliCommand {
+                public function __construct(private $os)
+                {
+                }
+
+                public function __invoke(Console $console): Console
+                {
+                    return $console->exit(1);
+                }
+
+                public function usage(): string
+                {
+                    return 'foo';
+                }
+            })
+            ->command(static fn($_, $os) => new class($os) implements CliCommand {
+                public function __construct(private $os)
+                {
+                }
+
+                public function __invoke(Console $console): Console
+                {
+                    return $console;
+                }
+
+                public function usage(): string
+                {
+                    return 'hello-world';
+                }
+            });
+
+        $environment = $app->run(InMemory::of(
+            [],
+            true,
+            ['bin', 'hello-world'],
+            [['PATH', \getenv('PATH')]],
+            '/',
+        ));
+
+        $this->assertNull($environment->exitCode()->match(
+            static fn($exit) => $exit->toInt(),
+            static fn() => null,
+        ));
     }
 }
