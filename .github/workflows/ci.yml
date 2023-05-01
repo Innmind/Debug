@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Graphviz
+        uses: tlylt/install-graphviz@main
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
