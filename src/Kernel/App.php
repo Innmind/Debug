@@ -87,6 +87,7 @@ final class App implements Middleware
                 $recordAppGraph = new Http\RecordAppGraph(
                     $handler,
                     $appGraph,
+                    $get,
                 );
                 $recordException = new Http\RecordException(
                     $recordAppGraph,

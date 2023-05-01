@@ -9,6 +9,7 @@ use Innmind\Http\Message\{
     ServerRequest,
     Response,
 };
+use Innmind\DI\Container;
 
 /**
  * @internal
@@ -17,11 +18,16 @@ final class RecordAppGraph implements RequestHandler
 {
     private RequestHandler $inner;
     private AppGraph $record;
+    private Container $container;
 
-    public function __construct(RequestHandler $inner, AppGraph $record)
-    {
+    public function __construct(
+        RequestHandler $inner,
+        AppGraph $record,
+        Container $container,
+    ) {
         $this->inner = $inner;
         $this->record = $record;
+        $this->container = $container;
     }
 
     public function __invoke(ServerRequest $request): Response
@@ -29,7 +35,7 @@ final class RecordAppGraph implements RequestHandler
         try {
             return ($this->inner)($request);
         } finally {
-            ($this->record)($this->inner);
+            ($this->record)($this->container);
         }
     }
 }
