@@ -37,15 +37,9 @@ use Innmind\Html\{
 };
 use Innmind\Immutable\Str;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set,
-};
 
 class FunctionalTest extends TestCase
 {
-    use BlackBox;
-
     private Path $storage;
 
     public function setUp(): void
