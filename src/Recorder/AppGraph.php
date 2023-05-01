@@ -44,7 +44,7 @@ final class AppGraph implements Recorder
         $this->render = Render::of(match ($ide) {
             IDE::sublimeText => new SublimeHandler,
             default => null,
-        });
+        })->fromTopToBottom();
         $this->lookup = Lookup::of();
     }
 

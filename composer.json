@@ -20,7 +20,7 @@
         "innmind/framework": "~1.2",
         "innmind/http": "~6.3",
         "innmind/stack-trace": "~4.0",
-        "innmind/object-graph": "~3.0"
+        "innmind/object-graph": "~3.1"
     },
     "autoload": {
         "psr-4": {
