@@ -14,71 +14,41 @@ composer require --dev innmind/debug
 
 ## Usage
 
-### Http
-
 ```php
-use Innmind\HttpServer\Main;
-use Innmind\Http\Message\{
-    ServerRequest,
-    Response,
-    Environment,
+use Innmind\Framework\{
+    Application,
+    Main\Http, // this example also works with Main\Cli
+    Middleware\Optional,
 };
-use Innmind\OperatingSystem\OperatingSystem;
-use Innmind\Url\Url;
-use function Innmind\Debug\bootstrap;
+use Innmind\Profiler\Web\Kernel as Profiler;
+use Innmind\Debug\Kernel as Debug;
+use Innmind\Url\Path;
 
-new class extends Main {
-    private $handle;
-
-    protected function preload(OperatingSystem $os, Environment $env): void
+new class extends Http {
+    protected function configure(Application $app): Application
     {
-        $debug = debug($os, Url::of('http://localhost:8000')); // replace with the profiler url
-
-        $handle = bootstrapYourApp($debug['os']()); // $handle must be an instance of Innmind\HttpFramework\RequestHandler
-        $this->handle = $debug['http']($handle);
-    }
-
-    protected function main(ServerRequest $request): Response
-    {
-        return ($this->handle)($request);
+        return $app
+            ->map(Optional::of(
+                Debug::class,
+                static fn() => Debug::inApp()->operatingSystem(),
+            ))
+            ->map(new YourAppKernel)
+            ->map(Optional::of(
+                Profiler::class,
+                static fn() => Profiler::inApp(Path::of('var/profiler/')),
+            ))
+            ->map(Optional::of(
+                Debug::class,
+                static fn() => Debug::inApp()->app(),
+            ));
     }
 };
 ```
 
-`bootstrapYourApp` is the function that create the request handler that is your whole app, replace this line by your real code.
+The first middleware will record calls to the operating system, you can omit this middleware if you don't want to record it. This middleware is defined first so all decorators to the `OperatingSystem` will be recorded, such as redirections for http calls.
 
-By using `$debug['os']()` in your app it allows to logs in the profiler all processes and http requests made, and add most calls to the os in the call graph.
+> **Note** if you don't want to record low level calls to the OS but the one initiated by your app you can define a single middleware via `Optional::of(Debug::class, static fn() => Debug::inApp())` as the last middleware.
 
-`$debug['http']()` wraps your request handler in order to automatically start a profile when a request is received and finish it when a response is sent or an exception is thrown.
+The `Profiler` middleware adds the route `GET /_profiler/` where you'll find all the recorded profiles. The profiles are stored in the local `var/profiler/` in clear text.
 
-### CLI
-
-```php
-use Innmind\CLI\{
-    Main,
-    Environment,
-    Commands,
-};
-use Innmind\OperatingSystem\OperatingSystem;
-use Innmind\Url\Url;
-use function Innmind\Immutable\unwrap;
-use function Innmind\Debug\bootstrap;
-
-new class extends Main {
-    protected function main(Environment $env, OperatingSystem $os): void
-    {
-        $debug = debug($os, Url::of('http://localhost:8000')); // replace with the profiler url
-
-        $commands = bootstrapYourCommands($debug['os']()); // $commands bus be a set<Innmind\CLI\Command>
-
-        $run = new Commands(...unwrap($debug['cli'](...$commands)));
-        $run($env);
-    }
-};
-```
-
-`bootstrapYourCommands` is the function that create all the commands available in your app, replace this line by your real code.
-
-By using `$debug['os']()` in your app it allows to logs in the profiler all processes and http requests made, and add most calls to the os in the call graph.
-
-`$debug['cli']()` wraps all your commands in order to automatically start a profile when a command is executed and finish it when the command is finished or an exception is thrown.
+The last middleware is the one that initiates the recording of profiles.
