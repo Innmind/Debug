@@ -8,30 +8,24 @@
     "authors": [
         {
             "name": "Baptiste Langlade",
-            "email": "langlade.baptiste@gmail.com"
+            "email": "baptiste.langlade@hey.com"
         }
     ],
     "support": {
         "issues": "http://github.com/Innmind/Debug/issues"
     },
     "require": {
-        "php": "~7.4|~8.0",
-        "innmind/rest-client": "~8.0",
-        "innmind/http-framework": "~2.0",
-        "innmind/stack-trace": "~3.0",
-        "innmind/object-graph": "~2.0",
-        "innmind/cli": "~2.0",
-        "innmind/immutable": "~3.5",
-        "innmind/operating-system": "~2.0",
-        "innmind/json": "^1.1",
-        "innmind/command-bus": "~4.0",
-        "innmind/event-bus": "~4.0"
+        "php": "~8.1",
+        "innmind/profiler": "^3.0.2",
+        "innmind/framework": "~1.2",
+        "innmind/http": "~6.3",
+        "innmind/stack-trace": "~4.0",
+        "innmind/object-graph": "~3.1"
     },
     "autoload": {
         "psr-4": {
             "Innmind\\Debug\\": "src/"
-        },
-        "files": ["src/bootstrap.php"]
+        }
     },
     "autoload-dev": {
         "psr-4": {
@@ -40,7 +34,10 @@
     },
     "require-dev": {
         "phpunit/phpunit": "~9.0",
-        "vimeo/psalm": "~4.4",
-        "innmind/coding-standard": "^1.1"
+        "vimeo/psalm": "~5.6",
+        "innmind/coding-standard": "~2.0"
+    },
+    "provide": {
+        "innmind/framework-middlewares": "1.0"
     }
 }
