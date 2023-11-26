@@ -15,7 +15,7 @@
         "issues": "http://github.com/Innmind/Debug/issues"
     },
     "require": {
-        "php": "~8.1",
+        "php": "~8.2",
         "innmind/profiler": "~4.0",
         "innmind/framework": "~2.0",
         "innmind/http": "~7.0",
