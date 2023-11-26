@@ -631,7 +631,6 @@ class FunctionalTest extends TestCase
 
     public function testMakeSureCorrectCommandIsRun()
     {
-        var_dump(\getenv('PATH'));
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app())
