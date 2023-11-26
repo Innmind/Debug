@@ -9,6 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
     name: 'BlackBox'
     steps:
       - name: Checkout
@@ -21,6 +22,8 @@ jobs:
           coverage: none
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: BlackBox
         run: php blackbox.php
   coverage:
@@ -29,6 +32,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
     name: 'Coverage'
     steps:
       - name: Checkout
@@ -41,6 +45,8 @@ jobs:
           coverage: xdebug
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: BlackBox
         run: php blackbox.php
         env:
