@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Graphviz
+        uses: tlylt/install-graphviz@main
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -37,6 +39,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Graphviz
+        uses: tlylt/install-graphviz@main
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
