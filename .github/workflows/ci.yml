@@ -3,29 +3,54 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  phpunit:
+  blackbox:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         php-version: ['8.2', '8.3']
-    name: 'PHPUnit'
+        dependencies: ['lowest', 'highest']
+    name: 'BlackBox'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Graphviz
-        uses: tlylt/install-graphviz@main
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: none
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+  coverage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
+    name: 'Coverage'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
           extensions: mbstring, intl
           coverage: xdebug
-          ini-values: xdebug.max_nesting_level=2048
       - name: Composer
         uses: "ramsey/composer-install@v2"
-      - name: PHPUnit
-        run: vendor/bin/phpunit --coverage-clover=coverage.clover
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+        env:
+          ENABLE_COVERAGE: 'true'
       - uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
