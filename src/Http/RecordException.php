@@ -5,7 +5,7 @@ namespace Innmind\Debug\Http;
 
 use Innmind\Debug\Recorder\Exception;
 use Innmind\Framework\Http\RequestHandler;
-use Innmind\Http\Message\{
+use Innmind\Http\{
     ServerRequest,
     Response,
 };

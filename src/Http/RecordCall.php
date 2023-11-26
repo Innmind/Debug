@@ -8,7 +8,7 @@ use Innmind\Debug\{
     Record,
 };
 use Innmind\Framework\Http\RequestHandler;
-use Innmind\Http\Message\{
+use Innmind\Http\{
     ServerRequest,
     Response,
 };
@@ -33,14 +33,14 @@ final class RecordCall implements RequestHandler, Recorder
             static fn($mutation) => $mutation
                 ->sections()
                 ->http()
-                ->received(ServerRequest\Stringable::of($request)->asContent()),
+                ->received(ServerRequest\Stringable::new()($request)),
         );
         $response = ($this->inner)($request);
         ($this->record)(
             static fn($mutation) => $mutation
                 ->sections()
                 ->http()
-                ->respondedWith(Response\Stringable::of($response)->asContent()),
+                ->respondedWith(Response\Stringable::new()($response)),
         );
 
         return $response;

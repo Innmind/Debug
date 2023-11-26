@@ -65,13 +65,13 @@ final class Exception implements Recorder
             )
             ->wait()
             ->match(
-                static fn($success) => Content\Chunks::of(
+                static fn($success) => Content::ofChunks(
                     $success
                         ->output()
                         ->chunks()
                         ->map(static fn($pair) => $pair[0]),
                 ),
-                static fn() => Content\Lines::ofContent('Unable to render the exception graph'),
+                static fn() => Content::ofString('Unable to render the exception graph'),
             );
         ($this->record)(
             static fn($mutation) => $mutation

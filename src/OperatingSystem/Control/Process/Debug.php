@@ -87,7 +87,7 @@ final class Debug implements Process
                     static fn($mutation) => $mutation
                         ->sections()
                         ->processes()
-                        ->record(Content\Chunks::of($content)),
+                        ->record(Content::ofChunks($content)),
                 );
 
                 return $success;
@@ -119,7 +119,7 @@ final class Debug implements Process
                     static fn($mutation) => $mutation
                         ->sections()
                         ->processes()
-                        ->record(Content\Chunks::of($content)),
+                        ->record(Content::ofChunks($content)),
                 );
 
                 return $error;

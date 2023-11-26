@@ -9,7 +9,7 @@ use Innmind\Debug\{
 };
 use Innmind\Framework\Http\RequestHandler;
 use Innmind\Profiler\Profiler;
-use Innmind\Http\Message\{
+use Innmind\Http\{
     ServerRequest,
     Response,
 };

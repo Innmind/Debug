@@ -16,9 +16,9 @@
     },
     "require": {
         "php": "~8.1",
-        "innmind/profiler": "^3.0.2",
-        "innmind/framework": "~1.2",
-        "innmind/http": "~6.3",
+        "innmind/profiler": "~4.0",
+        "innmind/framework": "~2.0",
+        "innmind/http": "~7.0",
         "innmind/stack-trace": "~4.0",
         "innmind/object-graph": "~3.1"
     },
