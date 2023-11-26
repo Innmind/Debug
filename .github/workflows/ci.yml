@@ -1,18 +1,44 @@
 name: CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
-  phpunit:
+  blackbox:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest]
-        php-version: ['8.1', '8.2']
-    name: 'PHPUnit'
+        php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
+    name: 'BlackBox'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+      - name: Graphviz
+        uses: tlylt/install-graphviz@main
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: none
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+  coverage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
+    name: 'Coverage'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Graphviz
         uses: tlylt/install-graphviz@main
       - name: Setup PHP
@@ -21,23 +47,27 @@ jobs:
           php-version: ${{ matrix.php-version }}
           extensions: mbstring, intl
           coverage: xdebug
-          ini-values: xdebug.max_nesting_level=2048
       - name: Composer
         uses: "ramsey/composer-install@v2"
-      - name: PHPUnit
-        run: vendor/bin/phpunit --coverage-clover=coverage.clover
-      - uses: codecov/codecov-action@v1
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+        env:
+          ENABLE_COVERAGE: 'true'
+      - uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   psalm:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1', '8.2']
+        php-version: ['8.2', '8.3']
+        dependencies: ['lowest', 'highest']
     name: 'Psalm'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -45,17 +75,19 @@ jobs:
           extensions: mbstring, intl
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: Psalm
         run: vendor/bin/psalm --shepherd
   cs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1']
+        php-version: ['8.2']
     name: 'CS'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:

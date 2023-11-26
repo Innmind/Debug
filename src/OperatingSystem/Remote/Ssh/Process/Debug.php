@@ -98,7 +98,7 @@ final class Debug implements Process
                         ->sections()
                         ->remote()
                         ->processes()
-                        ->record(Content\Chunks::of($content)),
+                        ->record(Content::ofChunks($content)),
                 );
 
                 return $success;
@@ -134,7 +134,7 @@ final class Debug implements Process
                         ->sections()
                         ->remote()
                         ->processes()
-                        ->record(Content\Chunks::of($content)),
+                        ->record(Content::ofChunks($content)),
                 );
 
                 return $error;

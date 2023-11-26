@@ -47,7 +47,8 @@ new class extends Http {
 
 The first middleware will record calls to the operating system, you can omit this middleware if you don't want to record it. This middleware is defined first so all decorators to the `OperatingSystem` will be recorded, such as redirections for http calls.
 
-> **Note** if you don't want to record low level calls to the OS but the one initiated by your app you can define a single middleware via `Optional::of(Debug::class, static fn() => Debug::inApp())` as the last middleware.
+> [!NOTE]
+> if you don't want to record low level calls to the OS but the one initiated by your app you can define a single middleware via `Optional::of(Debug::class, static fn() => Debug::inApp())` as the last middleware.
 
 The `Profiler` middleware adds the route `GET /_profiler/` where you'll find all the recorded profiles. The profiles are stored in the local `var/profiler/` in clear text.
 

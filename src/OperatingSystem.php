@@ -39,6 +39,14 @@ final class OperatingSystem implements OS
         return new self($inner, $beacon);
     }
 
+    public function map(callable $map): self
+    {
+        return new self(
+            $this->inner->map($map),
+            $this->beacon,
+        );
+    }
+
     public function clock(): Clock
     {
         return $this->inner->clock();

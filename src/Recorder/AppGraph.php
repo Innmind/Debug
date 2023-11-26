@@ -66,13 +66,13 @@ final class AppGraph implements Recorder
             )
             ->wait()
             ->match(
-                static fn($success) => Content\Chunks::of(
+                static fn($success) => Content::ofChunks(
                     $success
                         ->output()
                         ->chunks()
                         ->map(static fn($pair) => $pair[0]),
                 ),
-                static fn() => Content\Lines::ofContent('Unable to render the app graph'),
+                static fn() => Content::ofString('Unable to render the app graph'),
             );
         ($this->record)(
             static fn($mutation) => $mutation

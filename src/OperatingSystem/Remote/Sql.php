@@ -46,7 +46,7 @@ final class Sql implements Connection
                 ->sections()
                 ->remote()
                 ->sql()
-                ->record(Content\Chunks::of(
+                ->record(Content::ofChunks(
                     Sequence::of($query->sql())
                         ->add("\n")
                         ->map(Str::of(...))

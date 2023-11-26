@@ -18,11 +18,11 @@ use Innmind\OperatingSystem\Factory;
 use Innmind\Filesystem\Adapter\Filesystem;
 use Innmind\Server\Control\Server\Command;
 use Innmind\Http\{
-    Message\ServerRequest\ServerRequest,
-    Message\Request\Request,
-    Message\Response\Response,
-    Message\Method,
-    Message\StatusCode,
+    ServerRequest,
+    Request,
+    Response,
+    Method,
+    Response\StatusCode,
     ProtocolVersion,
 };
 use Innmind\Router\Route;
@@ -36,7 +36,7 @@ use Innmind\Html\{
     Visitor\Element,
 };
 use Innmind\Immutable\Str;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class FunctionalTest extends TestCase
 {
@@ -50,7 +50,7 @@ class FunctionalTest extends TestCase
     public function tearDown(): void
     {
         $storage = Filesystem::mount($this->storage);
-        $storage->root()->files()->foreach(
+        $storage->root()->all()->foreach(
             static fn($file) => $storage->remove($file->name()),
         );
     }
@@ -82,7 +82,7 @@ class FunctionalTest extends TestCase
                         );
                     $os
                         ->remote()
-                        ->http()(new Request(
+                        ->http()(Request::of(
                             Url::of('https://github.com'),
                             Method::get,
                             ProtocolVersion::v11,
@@ -93,7 +93,7 @@ class FunctionalTest extends TestCase
                         );
                     $os
                         ->remote()
-                        ->http()(new Request(
+                        ->http()(Request::of(
                             Url::of('http://example.com/unknown'),
                             Method::get,
                             ProtocolVersion::v11,
@@ -108,7 +108,7 @@ class FunctionalTest extends TestCase
             ));
 
         try {
-            $app->run(new ServerRequest(
+            $app->run(ServerRequest::of(
                 Url::of('/'),
                 Method::get,
                 ProtocolVersion::v11,
@@ -118,7 +118,7 @@ class FunctionalTest extends TestCase
             $this->assertSame('foo', $e->getMessage());
         }
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
@@ -136,7 +136,7 @@ class FunctionalTest extends TestCase
             );
         $this->assertNotNull($profile);
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             $profile,
             Method::get,
             ProtocolVersion::v11,
@@ -183,7 +183,7 @@ class FunctionalTest extends TestCase
                         );
                     $os
                         ->remote()
-                        ->http()(new Request(
+                        ->http()(Request::of(
                             Url::of('https://github.com'),
                             Method::get,
                             ProtocolVersion::v11,
@@ -198,7 +198,7 @@ class FunctionalTest extends TestCase
             ));
 
         try {
-            $app->run(new ServerRequest(
+            $app->run(ServerRequest::of(
                 Url::of('/'),
                 Method::get,
                 ProtocolVersion::v11,
@@ -208,7 +208,7 @@ class FunctionalTest extends TestCase
             $this->assertSame('foo', $e->getMessage());
         }
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
@@ -226,7 +226,7 @@ class FunctionalTest extends TestCase
             );
         $this->assertNotNull($profile);
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             $profile,
             Method::get,
             ProtocolVersion::v11,
@@ -263,14 +263,14 @@ class FunctionalTest extends TestCase
             ->map(Debug::inApp()->app())
             ->appendRoutes(static fn($routes, $_, $os) => $routes->add(
                 Route::literal('GET /')->handle(static function($request) use ($os) {
-                    return new Response(
+                    return Response::of(
                         StatusCode::ok,
                         $request->protocolVersion(),
                     );
                 }),
             ));
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             Url::of('/'),
             Method::get,
             ProtocolVersion::v11,
@@ -278,7 +278,7 @@ class FunctionalTest extends TestCase
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
@@ -296,7 +296,7 @@ class FunctionalTest extends TestCase
             );
         $this->assertNotNull($profile);
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             $profile,
             Method::get,
             ProtocolVersion::v11,
@@ -350,7 +350,7 @@ class FunctionalTest extends TestCase
                     $this
                         ->os
                         ->remote()
-                        ->http()(new Request(
+                        ->http()(Request::of(
                             Url::of('https://github.com'),
                             Method::get,
                             ProtocolVersion::v11,
@@ -387,7 +387,7 @@ class FunctionalTest extends TestCase
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app());
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
@@ -405,7 +405,7 @@ class FunctionalTest extends TestCase
             );
         $this->assertNotNull($profile);
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             $profile,
             Method::get,
             ProtocolVersion::v11,
@@ -459,7 +459,7 @@ class FunctionalTest extends TestCase
                     $this
                         ->os
                         ->remote()
-                        ->http()(new Request(
+                        ->http()(Request::of(
                             Url::of('https://github.com'),
                             Method::get,
                             ProtocolVersion::v11,
@@ -496,7 +496,7 @@ class FunctionalTest extends TestCase
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app());
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
@@ -514,7 +514,7 @@ class FunctionalTest extends TestCase
             );
         $this->assertNotNull($profile);
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             $profile,
             Method::get,
             ProtocolVersion::v11,
@@ -582,7 +582,7 @@ class FunctionalTest extends TestCase
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app());
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
@@ -600,7 +600,7 @@ class FunctionalTest extends TestCase
             );
         $this->assertNotNull($profile);
 
-        $response = $app->run(new ServerRequest(
+        $response = $app->run(ServerRequest::of(
             $profile,
             Method::get,
             ProtocolVersion::v11,

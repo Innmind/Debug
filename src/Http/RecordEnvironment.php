@@ -11,7 +11,7 @@ use Innmind\Framework\{
     Http\RequestHandler,
     Environment,
 };
-use Innmind\Http\Message\{
+use Innmind\Http\{
     ServerRequest,
     Response,
 };

@@ -14,7 +14,7 @@ use Innmind\HttpTransport\{
     ConnectionFailed,
     Failure,
 };
-use Innmind\Http\Message\{
+use Innmind\Http\{
     Request,
     Response,
 };
@@ -43,30 +43,31 @@ final class Http implements Transport
                 ->sections()
                 ->remote()
                 ->http()
-                ->sent(Request\Stringable::of($request)->asContent()),
+                ->sent(Request\Stringable::new()($request)),
         );
+        $toString = Response\Stringable::new();
 
         return ($this->inner)($request)
-            ->map(static function($success) use ($record) {
+            ->map(static function($success) use ($record, $toString) {
                 $record(
                     static fn($mutation) => $mutation
                         ->sections()
                         ->remote()
                         ->http()
-                        ->got(Response\Stringable::of($success->response())->asContent()),
+                        ->got($toString($success->response())),
                 );
 
                 return $success;
             })
-            ->leftMap(static function($error) use ($record) {
+            ->leftMap(static function($error) use ($record, $toString) {
                 $got = match (true) {
-                    $error instanceof Information => Response\Stringable::of($error->response())->asContent(),
-                    $error instanceof Redirection => Response\Stringable::of($error->response())->asContent(),
-                    $error instanceof ClientError => Response\Stringable::of($error->response())->asContent(),
-                    $error instanceof ServerError => Response\Stringable::of($error->response())->asContent(),
-                    $error instanceof MalformedResponse => Content\Lines::ofContent('malformed response'),
-                    $error instanceof ConnectionFailed => Content\Lines::ofContent($error->reason()),
-                    $error instanceof Failure => Content\Lines::ofContent($error->reason()),
+                    $error instanceof Information => $toString($error->response()),
+                    $error instanceof Redirection => $toString($error->response()),
+                    $error instanceof ClientError => $toString($error->response()),
+                    $error instanceof ServerError => $toString($error->response()),
+                    $error instanceof MalformedResponse => Content::ofString('malformed response'),
+                    $error instanceof ConnectionFailed => Content::ofString($error->reason()),
+                    $error instanceof Failure => Content::ofString($error->reason()),
                 };
                 $record(
                     static fn($mutation) => $mutation
