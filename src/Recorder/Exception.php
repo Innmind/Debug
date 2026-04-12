@@ -17,7 +17,11 @@ use Innmind\StackTrace\{
     Link\SublimeHandler,
     FormatPath,
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\{
+    Map,
+    Attempt,
+    SideEffect,
+};
 
 /**
  * @internal
@@ -51,7 +55,10 @@ final class Exception implements Recorder
         );
     }
 
-    public function __invoke(\Throwable $e): void
+    /**
+     * @return Attempt<SideEffect>
+     */
+    public function __invoke(\Throwable $e): Attempt
     {
         $graph = $this
             ->os
@@ -63,17 +70,18 @@ final class Exception implements Recorder
                     ->withEnvironments($this->env)
                     ->withInput(($this->render)(StackTrace::of($e))),
             )
-            ->wait()
+            ->maybe()
+            ->flatMap(static fn($process) => $process->wait()->maybe())
             ->match(
                 static fn($success) => Content::ofChunks(
                     $success
                         ->output()
-                        ->chunks()
-                        ->map(static fn($pair) => $pair[0]),
+                        ->map(static fn($chunk) => $chunk->data()),
                 ),
                 static fn() => Content::ofString('Unable to render the exception graph'),
             );
-        ($this->record)(
+
+        return ($this->record)(
             static fn($mutation) => $mutation
                 ->sections()
                 ->exception()
@@ -81,6 +89,7 @@ final class Exception implements Recorder
         );
     }
 
+    #[\Override]
     public function push(Record $record): void
     {
         $this->record = $record;

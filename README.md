@@ -1,6 +1,6 @@
 # Debug
 
-[![Build Status](https://github.com/Innmind/Debug/workflows/CI/badge.svg?branch=master)](https://github.com/Innmind/Debug/actions?query=workflow%3ACI)
+[![CI](https://github.com/Innmind/Debug/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Innmind/Debug/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/Innmind/Debug/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/Debug)
 [![Type Coverage](https://shepherd.dev/github/Innmind/Debug/coverage.svg)](https://shepherd.dev/github/Innmind/Debug)
 

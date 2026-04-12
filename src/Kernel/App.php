@@ -9,6 +9,7 @@ use Innmind\Debug\{
     Recorder,
     IDE,
 };
+use Innmind\Profiler;
 use Innmind\Framework\{
     Application,
     Middleware,
@@ -31,92 +32,65 @@ final class App implements Middleware
         $this->formatPath = $formatPath;
     }
 
+    #[\Override]
     public function __invoke(Application $app): Application
     {
         return $app
-            ->service('innmind/debug.appGraph', fn($get, $os, $env) => new Recorder\AppGraph(
-                $os,
-                $env->all()->filter(static fn($name) => $name === 'PATH'),
-                $this->ide,
-            ))
-            ->service('innmind/debug.exception', fn($get, $os, $env) => new Recorder\Exception(
+            ->service(Services::exception, fn($get, $os, $env) => new Recorder\Exception(
                 $os,
                 $env->all()->filter(static fn($name) => $name === 'PATH'),
                 $this->ide,
                 $this->formatPath,
             ))
-            ->mapCommand(static function($command, $get, $os, $env) {
-                $appGraph = $get('innmind/debug.appGraph');
-                $exception = $get('innmind/debug.exception');
-
-                $recordAppGraph = new Cli\RecordAppGraph(
-                    $command,
-                    $appGraph,
-                );
-                $recordException = new Cli\RecordException(
-                    $recordAppGraph,
-                    $exception,
-                );
-                $recordEnvironment = new Cli\RecordEnvironment(
-                    $recordException,
-                    $env,
-                );
-                $all = [
-                    $appGraph,
-                    $exception,
-                    $recordEnvironment,
-                ];
-
+            ->service(Services::httpEndProfile, static fn() => Http\EndProfile::new())
+            ->service(Services::httpEnvironment, static fn($_, $__, $env) => Http\RecordEnvironment::of($env))
+            ->service(Services::httpException, static fn($get) => Http\RecordException::of(
+                $get(Services::exception()),
+            ))
+            ->service(Services::httpRecorder, static function($get) {
                 try {
-                    $all[] = $get('innmind/debug.beacon');
-                } catch (ServiceNotFound $e) {
-                    // pass
+                    $os = [$get(Services::beacon())];
+                } catch (ServiceNotFound) {
                     // this means the user didn't use the OS kernel
+                    $os = [];
                 }
 
-                return new Cli\StartProfile(
-                    $get('innmind/profiler'),
-                    Recorder\All::of(...$all),
-                    $recordEnvironment,
+                return Recorder\All::of(
+                    $get(Services::httpEndProfile()),
+                    $get(Services::httpEnvironment()),
+                    $get(Services::httpException()),
+                    ...$os,
                 );
             })
-            ->mapRequestHandler(static function($handler, $get, $os, $env) {
-                $appGraph = $get('innmind/debug.appGraph');
-                $exception = $get('innmind/debug.exception');
-
-                $recordAppGraph = new Http\RecordAppGraph(
-                    $handler,
-                    $appGraph,
-                    $get,
-                );
-                $recordException = new Http\RecordException(
-                    $recordAppGraph,
-                    $exception,
-                );
-                $recordEnvironment = new Http\RecordEnvironment(
-                    $recordException,
-                    $env,
-                );
-                $recordCall = new Http\RecordCall($recordEnvironment);
-                $all = [
-                    $appGraph,
-                    $exception,
-                    $recordEnvironment,
-                    $recordCall,
-                ];
-
+            ->service(Services::cliRecorder, static function($get) {
                 try {
-                    $all[] = $get('innmind/debug.beacon');
-                } catch (ServiceNotFound $e) {
-                    // pass
+                    $os = [$get(Services::beacon())];
+                } catch (ServiceNotFound) {
                     // this means the user didn't use the OS kernel
+                    $os = [];
                 }
 
-                return new Http\StartProfile(
-                    $get('innmind/profiler'),
-                    Recorder\All::of(...$all),
-                    $recordCall,
+                return Recorder\All::of(
+                    $get(Services::exception()),
+                    ...$os,
                 );
-            });
+            })
+            ->mapCommand(static fn($command, $get) => Cli\Record::of(
+                $command,
+                $get(Profiler\Web\Services::profiler()),
+                $get(Services::cliRecorder()),
+                $get(Services::exception()),
+            ))
+            ->mapRoutes(
+                static fn($route, $get) => Http\StartProfile::of(
+                    $get(Profiler\Web\Services::profiler()),
+                    $get(Services::httpRecorder()),
+                )
+                    ->pipe($get(Services::httpEnvironment()))
+                    ->pipe($route)
+                    ->otherwise($get(Services::httpException()))
+                    ->pipe($get(Services::httpEndProfile()))
+                    ->pipe(Http\FreeProfile::of($get(Services::httpRecorder()))),
+            );
     }
 }

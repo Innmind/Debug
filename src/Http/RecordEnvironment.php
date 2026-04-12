@@ -7,49 +7,49 @@ use Innmind\Debug\{
     Recorder,
     Record,
 };
-use Innmind\Framework\{
-    Http\RequestHandler,
-    Environment,
-};
-use Innmind\Http\{
-    ServerRequest,
-    Response,
-};
+use Innmind\Framework\Environment;
+use Innmind\Router\Component;
+use Innmind\Http\ServerRequest;
+use Innmind\Immutable\SideEffect;
 
 /**
  * @internal
+ * @psalm-immutable
+ * @implements Component\Provider<SideEffect, SideEffect>
  */
-final class RecordEnvironment implements RequestHandler, Recorder
+final class RecordEnvironment implements Recorder, Component\Provider
 {
-    private Record $record;
-    private RequestHandler $inner;
-    private Environment $env;
-
-    public function __construct(
-        RequestHandler $inner,
-        Environment $env,
+    private function __construct(
+        private Environment $env,
+        private Record $record = new Record\Nothing,
     ) {
-        $this->record = new Record\Nothing;
-        $this->inner = $inner;
-        $this->env = $env;
     }
 
-    public function __invoke(ServerRequest $request): Response
+    /**
+     * @internal
+     */
+    public static function of(Environment $env): self
     {
-        try {
-            return ($this->inner)($request);
-        } finally {
-            ($this->record)(
+        return new self($env);
+    }
+
+    #[\Override]
+    public function push(Record $record): void
+    {
+        /** @psalm-suppress InaccessibleProperty */
+        $this->record = $record;
+    }
+
+    #[\Override]
+    public function toComponent(): Component
+    {
+        return Component::of(
+            fn(ServerRequest $request, SideEffect $input) => ($this->record)(
                 fn($mutation) => $mutation
                     ->sections()
                     ->environment()
                     ->record($this->env->all()),
-            );
-        }
-    }
-
-    public function push(Record $record): void
-    {
-        $this->record = $record;
+            )->map(static fn() => $input),
+        );
     }
 }
