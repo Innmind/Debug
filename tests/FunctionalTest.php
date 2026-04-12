@@ -53,7 +53,7 @@ class FunctionalTest extends TestCase
 
     public function setUp(): void
     {
-        $this->storage = Path::of(\sys_get_temp_dir().'/innmind_debug/');
+        $this->storage = Path::of(\dirname(__DIR__).'/var/');
     }
 
     public function tearDown(): void
