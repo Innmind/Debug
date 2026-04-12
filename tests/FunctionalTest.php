@@ -59,9 +59,13 @@ class FunctionalTest extends TestCase
     public function tearDown(): void
     {
         $storage = Adapter::mount($this->storage)->unwrap();
-        $_ = $storage->root()->foreach(
-            static fn($file) => $storage->remove($file->name()),
-        );
+        $_ = $storage
+            ->root()
+            ->all()
+            ->exclude(static fn($file) => $file->name()->toString() === '.gitkeep')
+            ->foreach(
+                static fn($file) => $storage->remove($file->name()),
+            );
     }
 
     public function testRecordHttpContext()
