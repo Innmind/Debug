@@ -60,8 +60,6 @@ final class Exception implements Recorder
      */
     public function __invoke(\Throwable $e): Attempt
     {
-        $content = ($this->render)(StackTrace::of($e));
-        dump($content->toString());
         $graph = $this
             ->os
             ->control()
@@ -70,7 +68,7 @@ final class Exception implements Recorder
                 Command::foreground('dot')
                     ->withShortOption('Tsvg')
                     ->withEnvironments($this->env)
-                    ->withInput($content),
+                    ->withInput(($this->render)(StackTrace::of($e))),
             )
             ->maybe()
             ->flatMap(static fn($process) => $process->wait()->maybe())
