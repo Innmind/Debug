@@ -25,6 +25,7 @@ final class Beacon implements Recorder
         return $this->record;
     }
 
+    #[\Override]
     public function push(Record $record): void
     {
         $this->record = $record;
