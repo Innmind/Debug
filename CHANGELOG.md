@@ -11,6 +11,7 @@
 ### Removed
 
 - App graph is no longer recorded
+- The processes output and exit code are not recorded
 
 ## 4.0.0 - 2023-11-26
 
