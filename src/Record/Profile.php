@@ -8,6 +8,7 @@ use Innmind\Profiler\{
     Profiler,
     Profile\Id,
 };
+use Innmind\Immutable\Attempt;
 
 /**
  * @internal
@@ -23,9 +24,10 @@ final class Profile implements Record
         $this->profile = $profile;
     }
 
-    public function __invoke(callable $mutation): void
+    #[\Override]
+    public function __invoke(callable $mutation): Attempt
     {
-        $this->profiler->mutate($this->profile, $mutation);
+        return $this->profiler->mutate($this->profile, $mutation);
     }
 
     public static function of(Profiler $profiler, Id $profile): self

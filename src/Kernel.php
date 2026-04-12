@@ -21,6 +21,7 @@ final class Kernel implements Middleware
         $this->formatPath = $formatPath;
     }
 
+    #[\Override]
     public function __invoke(Application $app): Application
     {
         return $app

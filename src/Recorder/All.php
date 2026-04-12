@@ -32,6 +32,7 @@ final class All implements Recorder
         return new self($recorders);
     }
 
+    #[\Override]
     public function push(Record $record): void
     {
         foreach ($this->recorders as $recorder) {

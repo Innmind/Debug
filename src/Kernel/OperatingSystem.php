@@ -5,7 +5,7 @@ namespace Innmind\Debug\Kernel;
 
 use Innmind\Debug\{
     Recorder\Beacon,
-    OperatingSystem as Debug,
+    OperatingSystem\Debug,
 };
 use Innmind\Framework\{
     Application,
@@ -17,12 +17,13 @@ use Innmind\Framework\{
  */
 final class OperatingSystem implements Middleware
 {
+    #[\Override]
     public function __invoke(Application $app): Application
     {
         $beacon = new Beacon;
 
         return $app
-            ->service('innmind/debug.beacon', static fn() => $beacon)
-            ->mapOperatingSystem(static fn($os) => Debug::of($os, $beacon));
+            ->service(Services::beacon, static fn() => $beacon)
+            ->mapOperatingSystem(static fn($os) => $os->map(Debug::of($beacon)));
     }
 }

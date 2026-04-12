@@ -11,11 +11,12 @@ use Innmind\Framework\{
 };
 use Innmind\CLI\{
     Command as CliCommand,
+    Command\Usage,
     Console,
-    Environment\InMemory,
+    Environment as CliEnvironment,
 };
 use Innmind\OperatingSystem\Factory;
-use Innmind\Filesystem\Adapter\Filesystem;
+use Innmind\Filesystem\Adapter;
 use Innmind\Server\Control\Server\Command;
 use Innmind\Http\{
     ServerRequest,
@@ -25,18 +26,26 @@ use Innmind\Http\{
     Response\StatusCode,
     ProtocolVersion,
 };
-use Innmind\Router\Route;
+use Innmind\DI\Service;
 use Innmind\Url\{
     Url,
     Path,
 };
 use Innmind\Html\{
-    Reader\Reader,
+    Reader,
     Visitor\Elements,
     Visitor\Element,
 };
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Attempt,
+};
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+
+enum _Services implements Service
+{
+    case os;
+}
 
 class FunctionalTest extends TestCase
 {
@@ -49,8 +58,8 @@ class FunctionalTest extends TestCase
 
     public function tearDown(): void
     {
-        $storage = Filesystem::mount($this->storage);
-        $storage->root()->all()->foreach(
+        $storage = Adapter::mount($this->storage)->unwrap();
+        $_ = $storage->root()->foreach(
             static fn($file) => $storage->remove($file->name()),
         );
     }
@@ -60,72 +69,83 @@ class FunctionalTest extends TestCase
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp())
-            ->appendRoutes(static fn($routes, $_, $os) => $routes->add(
-                Route::literal('GET /')->handle(static function() use ($os) {
-                    $os
-                        ->control()
-                        ->processes()
-                        ->execute(Command::foreground('cat hello'))
-                        ->wait()
-                        ->match(
-                            static fn() => null,
-                            static fn() => null,
-                        );
-                    $os
-                        ->control()
-                        ->processes()
-                        ->execute(Command::foreground('echo hello'))
-                        ->wait()
-                        ->match(
-                            static fn() => null,
-                            static fn() => null,
-                        );
-                    $os
-                        ->remote()
-                        ->http()(Request::of(
-                            Url::of('https://github.com'),
-                            Method::get,
-                            ProtocolVersion::v11,
-                        ))
-                        ->match(
-                            static fn() => null,
-                            static fn() => null,
-                        );
-                    $os
-                        ->remote()
-                        ->http()(Request::of(
-                            Url::of('http://example.com/unknown'),
-                            Method::get,
-                            ProtocolVersion::v11,
-                        ))
-                        ->match(
-                            static fn() => null,
-                            static fn() => null,
-                        );
+            ->service(_Services::os, static fn($_, $os) => $os)
+            ->route(
+                static fn($pipe, $get) => $pipe
+                    ->get()
+                    ->endpoint('/')
+                    ->handle(
+                        static function() use ($get) {
+                            $os = $get(_Services::os);
+                            $_ = $os
+                                ->control()
+                                ->processes()
+                                ->execute(Command::foreground('cat hello'))
+                                ->flatMap(static fn($process) => $process->wait()->attempt(
+                                    static fn() => new \Exception,
+                                ))
+                                ->match(
+                                    static fn() => null,
+                                    static fn() => null,
+                                );
+                            $_ = $os
+                                ->control()
+                                ->processes()
+                                ->execute(Command::foreground('echo hello'))
+                                ->flatMap(static fn($process) => $process->wait()->attempt(
+                                    static fn() => new \Exception,
+                                ))
+                                ->match(
+                                    static fn() => null,
+                                    static fn() => null,
+                                );
+                            $_ = $os
+                                ->remote()
+                                ->http()(Request::of(
+                                    Url::of('https://github.com'),
+                                    Method::get,
+                                    ProtocolVersion::v11,
+                                ))
+                                ->match(
+                                    static fn() => null,
+                                    static fn() => null,
+                                );
+                            $_ = $os
+                                ->remote()
+                                ->http()(Request::of(
+                                    Url::of('http://example.com/unknown'),
+                                    Method::get,
+                                    ProtocolVersion::v11,
+                                ))
+                                ->match(
+                                    static fn() => null,
+                                    static fn() => null,
+                                );
 
-                    throw new \Exception('foo');
-                }),
-            ));
+                            return Attempt::error(new \Exception('foo'));
+                        },
+                    ),
+            );
 
-        try {
-            $app->run(ServerRequest::of(
-                Url::of('/'),
-                Method::get,
-                ProtocolVersion::v11,
-            ));
-            $this->fail('it should throw');
-        } catch (\Exception $e) {
-            $this->assertSame('foo', $e->getMessage());
-        }
+        $this->assert()->throws(
+            static fn() => $app
+                ->run(ServerRequest::of(
+                    Url::of('/'),
+                    Method::get,
+                    ProtocolVersion::v11,
+                ))
+                ->unwrap(),
+        );
 
         $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $profile = Reader::default()($response->body())
+        $profile = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('main'))
             ->flatMap(Element::of('li'))
@@ -140,27 +160,24 @@ class FunctionalTest extends TestCase
             $profile,
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $sections = Reader::default()($response->body())
+        $sections = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('header'))
-            ->map(static fn($header) => Elements::of('li')($header))
-            ->map(
-                static fn($lis) => $lis
-                    ->flatMap(Elements::of('a'))
-                    ->map(static fn($a) => $a->content())
-                    ->map(Str::of(...))
-                    ->map(static fn($text) => $text->trim()->toString()),
-            )
-            ->match(
-                static fn($sections) => $sections->toList(),
-                static fn() => [],
-            );
+            ->toSequence()
+            ->flatMap(Elements::of('li'))
+            ->flatMap(Elements::of('a'))
+            ->flatMap(static fn($a) => $a->normalize()->children())
+            ->map(static fn($a) => $a->content())
+            ->map(Str::of(...))
+            ->map(static fn($text) => $text->trim()->toString())
+            ->toList();
 
         $this->assertSame(
-            ['Exception', 'Http', 'Environment', 'Processes', 'Remote/Http', 'App graph'],
+            ['Exception', 'Http', 'Environment', 'Processes', 'Remote/Http'],
             $sections,
         );
     }
@@ -170,52 +187,63 @@ class FunctionalTest extends TestCase
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app())
-            ->appendRoutes(static fn($routes, $_, $os) => $routes->add(
-                Route::literal('GET /')->handle(static function() use ($os) {
-                    $os
-                        ->control()
-                        ->processes()
-                        ->execute(Command::foreground('cat hello'))
-                        ->wait()
-                        ->match(
-                            static fn() => null,
-                            static fn() => null,
-                        );
-                    $os
-                        ->remote()
-                        ->http()(Request::of(
-                            Url::of('https://github.com'),
-                            Method::get,
-                            ProtocolVersion::v11,
-                        ))
-                        ->match(
-                            static fn() => null,
-                            static fn() => null,
-                        );
+            ->service(_Services::os, static fn($_, $os) => $os)
+            ->route(
+                static fn($pipe, $get) => $pipe
+                    ->get()
+                    ->endpoint('/')
+                    ->handle(
+                        static function() use ($get) {
+                            $os = $get(_Services::os);
+                            $_ = $os
+                                ->control()
+                                ->processes()
+                                ->execute(Command::foreground('cat hello'))
+                                ->maybe()
+                                ->flatMap(static fn($process) => $process->wait()->maybe())
+                                ->match(
+                                    static fn() => null,
+                                    static fn() => null,
+                                );
+                            $_ = $os
+                                ->remote()
+                                ->http()(Request::of(
+                                    Url::of('https://github.com'),
+                                    Method::get,
+                                    ProtocolVersion::v11,
+                                ))
+                                ->match(
+                                    static fn() => null,
+                                    static fn() => null,
+                                );
 
-                    throw new \Exception('foo');
-                }),
-            ));
+                            return Attempt::error(new \Exception('foo'));
+                        },
+                    ),
+            );
 
-        try {
-            $app->run(ServerRequest::of(
+        $error = $app
+            ->run(ServerRequest::of(
                 Url::of('/'),
                 Method::get,
                 ProtocolVersion::v11,
-            ));
-            $this->fail('it should throw');
-        } catch (\Exception $e) {
-            $this->assertSame('foo', $e->getMessage());
-        }
+            ))
+            ->match(
+                static fn() => null,
+                static fn($e) => $e,
+            );
+
+        $this->assertSame('foo', $error->getMessage());
 
         $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $profile = Reader::default()($response->body())
+        $profile = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('main'))
             ->flatMap(Element::of('li'))
@@ -230,27 +258,24 @@ class FunctionalTest extends TestCase
             $profile,
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $sections = Reader::default()($response->body())
+        $sections = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('header'))
-            ->map(static fn($header) => Elements::of('li')($header))
-            ->map(
-                static fn($lis) => $lis
-                    ->flatMap(Elements::of('a'))
-                    ->map(static fn($a) => $a->content())
-                    ->map(Str::of(...))
-                    ->map(static fn($text) => $text->trim()->toString()),
-            )
-            ->match(
-                static fn($sections) => $sections->toList(),
-                static fn() => [],
-            );
+            ->toSequence()
+            ->flatMap(Elements::of('li'))
+            ->flatMap(Elements::of('a'))
+            ->flatMap(static fn($a) => $a->normalize()->children())
+            ->map(static fn($a) => $a->content())
+            ->map(Str::of(...))
+            ->map(static fn($text) => $text->trim()->toString())
+            ->toList();
 
         $this->assertSame(
-            ['Exception', 'Http', 'Environment', 'App graph'],
+            ['Exception', 'Http', 'Environment'],
             $sections,
         );
     }
@@ -261,20 +286,21 @@ class FunctionalTest extends TestCase
             ->map(Debug::inApp()->operatingSystem())
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app())
-            ->appendRoutes(static fn($routes, $_, $os) => $routes->add(
-                Route::literal('GET /')->handle(static function($request) use ($os) {
-                    return Response::of(
+            ->route(
+                static fn($pipe, $get) => $pipe
+                    ->get()
+                    ->endpoint('/')
+                    ->handle(static fn($request) => Attempt::result(Response::of(
                         StatusCode::ok,
                         $request->protocolVersion(),
-                    );
-                }),
-            ));
+                    ))),
+            );
 
         $response = $app->run(ServerRequest::of(
             Url::of('/'),
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
 
@@ -282,10 +308,11 @@ class FunctionalTest extends TestCase
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $profile = Reader::default()($response->body())
+        $profile = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('main'))
             ->flatMap(Element::of('li'))
@@ -300,27 +327,24 @@ class FunctionalTest extends TestCase
             $profile,
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $sections = Reader::default()($response->body())
+        $sections = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('header'))
-            ->map(static fn($header) => Elements::of('li')($header))
-            ->map(
-                static fn($lis) => $lis
-                    ->flatMap(Elements::of('a'))
-                    ->map(static fn($a) => $a->content())
-                    ->map(Str::of(...))
-                    ->map(static fn($text) => $text->trim()->toString()),
-            )
-            ->match(
-                static fn($sections) => $sections->toList(),
-                static fn() => [],
-            );
+            ->toSequence()
+            ->flatMap(Elements::of('li'))
+            ->flatMap(Elements::of('a'))
+            ->flatMap(static fn($a) => $a->normalize()->children())
+            ->map(static fn($a) => $a->content())
+            ->map(Str::of(...))
+            ->map(static fn($text) => $text->trim()->toString())
+            ->toList();
 
         $this->assertSame(
-            ['Http', 'Environment', 'App graph'],
+            ['Http', 'Environment'],
             $sections,
         );
     }
@@ -330,24 +354,26 @@ class FunctionalTest extends TestCase
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp())
-            ->command(static fn($_, $os) => new class($os) implements CliCommand {
+            ->service(_Services::os, static fn($_, $os) => $os)
+            ->command(static fn($get) => new class($get(_Services::os)) implements CliCommand {
                 public function __construct(private $os)
                 {
                 }
 
-                public function __invoke(Console $console): Console
+                public function __invoke(Console $console): Attempt
                 {
-                    $this
+                    $_ = $this
                         ->os
                         ->control()
                         ->processes()
                         ->execute(Command::foreground('cat hello'))
-                        ->wait()
+                        ->maybe()
+                        ->flatMap(static fn($process) => $process->wait()->maybe())
                         ->match(
                             static fn() => null,
                             static fn() => null,
                         );
-                    $this
+                    $_ = $this
                         ->os
                         ->remote()
                         ->http()(Request::of(
@@ -360,27 +386,29 @@ class FunctionalTest extends TestCase
                             static fn() => null,
                         );
 
-                    throw new \Exception('foo');
+                    return Attempt::error(new \Exception('foo'));
                 }
 
-                public function usage(): string
+                public function usage(): Usage
                 {
-                    return 'hello-world';
+                    return Usage::parse('hello-world');
                 }
             });
 
-        try {
-            $app->run(InMemory::of(
+        $error = $app
+            ->run(CliEnvironment::inMemory(
                 [],
                 true,
                 ['bin', 'hello-world'],
                 [['PATH', \getenv('PATH')]],
                 '/',
-            ));
-            $this->fail('it should throw');
-        } catch (\Exception $e) {
-            $this->assertSame('foo', $e->getMessage());
-        }
+            ))
+            ->match(
+                static fn() => null,
+                static fn($e) => $e,
+            );
+
+        $this->assertSame('foo', $error->getMessage());
 
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Debug::inApp()->operatingSystem())
@@ -391,10 +419,11 @@ class FunctionalTest extends TestCase
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $profile = Reader::default()($response->body())
+        $profile = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('main'))
             ->flatMap(Element::of('li'))
@@ -409,27 +438,24 @@ class FunctionalTest extends TestCase
             $profile,
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $sections = Reader::default()($response->body())
+        $sections = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('header'))
-            ->map(static fn($header) => Elements::of('li')($header))
-            ->map(
-                static fn($lis) => $lis
-                    ->flatMap(Elements::of('a'))
-                    ->map(static fn($a) => $a->content())
-                    ->map(Str::of(...))
-                    ->map(static fn($text) => $text->trim()->toString()),
-            )
-            ->match(
-                static fn($sections) => $sections->toList(),
-                static fn() => [],
-            );
+            ->toSequence()
+            ->flatMap(Elements::of('li'))
+            ->flatMap(Elements::of('a'))
+            ->flatMap(static fn($a) => $a->normalize()->children())
+            ->map(static fn($a) => $a->content())
+            ->map(Str::of(...))
+            ->map(static fn($text) => $text->trim()->toString())
+            ->toList();
 
         $this->assertSame(
-            ['Exception', 'Environment', 'Processes', 'Remote/Http', 'App graph'],
+            ['Exception', 'Environment', 'Processes', 'Remote/Http'],
             $sections,
         );
     }
@@ -439,24 +465,26 @@ class FunctionalTest extends TestCase
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app())
-            ->command(static fn($_, $os) => new class($os) implements CliCommand {
+            ->service(_Services::os, static fn($_, $os) => $os)
+            ->command(static fn($get) => new class($get(_Services::os)) implements CliCommand {
                 public function __construct(private $os)
                 {
                 }
 
-                public function __invoke(Console $console): Console
+                public function __invoke(Console $console): Attempt
                 {
-                    $this
+                    $_ = $this
                         ->os
                         ->control()
                         ->processes()
                         ->execute(Command::foreground('cat hello'))
-                        ->wait()
+                        ->maybe()
+                        ->flatMap(static fn($process) => $process->wait()->maybe())
                         ->match(
                             static fn() => null,
                             static fn() => null,
                         );
-                    $this
+                    $_ = $this
                         ->os
                         ->remote()
                         ->http()(Request::of(
@@ -469,27 +497,29 @@ class FunctionalTest extends TestCase
                             static fn() => null,
                         );
 
-                    throw new \Exception('foo');
+                    return Attempt::error(new \Exception('foo'));
                 }
 
-                public function usage(): string
+                public function usage(): Usage
                 {
-                    return 'hello-world';
+                    return Usage::parse('hello-world');
                 }
             });
 
-        try {
-            $app->run(InMemory::of(
+        $error = $app
+            ->run(CliEnvironment::inMemory(
                 [],
                 true,
                 ['bin', 'hello-world'],
                 [['PATH', \getenv('PATH')]],
                 '/',
-            ));
-            $this->fail('it should throw');
-        } catch (\Exception $e) {
-            $this->assertSame('foo', $e->getMessage());
-        }
+            ))
+            ->match(
+                static fn() => null,
+                static fn($e) => $e,
+            );
+
+        $this->assertSame('foo', $error->getMessage());
 
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Debug::inApp()->operatingSystem())
@@ -500,10 +530,11 @@ class FunctionalTest extends TestCase
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $profile = Reader::default()($response->body())
+        $profile = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('main'))
             ->flatMap(Element::of('li'))
@@ -518,27 +549,24 @@ class FunctionalTest extends TestCase
             $profile,
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $sections = Reader::default()($response->body())
+        $sections = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('header'))
-            ->map(static fn($header) => Elements::of('li')($header))
-            ->map(
-                static fn($lis) => $lis
-                    ->flatMap(Elements::of('a'))
-                    ->map(static fn($a) => $a->content())
-                    ->map(Str::of(...))
-                    ->map(static fn($text) => $text->trim()->toString()),
-            )
-            ->match(
-                static fn($sections) => $sections->toList(),
-                static fn() => [],
-            );
+            ->toSequence()
+            ->flatMap(Elements::of('li'))
+            ->flatMap(Elements::of('a'))
+            ->flatMap(static fn($a) => $a->normalize()->children())
+            ->map(static fn($a) => $a->content())
+            ->map(Str::of(...))
+            ->map(static fn($text) => $text->trim()->toString())
+            ->toList();
 
         $this->assertSame(
-            ['Exception', 'Environment', 'App graph'],
+            ['Exception', 'Environment'],
             $sections,
         );
     }
@@ -548,29 +576,25 @@ class FunctionalTest extends TestCase
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app())
-            ->command(static fn($_, $os) => new class($os) implements CliCommand {
-                public function __construct(private $os)
+            ->command(static fn() => new class implements CliCommand {
+                public function __invoke(Console $console): Attempt
                 {
+                    return Attempt::result($console->exit(1));
                 }
 
-                public function __invoke(Console $console): Console
+                public function usage(): Usage
                 {
-                    return $console->exit(1);
-                }
-
-                public function usage(): string
-                {
-                    return 'hello-world';
+                    return Usage::parse('hello-world');
                 }
             });
 
-        $environment = $app->run(InMemory::of(
+        $environment = $app->run(CliEnvironment::inMemory(
             [],
             true,
             ['bin', 'hello-world'],
             [['PATH', \getenv('PATH')]],
             '/',
-        ));
+        ))->unwrap();
 
         $this->assertSame(1, $environment->exitCode()->match(
             static fn($exit) => $exit->toInt(),
@@ -586,10 +610,11 @@ class FunctionalTest extends TestCase
             Url::of('/_profiler/'),
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $profile = Reader::default()($response->body())
+        $profile = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('main'))
             ->flatMap(Element::of('li'))
@@ -604,27 +629,24 @@ class FunctionalTest extends TestCase
             $profile,
             Method::get,
             ProtocolVersion::v11,
-        ));
+        ))->unwrap();
 
         $this->assertSame(StatusCode::ok, $response->statusCode());
-        $sections = Reader::default()($response->body())
+        $sections = Reader::new()($response->body())
+            ->maybe()
             ->flatMap(Element::body())
             ->flatMap(Element::of('header'))
-            ->map(static fn($header) => Elements::of('li')($header))
-            ->map(
-                static fn($lis) => $lis
-                    ->flatMap(Elements::of('a'))
-                    ->map(static fn($a) => $a->content())
-                    ->map(Str::of(...))
-                    ->map(static fn($text) => $text->trim()->toString()),
-            )
-            ->match(
-                static fn($sections) => $sections->toList(),
-                static fn() => [],
-            );
+            ->toSequence()
+            ->flatMap(Elements::of('li'))
+            ->flatMap(Elements::of('a'))
+            ->flatMap(static fn($a) => $a->normalize()->children())
+            ->map(static fn($a) => $a->content())
+            ->map(Str::of(...))
+            ->map(static fn($text) => $text->trim()->toString())
+            ->toList();
 
         $this->assertSame(
-            ['Environment', 'App graph'],
+            ['Environment'],
             $sections,
         );
     }
@@ -634,44 +656,36 @@ class FunctionalTest extends TestCase
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
             ->map(Debug::inApp()->app())
-            ->command(static fn($_, $os) => new class($os) implements CliCommand {
-                public function __construct(private $os)
+            ->command(static fn() => new class implements CliCommand {
+                public function __invoke(Console $console): Attempt
                 {
+                    return Attempt::result($console->exit(1));
                 }
 
-                public function __invoke(Console $console): Console
+                public function usage(): Usage
                 {
-                    return $console->exit(1);
-                }
-
-                public function usage(): string
-                {
-                    return 'foo';
+                    return Usage::parse('foo');
                 }
             })
-            ->command(static fn($_, $os) => new class($os) implements CliCommand {
-                public function __construct(private $os)
+            ->command(static fn() => new class implements CliCommand {
+                public function __invoke(Console $console): Attempt
                 {
+                    return Attempt::result($console);
                 }
 
-                public function __invoke(Console $console): Console
+                public function usage(): Usage
                 {
-                    return $console;
-                }
-
-                public function usage(): string
-                {
-                    return 'hello-world';
+                    return Usage::parse('hello-world');
                 }
             });
 
-        $environment = $app->run(InMemory::of(
+        $environment = $app->run(CliEnvironment::inMemory(
             [],
             true,
             ['bin', 'hello-world'],
             [['PATH', \getenv('PATH')]],
             '/',
-        ));
+        ))->unwrap();
 
         $this->assertNull($environment->exitCode()->match(
             static fn($exit) => $exit->toInt(),
