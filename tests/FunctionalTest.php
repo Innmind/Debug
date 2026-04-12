@@ -70,9 +70,12 @@ class FunctionalTest extends TestCase
 
     public function testRecordHttpContext()
     {
+        $debug = Debug::inApp()->removePathFromStackTrace(
+            Url::of(__DIR__),
+        );
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp())
+            ->map($debug)
             ->service(_Services::os, static fn($_, $os) => $os)
             ->route(
                 static fn($pipe, $get) => $pipe
@@ -188,9 +191,12 @@ class FunctionalTest extends TestCase
 
     public function testRecordHttpContextWithoutOSLayer()
     {
+        $debug = Debug::inApp()->removePathFromStackTrace(
+            Url::of(__DIR__),
+        );
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp()->app())
+            ->map($debug->app())
             ->service(_Services::os, static fn($_, $os) => $os)
             ->route(
                 static fn($pipe, $get) => $pipe
@@ -286,10 +292,13 @@ class FunctionalTest extends TestCase
 
     public function testRecordHttpResponse()
     {
+        $debug = Debug::inApp()->removePathFromStackTrace(
+            Url::of(__DIR__),
+        );
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
-            ->map(Debug::inApp()->operatingSystem())
+            ->map($debug->operatingSystem())
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp()->app())
+            ->map($debug->app())
             ->route(
                 static fn($pipe, $get) => $pipe
                     ->get()
@@ -355,9 +364,12 @@ class FunctionalTest extends TestCase
 
     public function testRecordCliContext()
     {
+        $debug = Debug::inApp()->removePathFromStackTrace(
+            Url::of(__DIR__),
+        );
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp())
+            ->map($debug)
             ->service(_Services::os, static fn($_, $os) => $os)
             ->command(static fn($get) => new class($get(_Services::os)) implements CliCommand {
                 public function __construct(private $os)
@@ -415,9 +427,9 @@ class FunctionalTest extends TestCase
         $this->assertSame('foo', $error->getMessage());
 
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
-            ->map(Debug::inApp()->operatingSystem())
+            ->map($debug->operatingSystem())
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp()->app());
+            ->map($debug->app());
 
         $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
@@ -466,9 +478,12 @@ class FunctionalTest extends TestCase
 
     public function testRecordCliContextWithoutOSLayer()
     {
+        $debug = Debug::inApp()->removePathFromStackTrace(
+            Url::of(__DIR__),
+        );
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp()->app())
+            ->map($debug->app())
             ->service(_Services::os, static fn($_, $os) => $os)
             ->command(static fn($get) => new class($get(_Services::os)) implements CliCommand {
                 public function __construct(private $os)
@@ -526,9 +541,9 @@ class FunctionalTest extends TestCase
         $this->assertSame('foo', $error->getMessage());
 
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
-            ->map(Debug::inApp()->operatingSystem())
+            ->map($debug->operatingSystem())
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp()->app());
+            ->map($debug->app());
 
         $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
@@ -577,9 +592,12 @@ class FunctionalTest extends TestCase
 
     public function testRecordCliReturnCode()
     {
+        $debug = Debug::inApp()->removePathFromStackTrace(
+            Url::of(__DIR__),
+        );
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp()->app())
+            ->map($debug->app())
             ->command(static fn() => new class implements CliCommand {
                 public function __invoke(Console $console): Attempt
                 {
@@ -606,9 +624,9 @@ class FunctionalTest extends TestCase
         ));
 
         $app = Application::http(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
-            ->map(Debug::inApp()->operatingSystem())
+            ->map($debug->operatingSystem())
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp()->app());
+            ->map($debug->app());
 
         $response = $app->run(ServerRequest::of(
             Url::of('/_profiler/'),
@@ -657,9 +675,12 @@ class FunctionalTest extends TestCase
 
     public function testMakeSureCorrectCommandIsRun()
     {
+        $debug = Debug::inApp()->removePathFromStackTrace(
+            Url::of(__DIR__),
+        );
         $app = Application::cli(Factory::build(), Environment::test([['PATH', \getenv('PATH')]]))
             ->map(Profiler::inApp($this->storage))
-            ->map(Debug::inApp()->app())
+            ->map($debug->app())
             ->command(static fn() => new class implements CliCommand {
                 public function __invoke(Console $console): Attempt
                 {
