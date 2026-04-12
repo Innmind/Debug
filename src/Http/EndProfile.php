@@ -25,6 +25,9 @@ final class EndProfile implements Recorder, Component\Provider
     ) {
     }
 
+    /**
+     * @internal
+     */
     public static function new(): self
     {
         return new self;

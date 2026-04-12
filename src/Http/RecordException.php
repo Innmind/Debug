@@ -59,6 +59,9 @@ final class RecordException implements Recorder
         ) => $result);
     }
 
+    /**
+     * @internal
+     */
     public static function of(Exception $record): self
     {
         return new self($record);

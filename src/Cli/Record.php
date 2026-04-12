@@ -68,6 +68,9 @@ final class Record implements Command
             });
     }
 
+    /**
+     * @internal
+     */
     public static function of(
         Command $inner,
         Profiler $profiler,
